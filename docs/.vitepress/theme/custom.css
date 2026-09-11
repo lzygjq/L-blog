@@ -126,6 +126,15 @@ html.sidebar-collapsed .VPNavBarTitle {
   background: rgba(100, 116, 139, 0.5);
 }
 
+/* 阅读列宽度与侧边栏联动：
+   默认主题把正文列硬性限宽 688px，且是 scoped 样式（编译后带 [data-v-xxx] 属性
+   选择器，特异性 0,4,0），普通选择器压不住，只能用 !important。
+   效果：收起侧边栏腾出的 240px 由阅读列吃掉（688→928px），随宽度变量平滑过渡 */
+html .VPDoc.has-aside .content-container,
+html .VPDoc:not(.has-aside) .content-container {
+  max-width: calc(688px + (240px - var(--vp-sidebar-width))) !important;
+}
+
 /* ===== 顶部导航菜单：hover / 选中态 ===== */
 
 .VPNavBarMenuLink {
