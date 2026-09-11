@@ -310,3 +310,32 @@ html .VPHome .tagline {
 html .VPHome .tagline {
   max-width: 720px !important;
 }
+
+/* 卡片头部一行化：图标与标题同行（用户定稿），说明文字独占下一行。
+   .box 转 flex 换行；图标缩为 28px 内联块，不再单独占一整行 */
+html .VPHome .VPFeature .box {
+  display: flex !important;
+  flex-direction: row !important; /* 主题默认 column，必须显式覆盖 */
+  flex-wrap: wrap !important;
+  align-items: center !important;
+}
+
+html .VPHome .VPFeature .icon {
+  width: 28px !important;
+  height: 28px !important;
+  margin-bottom: 0 !important;
+  margin-right: 10px !important;
+  flex-shrink: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+html .VPHome .VPFeature .title {
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+}
+
+html .VPHome .VPFeature .details {
+  flex: 1 1 100% !important;
+}
