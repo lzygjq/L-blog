@@ -78,7 +78,24 @@ export default defineConfig({
                   { text: '享元模式', link: '/java/design-patterns/structural/flyweight' }
                 ]
               },
-              { text: '行为型（11 种）', link: '/java/design-patterns/behavioral/' }
+              {
+                text: '行为型（11 种）',
+                collapsed: true,
+                items: [
+                  { text: '导览', link: '/java/design-patterns/behavioral/' },
+                  { text: '模板方法模式', link: '/java/design-patterns/behavioral/template-method' },
+                  { text: '策略模式', link: '/java/design-patterns/behavioral/strategy' },
+                  { text: '责任链模式', link: '/java/design-patterns/behavioral/chain-of-responsibility' },
+                  { text: '命令模式', link: '/java/design-patterns/behavioral/command' },
+                  { text: '状态模式', link: '/java/design-patterns/behavioral/state' },
+                  { text: '观察者模式', link: '/java/design-patterns/behavioral/observer' },
+                  { text: '中介者模式', link: '/java/design-patterns/behavioral/mediator' },
+                  { text: '迭代器模式', link: '/java/design-patterns/behavioral/iterator' },
+                  { text: '备忘录模式', link: '/java/design-patterns/behavioral/memento' },
+                  { text: '访问者模式', link: '/java/design-patterns/behavioral/visitor' },
+                  { text: '解释器模式', link: '/java/design-patterns/behavioral/interpreter' }
+                ]
+              }
             ]
           }
         ]
