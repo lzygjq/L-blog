@@ -224,3 +224,78 @@ html.aside-collapsed .VPDoc .aside {
 .VPNavBarMenuLink.active::after {
   transform: scaleX(1);
 }
+
+/* ===== 首页紧凑布局：hero + 七张卡片一屏呈现（docH 恰好 = 900 视口） =====
+   默认主题 hero 文字 56px、tagline 24px、卡片内 .box padding 24px、
+   VPHome 底部留白 128px，整页远超一屏。这里整体缩一档。
+   注意：主题组件是 Vue scoped 样式（带 [data-v-hash]），必须 !important 覆盖；
+   统一加 html 前缀——同带 !important 时按特异性决胜（0,3,1 压过 0,1,1） */
+html .VPHome {
+  margin-bottom: 0 !important;
+}
+
+html .VPHome .VPHero {
+  padding-top: calc(var(--vp-nav-height) + 20px) !important;
+  padding-bottom: 6px !important;
+}
+
+html .VPHome .name,
+html .VPHome .text {
+  font-size: 28px !important;
+  line-height: 38px !important;
+}
+
+html .VPHome .tagline {
+  padding-top: 6px !important;
+  font-size: 14px !important;
+  line-height: 22px !important;
+}
+
+html .VPHome .actions {
+  padding-top: 12px !important;
+  margin: -4px !important;
+}
+
+html .VPHome .VPButton {
+  font-size: 14px !important;
+  padding: 0 16px !important;
+  border-radius: 16px !important;
+}
+
+/* 卡片：.VPFeature 是链接外壳，实高在内层 .box */
+html .VPHome .VPFeature .box {
+  padding: 10px 14px !important;
+}
+
+html .VPHome .VPFeature .icon {
+  width: 34px !important;
+  height: 34px !important;
+  margin-bottom: 8px !important;
+  border-radius: 8px !important;
+  font-size: 18px !important;
+}
+
+html .VPHome .VPFeature .title {
+  padding-top: 0 !important;
+  font-size: 14px !important;
+  line-height: 22px !important;
+}
+
+html .VPHome .VPFeature .details {
+  padding-top: 2px !important;
+  font-size: 12px !important;
+  line-height: 18px !important;
+}
+
+/* 网格：主题用 .items margin:-8 + .item padding:8 实现间距（不是 gap） */
+html .VPHome .VPFeatures {
+  padding: 0 24px 24px !important;
+}
+
+html .VPHome .VPFeatures .items {
+  margin: -5px !important;
+}
+
+html .VPHome .VPFeatures .item {
+  padding: 5px !important;
+}
