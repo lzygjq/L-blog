@@ -4,8 +4,8 @@ import { defineConfig } from 'vitepress'
 // 约定：目录名英文、侧边栏标题中文；每个板块 index.md 为导览页
 export default defineConfig({
   lang: 'zh-CN',
-  title: 'L知识体系',
-  description: 'Java 后端知识体系 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / AI 编程，附项目实战难点复盘',
+  title: 'L知识库',
+  description: 'Java 后端知识库 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / AI 应用，附项目实战难点复盘',
   head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
 
   markdown: {
@@ -14,7 +14,7 @@ export default defineConfig({
   },
 
   themeConfig: {
-    siteTitle: 'L知识体系',
+    siteTitle: 'L知识库',
     nav: [
       { text: '首页', link: '/' },
       { text: 'Java 核心', link: '/java/' },

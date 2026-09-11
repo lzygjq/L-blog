@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: L知识体系
+  name: L知识库
   text: 夯实基础 · 构建体系 · 沉淀实战
   tagline: 系统化梳理 Java 后端知识主线 —— 从语言与框架原理，到数据存储、消息队列、云原生与数据仓库，再到项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
   actions:
     - theme: brand
-      text: 知识体系总览
+      text: 知识库总览
       link: /about/
     - theme: alt
       text: 项目实战
