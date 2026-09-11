@@ -225,77 +225,88 @@ html.aside-collapsed .VPDoc .aside {
   transform: scaleX(1);
 }
 
-/* ===== 首页紧凑布局：hero + 七张卡片一屏呈现（docH 恰好 = 900 视口） =====
-   默认主题 hero 文字 56px、tagline 24px、卡片内 .box padding 24px、
-   VPHome 底部留白 128px，整页远超一屏。这里整体缩一档。
-   注意：主题组件是 Vue scoped 样式（带 [data-v-hash]），必须 !important 覆盖；
+/* ===== 首页布局（大气清爽版） =====
+   与文档页统一的全站字号刻度：正文 16px / 次要 14px / 辅助 13px，
+   首页不再自成一套小字。间距按"大气"标准放宽，整页略超一屏可接受。
+   主题组件是 Vue scoped 样式（带 [data-v-hash]），必须 !important 覆盖；
    统一加 html 前缀——同带 !important 时按特异性决胜（0,3,1 压过 0,1,1） */
 html .VPHome {
   margin-bottom: 0 !important;
 }
 
+/* hero：标题与文档页 h1（32px）同一量级略大一号，形成首屏重心 */
 html .VPHome .VPHero {
-  padding-top: calc(var(--vp-nav-height) + 20px) !important;
-  padding-bottom: 6px !important;
+  padding-top: calc(var(--vp-nav-height) + 48px) !important;
+  padding-bottom: 32px !important;
 }
 
 html .VPHome .name,
 html .VPHome .text {
-  font-size: 28px !important;
-  line-height: 38px !important;
+  font-size: 36px !important;
+  line-height: 48px !important;
 }
 
 html .VPHome .tagline {
-  padding-top: 6px !important;
-  font-size: 14px !important;
-  line-height: 22px !important;
+  padding-top: 10px !important;
+  font-size: 16px !important;
+  line-height: 28px !important;
 }
 
 html .VPHome .actions {
-  padding-top: 12px !important;
-  margin: -4px !important;
+  padding-top: 24px !important;
+  margin: -6px !important;
 }
 
 html .VPHome .VPButton {
-  font-size: 14px !important;
-  padding: 0 16px !important;
-  border-radius: 16px !important;
+  font-size: 15px !important;
+  padding: 0 20px !important;
+  border-radius: 18px !important;
 }
 
-/* 卡片：.VPFeature 是链接外壳，实高在内层 .box */
+/* 卡片：.VPFeature 是链接外壳，实高在内层 .box；尺寸向正文刻度看齐 */
 html .VPHome .VPFeature .box {
-  padding: 10px 14px !important;
+  padding: 18px 20px !important;
 }
 
 html .VPHome .VPFeature .icon {
-  width: 34px !important;
-  height: 34px !important;
-  margin-bottom: 8px !important;
-  border-radius: 8px !important;
-  font-size: 18px !important;
+  width: 40px !important;
+  height: 40px !important;
+  margin-bottom: 12px !important;
+  border-radius: 10px !important;
+  font-size: 20px !important;
 }
 
 html .VPHome .VPFeature .title {
   padding-top: 0 !important;
-  font-size: 14px !important;
-  line-height: 22px !important;
+  font-size: 16px !important;
+  line-height: 26px !important;
 }
 
 html .VPHome .VPFeature .details {
-  padding-top: 2px !important;
-  font-size: 12px !important;
-  line-height: 18px !important;
+  padding-top: 6px !important;
+  font-size: 14px !important;
+  line-height: 23px !important;
 }
 
 /* 网格：主题用 .items margin:-8 + .item padding:8 实现间距（不是 gap） */
 html .VPHome .VPFeatures {
-  padding: 0 24px 24px !important;
+  padding: 0 24px 40px !important;
 }
 
 html .VPHome .VPFeatures .items {
-  margin: -5px !important;
+  margin: -8px !important;
 }
 
 html .VPHome .VPFeatures .item {
-  padding: 5px !important;
+  padding: 8px !important;
+}
+
+/* tagline 放宽换行宽度：默认 576px 折 3 行太碎，720px 收成 2 行更整 */
+html .VPHome .tagline {
+  max-width: 720px !important;
+}
+
+/* tagline 放宽换行宽度：默认 576px 折 3 行太碎，720px 收成 2 行更整 */
+html .VPHome .tagline {
+  max-width: 720px !important;
 }
