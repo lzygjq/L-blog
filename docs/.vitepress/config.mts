@@ -42,9 +42,20 @@ export default defineConfig({
             collapsed: true,
             items: [
               { text: '导览', link: '/java/spring/' },
-              { text: 'Spring Framework 与 MyBatis', link: '/java/spring/spring-framework/' },
+              {
+                text: 'Spring Framework',
+                collapsed: true,
+                items: [
+                  { text: '导览', link: '/java/spring/spring-framework/' },
+                  { text: 'IoC 与生命周期', link: '/java/spring/spring-framework/ioc-container' },
+                  { text: '循环依赖', link: '/java/spring/spring-framework/circular-dependency' },
+                  { text: 'AOP 与代理', link: '/java/spring/spring-framework/aop' },
+                  { text: '事务与传播', link: '/java/spring/spring-framework/transaction' },
+                  { text: 'MyBatis 集成', link: '/java/spring/spring-framework/mybatis' }
+                ]
+              },
               { text: 'Spring Boot', link: '/java/spring/spring-boot/' },
-              { text: 'Spring Cloud 微服务', link: '/java/spring/spring-cloud/' }
+              { text: 'Spring Cloud', link: '/java/spring/spring-cloud/' }
             ]
           },
           {
