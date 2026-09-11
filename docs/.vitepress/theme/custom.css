@@ -1,0 +1,51 @@
+/**
+ * 全站自定义样式
+ * 说明：VitePress 默认主题的 CSS 变量仍可在此覆盖。
+ * 品牌色对齐站点图标（favicon.svg）的绿色 #3eaf7c。
+ */
+
+:root {
+  --vp-c-brand-1: #3eaf7c;
+  --vp-c-brand-2: #35926b;
+  --vp-c-brand-3: #2f7d5c;
+}
+
+/* ===== 顶部导航菜单：hover / 选中态 ===== */
+
+.VPNavBarMenuLink {
+  position: relative;
+  transition: color 0.25s ease;
+}
+
+/* 底部指示条：默认缩放为 0，hover / 选中时展开 */
+.VPNavBarMenuLink::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--vp-c-brand-1);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.VPNavBarMenuLink:hover {
+  color: var(--vp-c-brand-1);
+}
+
+.VPNavBarMenuLink:hover::after {
+  transform: scaleX(1);
+}
+
+/* 当前所在板块：保持高亮 + 加粗，指示条常驻 */
+.VPNavBarMenuLink.active {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+.VPNavBarMenuLink.active::after {
+  transform: scaleX(1);
+}
