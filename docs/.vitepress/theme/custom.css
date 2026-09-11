@@ -48,49 +48,34 @@ html.sidebar-collapsed .VPSidebar {
   overflow: hidden;
 }
 
-/* 收起/展开按钮：固定在侧边栏底部，避开菜单条目区域 */
+/* 收起/展开按钮：导航栏内的汉堡菜单按钮（后台管理系统风格），
+   挂在 nav-bar-content-before 插槽，位于站名右侧、搜索框左侧 */
 .sidebar-toggle {
-  position: fixed;
-  bottom: 14px;
-  left: calc(var(--vp-sidebar-width) - 13px);
-  z-index: 50;
-  width: 26px;
-  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  margin-right: 2px;
   padding: 0;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 50%;
-  background: var(--vp-c-bg);
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   color: var(--vp-c-text-2);
   cursor: pointer;
-  transition: left 0.25s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-/* 收起后按钮贴左边缘；按钮虽在侧边栏 DOM 内，必须显式恢复可见，
-   否则继承侧边栏的 visibility:hidden 导致无法再展开。
-   另：默认主题给 .VPSidebar 设了 transform（即使是单位矩阵），
-   会使它成为 fixed 后代的包含块，收起后按钮坐标会跟着偏出屏幕，
-   因此收起态必须去掉 transform，让按钮真正相对视口定位 */
-html.sidebar-collapsed .sidebar-toggle {
-  left: 10px;
-  visibility: visible;
-}
-
-html.sidebar-collapsed .VPSidebar {
-  transform: none;
-}
-
-/* 收起后站名容器宽度归零会与搜索框重叠，直接隐藏 */
-html.sidebar-collapsed .VPNavBarTitle {
-  display: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .sidebar-toggle:hover {
   color: var(--vp-c-brand-1);
-  border-color: var(--vp-c-brand-1);
-  box-shadow: 0 0 0 3px rgba(62, 175, 124, 0.15);
+  background: var(--vp-c-bg-soft);
+}
+
+/* 收起后站名容器宽度归零会与搜索框重叠，直接隐藏；
+   按钮在 content 插槽内不受影响，仍留在导航栏最左侧 */
+html.sidebar-collapsed .VPNavBarTitle {
+  display: none;
 }
 
 /* 移动端侧边栏是抽屉模式，不显示此按钮 */
