@@ -122,4 +122,4 @@ desc: 云渲染落地的两种宿主形态：Web 模式与原生 App 模式的�
 
 ---
 
-*相关阅读：[实时互动数字人：选型与集成](/ai/digital-human/interactive-avatar/) · [第三方 AI 能力集成清单](/ai/digital-human/integration-checklist/)*
+*相关阅读：[实时互动数字人：选型与集成](/ai/digital-human/interactive-avatar) · [第三方 AI 能力集成清单](/ai/digital-human/integration-checklist)*

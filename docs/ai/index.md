@@ -50,6 +50,6 @@ AI 应用
 | 提升日常开发效率 | Vibe Coding → Agent 与 Harness |
 | 在 Java 项目里用大模型 | Spring AI → Spring AI Alibaba |
 | 做面向终端的 AI 产品 | 数字人导览 → 实时互动数字人 → 集成清单 |
-| 只要一套通用接入方法 | 直接看[集成清单](/ai/digital-human/integration-checklist/) |
+| 只要一套通用接入方法 | 直接看[集成清单](/ai/digital-human/integration-checklist) |
 
 > 后一条路径中的「集成清单」虽然写在数字人板块下，但它与具体厂商无关：约束定义、能力边界盘点、凭证分层、供应商对接、验收标准——换任何第三方 AI 能力都适用。

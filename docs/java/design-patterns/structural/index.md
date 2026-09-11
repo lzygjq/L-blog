@@ -12,13 +12,13 @@ date: 2026-09-11
 
 | 意图 | 模式 | 一句话 | 状态 |
 |---|---|---|---|
-| **包装增强** | [代理 Proxy](/java/design-patterns/structural/proxy/) | 控制对目标对象的访问，在调用前后插入横切逻辑 | ✅ |
-| | [装饰者 Decorator](/java/design-patterns/structural/decorator/) | 动态叠加职责，功能可任意组合 | ✅ |
-| | [适配器 Adapter](/java/design-patterns/structural/adapter/) | 转换接口，让不兼容的类能协作 | ✅ |
-| **结构解耦** | [桥接 Bridge](/java/design-patterns/structural/bridge/) | 把抽象与实现拆成两条独立变化的维度 | ✅ |
-| | [组合 Composite](/java/design-patterns/structural/composite/) | 用树形结构统一对待"单个对象"与"对象容器" | ✅ |
-| **接口简化** | [外观 Facade](/java/design-patterns/structural/facade/) | 为一组复杂子系统提供统一入口 | ✅ |
-| **对象共享** | [享元 Flyweight](/java/design-patterns/structural/flyweight/) | 复用细粒度对象，把状态外置以节省内存 | ✅ |
+| **包装增强** | [代理 Proxy](/java/design-patterns/structural/proxy) | 控制对目标对象的访问，在调用前后插入横切逻辑 | ✅ |
+| | [装饰者 Decorator](/java/design-patterns/structural/decorator) | 动态叠加职责，功能可任意组合 | ✅ |
+| | [适配器 Adapter](/java/design-patterns/structural/adapter) | 转换接口，让不兼容的类能协作 | ✅ |
+| **结构解耦** | [桥接 Bridge](/java/design-patterns/structural/bridge) | 把抽象与实现拆成两条独立变化的维度 | ✅ |
+| | [组合 Composite](/java/design-patterns/structural/composite) | 用树形结构统一对待"单个对象"与"对象容器" | ✅ |
+| **接口简化** | [外观 Facade](/java/design-patterns/structural/facade) | 为一组复杂子系统提供统一入口 | ✅ |
+| **对象共享** | [享元 Flyweight](/java/design-patterns/structural/flyweight) | 复用细粒度对象，把状态外置以节省内存 | ✅ |
 
 ## 二、最容易混淆的两组（面试高频）
 

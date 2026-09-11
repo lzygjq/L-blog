@@ -180,9 +180,9 @@ DI 的三种注入方式：
 
 同样的顺序规律适用于销毁：`@PreDestroy` → `DisposableBean.destroy()` → `destroy-method`。
 
-**③ AOP 代理生成在 ⑥**。这一点直接决定了事务、缓存、异步注解能否生效——**代理替换的是 Bean 的最终形态**，之后放入单例池的已经是代理对象。理解这一点，才能解释"为什么同类内部方法调用导致 `@Transactional` 失效"（见 [AOP 与代理机制](/java/spring/spring-framework/aop/)）。
+**③ AOP 代理生成在 ⑥**。这一点直接决定了事务、缓存、异步注解能否生效——**代理替换的是 Bean 的最终形态**，之后放入单例池的已经是代理对象。理解这一点，才能解释"为什么同类内部方法调用导致 `@Transactional` 失效"（见 [AOP 与代理机制](/java/spring/spring-framework/aop)）。
 
-**④ 循环依赖的破解点在 ① 与 ② 之间**。`createBeanInstance` 完成后就把"早期引用"暴露到三级缓存，使得其它 Bean 在 ② 阶段能拿到一个尚未填充属性的对象——这是 [循环依赖](/java/spring/spring-framework/circular-dependency/) 的机制基础。
+**④ 循环依赖的破解点在 ① 与 ② 之间**。`createBeanInstance` 完成后就把"早期引用"暴露到三级缓存，使得其它 Bean 在 ② 阶段能拿到一个尚未填充属性的对象——这是 [循环依赖](/java/spring/spring-framework/circular-dependency) 的机制基础。
 
 ## 七、扩展点总览（面试高分项）
 

@@ -115,7 +115,7 @@ Spring AOP 的底层是两种动态代理技术：
 
 ### 代理是在什么时机创建的
 
-回顾 [Bean 生命周期](/java/spring/spring-framework/ioc-container/)：代理创建于**初始化阶段的后置处理**——`AbstractAutoProxyCreator.postProcessAfterInitialization()`：
+回顾 [Bean 生命周期](/java/spring/spring-framework/ioc-container)：代理创建于**初始化阶段的后置处理**——`AbstractAutoProxyCreator.postProcessAfterInitialization()`：
 
 ```java
 // AbstractAutoProxyCreator 核心逻辑（简化）

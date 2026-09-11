@@ -231,7 +231,7 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 | **事务协同** | 有事务时复用事务绑定的 `SqlSession`（同一连接），保证同一事务内的操作在同一个连接上 |
 | **自动提交** | 无事务时每次操作后自动 commit；有事务时交由 `PlatformTransactionManager` 统一控制 |
 
-**`@MapperScan` 的实现**：`MapperScannerConfigurer` 是 `BeanDefinitionRegistryPostProcessor`——在容器启动的最早期扫描指定包下的接口，为每个 Mapper 接口注册一个 `MapperFactoryBean` 类型的 `BeanDefinition`。这就是"Mapper 接口能作为 Bean 被注入"的原因（结合 [IoC 容器](/java/spring/spring-framework/ioc-container/) 的扩展点顺序理解：它在第 5 步最早执行，早于所有 Bean 实例化）。
+**`@MapperScan` 的实现**：`MapperScannerConfigurer` 是 `BeanDefinitionRegistryPostProcessor`——在容器启动的最早期扫描指定包下的接口，为每个 Mapper 接口注册一个 `MapperFactoryBean` 类型的 `BeanDefinition`。这就是"Mapper 接口能作为 Bean 被注入"的原因（结合 [IoC 容器](/java/spring/spring-framework/ioc-container) 的扩展点顺序理解：它在第 5 步最早执行，早于所有 Bean 实例化）。
 
 ## 七、面试问答
 

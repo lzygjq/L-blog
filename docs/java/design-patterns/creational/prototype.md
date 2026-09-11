@@ -135,7 +135,7 @@ Report copy = JSON.parseObject(JSON.toJSONString(origin), Report.class);
 
 优点：代码最少、不要求实现 `Serializable`（fastjson2/Jackson 均可）。缺点：**有性能开销**，且对循环引用、泛型复杂结构需要额外配置。适合"需要副本但不在热点路径"的场景。
 
-> 反序列化注意：用 `readObject()` 得到的对象**不会走构造器**——这也是"序列化能破坏单例"的原因（见[单例模式](/java/design-patterns/creational/singleton/)）。
+> 反序列化注意：用 `readObject()` 得到的对象**不会走构造器**——这也是"序列化能破坏单例"的原因（见[单例模式](/java/design-patterns/creational/singleton)）。
 
 ## 四、优缺点
 

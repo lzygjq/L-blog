@@ -10,11 +10,11 @@ Spring Framework 是整个 Spring 生态的地基。Boot 和 Cloud 都是在这�
 
 | 主题 | 回答的核心问题 | 面试权重 |
 |---|---|---|
-| [IoC 容器与 Bean 生命周期](/java/spring/spring-framework/ioc-container/) | 对象由谁创建、依赖由谁装配、Bean 从生到死经历什么 | ★★★★★ |
-| [循环依赖与三级缓存](/java/spring/spring-framework/circular-dependency/) | A 依赖 B、B 依赖 A，Spring 凭什么能启动 | ★★★★★ |
-| [AOP 与代理机制](/java/spring/spring-framework/aop/) | 横切逻辑怎么织入、JDK 代理与 CGLIB 如何选 | ★★★★★ |
-| [声明式事务与传播行为](/java/spring/spring-framework/transaction/) | `@Transactional` 怎么生效、为什么会失效 | ★★★★★ |
-| [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | SQL 怎么被执行、缓存有什么坑、如何与事务协同 | ★★★★ |
+| [IoC 容器与 Bean 生命周期](/java/spring/spring-framework/ioc-container) | 对象由谁创建、依赖由谁装配、Bean 从生到死经历什么 | ★★★★★ |
+| [循环依赖与三级缓存](/java/spring/spring-framework/circular-dependency) | A 依赖 B、B 依赖 A，Spring 凭什么能启动 | ★★★★★ |
+| [AOP 与代理机制](/java/spring/spring-framework/aop) | 横切逻辑怎么织入、JDK 代理与 CGLIB 如何选 | ★★★★★ |
+| [声明式事务与传播行为](/java/spring/spring-framework/transaction) | `@Transactional` 怎么生效、为什么会失效 | ★★★★★ |
+| [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis) | SQL 怎么被执行、缓存有什么坑、如何与事务协同 | ★★★★ |
 
 ## 二、推荐阅读顺序
 

@@ -12,10 +12,10 @@ date: 2026-09-11
 
 | 模式 | 解决的问题 | 一句话方案 | 复杂度 |
 |---|---|---|---|
-| [单例](/java/design-patterns/creational/singleton/) | 全局唯一实例 | 把构造器私有化，对外只暴露一个实例 | ★★ |
-| [工厂族](/java/design-patterns/creational/factory/) | 创建与使用解耦 | 把 `new` 移到工厂里，按需产出对象 | ★★★ |
-| [原型](/java/design-patterns/creational/prototype/) | 创建成本高 / 需要副本 | 复制已有对象，而不是重新构造 | ★★ |
-| [建造者](/java/design-patterns/creational/builder/) | 构造参数多、组装步骤复杂 | 分步组装，最后一步产出成品 | ★★★ |
+| [单例](/java/design-patterns/creational/singleton) | 全局唯一实例 | 把构造器私有化，对外只暴露一个实例 | ★★ |
+| [工厂族](/java/design-patterns/creational/factory) | 创建与使用解耦 | 把 `new` 移到工厂里，按需产出对象 | ★★★ |
+| [原型](/java/design-patterns/creational/prototype) | 创建成本高 / 需要副本 | 复制已有对象，而不是重新构造 | ★★ |
+| [建造者](/java/design-patterns/creational/builder) | 构造参数多、组装步骤复杂 | 分步组装，最后一步产出成品 | ★★★ |
 
 ## 二、怎么选
 
