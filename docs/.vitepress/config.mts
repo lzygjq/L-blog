@@ -4,7 +4,7 @@ import { defineConfig } from 'vitepress'
 // 约定：目录名英文、侧边栏标题中文；每个板块 index.md 为导览页
 export default defineConfig({
   lang: 'zh-CN',
-  title: '志勇的知识体系',
+  title: 'L知识体系',
   description: 'Java 后端 / 微服务与云原生 / 大数据 / AI 编程 — 个人知识沉淀与项目实战复盘',
   head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
 
@@ -14,23 +14,23 @@ export default defineConfig({
   },
 
   themeConfig: {
-    siteTitle: '志勇的知识体系',
+    siteTitle: 'L知识体系',
     nav: [
       { text: '首页', link: '/' },
-      { text: 'Java', link: '/java/' },
-      { text: '数据库', link: '/database/' },
-      { text: '中间件', link: '/middleware/' },
-      { text: '大数据', link: '/bigdata/' },
-      { text: '云原生', link: '/cloud-native/' },
-      { text: 'AI 编程', link: '/ai/' },
+      { text: 'Java 技术栈', link: '/java/' },
+      { text: '数据库原理', link: '/database/' },
+      { text: '中间件实践', link: '/middleware/' },
+      { text: '大数据数仓', link: '/bigdata/' },
+      { text: '云原生实践', link: '/cloud-native/' },
+      { text: 'AI 工程化', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
       { text: '面试专题', link: '/interview/' },
-      { text: '关于', link: '/about/' }
+      { text: '关于本站', link: '/about/' }
     ],
 
     sidebar: [
       {
-        text: 'Java',
+        text: 'Java 技术栈',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/java/' },
@@ -51,7 +51,7 @@ export default defineConfig({
         ]
       },
       {
-        text: '数据库',
+        text: '数据库原理',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/database/' },
@@ -60,7 +60,7 @@ export default defineConfig({
         ]
       },
       {
-        text: '中间件',
+        text: '中间件实践',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/middleware/' },
@@ -71,7 +71,7 @@ export default defineConfig({
         ]
       },
       {
-        text: '大数据与数仓',
+        text: '大数据数仓',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/bigdata/' },
@@ -82,7 +82,7 @@ export default defineConfig({
         ]
       },
       {
-        text: '云原生',
+        text: '云原生实践',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/cloud-native/' },
@@ -93,7 +93,7 @@ export default defineConfig({
         ]
       },
       {
-        text: 'AI 编程与 Agent',
+        text: 'AI 工程化',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/ai/' },
@@ -136,9 +136,9 @@ export default defineConfig({
         items: [{ text: '板块导览', link: '/interview/' }]
       },
       {
-        text: '关于',
+        text: '关于本站',
         collapsed: true,
-        items: [{ text: '关于本站', link: '/about/' }]
+        items: [{ text: '站点说明', link: '/about/' }]
       }
     ],
 
@@ -151,7 +151,7 @@ export default defineConfig({
 
     footer: {
       message: '仅供学习交流使用',
-      copyright: 'Copyright © 2026 志勇'
+      copyright: 'Copyright © 2026 L'
     }
   }
 })

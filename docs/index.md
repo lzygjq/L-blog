@@ -2,7 +2,7 @@
 layout: home
 
 hero:
-  name: 志勇的知识体系
+  name: L知识体系
   text: 夯实基础 · 构建体系 · 沉淀实战
   tagline: 13 年 Java/PHP 后端 — 微服务与云原生 / 大数据数仓 / AI 编程，用可验证的产出对抗遗忘
   actions:
@@ -26,7 +26,7 @@ features:
     details: MySQL 原理与分库分表、Redis、RabbitMQ / RocketMQ / 物联网 MQTT
     link: /database/
   - icon: 📊
-    title: 大数据与数仓
+    title: 大数据数仓
     details: Canal 同步、Doris、Iceberg / MinIO 冷热分层、数仓分层建模方法论
     link: /bigdata/
   - icon: ☸️
@@ -34,7 +34,7 @@ features:
     details: Docker、Kubernetes、CI/CD、监控可观测 — 从微服务到 K8s 的演进实录
     link: /cloud-native/
   - icon: 🤖
-    title: AI 编程与 Agent
+    title: AI 工程化
     details: Vibe Coding、Agent 与 Harness 机制、Spring AI / Spring AI Alibaba 实践
     link: /ai/
   - icon: 🎯
