@@ -174,6 +174,7 @@ export default defineConfig({
               { text: 'Spring AI Alibaba', link: '/ai/spring-ai-alibaba/' },
               { text: '数字人导览', link: '/ai/digital-human/' },
               { text: '实时互动数字人', link: '/ai/digital-human/interactive-avatar' },
+              { text: 'Web 与原生 App', link: '/ai/digital-human/web-vs-native' },
               { text: '集成清单', link: '/ai/digital-human/integration-checklist' }
             ]
           }
