@@ -25,6 +25,99 @@
   padding-right: 8px;
 }
 
+/* ===== 侧边栏收起/展开（桌面端） ===== */
+
+/* 注册自定义属性，让宽度变化可产生过渡动画（不支持的浏览器退化为瞬切） */
+@property --vp-sidebar-width {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 240px;
+}
+
+:root {
+  transition: --vp-sidebar-width 0.25s ease;
+}
+
+/* 收起态：宽度归零。侧边栏与内容区左留白都引用同一变量，自动联动占满 */
+html.sidebar-collapsed {
+  --vp-sidebar-width: 0px;
+}
+
+html.sidebar-collapsed .VPSidebar {
+  visibility: hidden;
+  overflow: hidden;
+}
+
+/* 收起/展开按钮：骑在侧边栏与内容区的分界线上，垂直居中 */
+.sidebar-toggle {
+  position: fixed;
+  top: 50%;
+  left: calc(var(--vp-sidebar-width) - 13px);
+  transform: translateY(-50%);
+  z-index: 50;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 50%;
+  background: var(--vp-c-bg);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: left 0.25s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 收起后按钮贴左边缘；按钮虽在侧边栏 DOM 内，必须显式恢复可见，
+   否则继承侧边栏的 visibility:hidden 导致无法再展开 */
+html.sidebar-collapsed .sidebar-toggle {
+  left: 10px;
+  visibility: visible;
+}
+
+/* 收起后站名容器宽度归零会与搜索框重叠，直接隐藏 */
+html.sidebar-collapsed .VPNavBarTitle {
+  display: none;
+}
+
+.sidebar-toggle:hover {
+  color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 0 0 3px rgba(62, 175, 124, 0.15);
+}
+
+/* 移动端侧边栏是抽屉模式，不显示此按钮 */
+@media (max-width: 959px) {
+  .sidebar-toggle {
+    display: none;
+  }
+}
+
+/* ===== 侧边栏滚动条美化：细滚动条，hover 加深 ===== */
+
+.VPSidebar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(100, 116, 139, 0.28) transparent;
+}
+
+.VPSidebar::-webkit-scrollbar {
+  width: 5px;
+}
+
+.VPSidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.VPSidebar::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.28);
+  border-radius: 999px;
+}
+
+.VPSidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.5);
+}
+
 /* ===== 顶部导航菜单：hover / 选中态 ===== */
 
 .VPNavBarMenuLink {
