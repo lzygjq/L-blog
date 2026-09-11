@@ -1,3 +1,7 @@
+---
+date: 2026-09-11
+---
+
 # Spring Framework · 导览
 
 Spring Framework 是整个 Spring 生态的地基。Boot 和 Cloud 都是在这一层之上做**约定与封装**——所以理解 Framework 的核心机制，是读懂一切上层现象的前提：为什么事务会失效、为什么循环依赖能被解决、为什么注解在同类内部调用时不起作用。

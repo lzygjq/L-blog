@@ -45,4 +45,5 @@ features:
     title: 项目实战
     details: 大型集团绩效系统四大技术难点、SaaS 平台云原生与数仓落地 —— 面试弹药库
     link: /projects/
+date: 2026-09-11
 ---

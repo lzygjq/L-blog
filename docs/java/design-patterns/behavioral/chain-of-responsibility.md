@@ -1,3 +1,7 @@
+---
+date: 2026-09-11
+---
+
 # 责任链模式（Chain of Responsibility）
 
 ## 一、问题场景
