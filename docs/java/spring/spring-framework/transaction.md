@@ -1,6 +1,8 @@
 ---
 order: 4
 date: 2026-09-11
+title: 声明式事务与传播行为
+desc: 七种传播行为、REQUIRES_NEW vs NESTED、失效清单十项、事务与连接池
 ---
 
 # 声明式事务与传播行为

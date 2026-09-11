@@ -91,11 +91,14 @@ date: 2026-09-11
 
 ## 四、本板块内容
 
-| 文章 | 内容 |
-|---|---|
-| [实时互动数字人：选型与集成](/ai/digital-human/interactive-avatar/) | 以云渲染路线为例，走完「场景反推选型 → 集成链路 → 鉴权设计 → 能力边界 → 终端工程 → 避坑」全流程 |
-| [Web 与原生 App 接入](/ai/digital-human/web-vs-native/) | 云渲染落地的两种宿主形态：Web 模式与原生 App 模式的环境约束、license/token 凭证差异与选型判据 |
-| [第三方 AI 能力集成清单](/ai/digital-human/integration-checklist/) | 把上面这套过程抽象成可复用的方法：约束清单、边界盘点、凭证模型、供应商对接与验收 |
+<!-- 自动生成：数据来自同目录 index.data.js（createContentLoader），新文章落在本目录即自动出现 -->
+
+<script setup>
+import AutoList from '../../.vitepress/theme/components/AutoList.vue'
+import { data } from './index.data.js'
+</script>
+
+<AutoList :items="data" />
 
 ## 五、常见落地形态速览
 

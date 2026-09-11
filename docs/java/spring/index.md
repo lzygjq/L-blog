@@ -18,13 +18,14 @@ date: 2026-09-11
 
 ## 二、Spring Framework 已完成内容
 
-| 主题 | 一句话价值 |
-|---|---|
-| [IoC 容器与 Bean 生命周期](/java/spring/spring-framework/ioc-container/) | 容器体系、`BeanDefinition`、`refresh()` 十二步、Bean 生命周期八阶段、扩展点对照 |
-| [循环依赖与三级缓存](/java/spring/spring-framework/circular-dependency/) | 三级缓存的逐层推演，以及"为什么必须是三级"的核心答案 |
-| [AOP 与代理机制](/java/spring/spring-framework/aop/) | JDK 代理 vs CGLIB、代理生成时机、切点表达式、失效根因 |
-| [声明式事务与传播行为](/java/spring/spring-framework/transaction/) | 七种传播行为、`REQUIRES_NEW` vs `NESTED`、失效清单十项、事务与连接池 |
-| [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | 四大对象、`#{}` vs `${}`、两级缓存的坑、`SqlSessionTemplate` |
+<!-- 自动生成：数据来自同目录 index.data.js（createContentLoader），新文章落在 spring-framework/ 即自动出现 -->
+
+<script setup>
+import AutoList from '../../.vitepress/theme/components/AutoList.vue'
+import { data } from './index.data.js'
+</script>
+
+<AutoList :items="data" />
 
 ## 三、Spring Boot 计划内容
 

@@ -1,6 +1,8 @@
 ---
 order: 2
 date: 2026-09-11
+title: Web 与原生 App 接入
+desc: 云渲染落地的两种宿主形态：Web 模式与原生 App 模式的环境约束、license/token 凭证差异与选型判据
 ---
 
 # 接入宿主选型：Web 与原生 App

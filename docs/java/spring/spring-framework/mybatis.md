@@ -1,6 +1,8 @@
 ---
 order: 5
 date: 2026-09-11
+title: MyBatis 执行流程与集成
+desc: 四大对象、#{} vs ${}、两级缓存的坑、SqlSessionTemplate
 ---
 
 # MyBatis 执行流程与 Spring 集成

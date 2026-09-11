@@ -1,6 +1,8 @@
 ---
 order: 3
 date: 2026-09-11
+title: AOP 与代理机制
+desc: JDK 代理 vs CGLIB、代理生成时机、切点表达式、失效根因
 ---
 
 # AOP 与代理机制

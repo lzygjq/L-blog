@@ -1,6 +1,8 @@
 ---
 order: 1
 date: 2026-09-11
+title: IoC 容器与 Bean 生命周期
+desc: 容器体系、BeanDefinition、refresh() 十二步、Bean 生命周期八阶段、扩展点对照
 ---
 
 # IoC 容器与 Bean 生命周期
