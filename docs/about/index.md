@@ -13,7 +13,7 @@ L知识体系是一个面向 Java 后端方向的技术知识站点，定位是*
 | [消息队列](/middleware/) | RabbitMQ、RocketMQ、物联网 MQTT 与选型对比 |
 | [数据仓库](/bigdata/) | Canal 同步、Doris 数仓、Iceberg 冷热分层、分层建模 |
 | [云原生](/cloud-native/) | Docker、Kubernetes、CI/CD、监控与可观测 |
-| [AI 编程](/ai/) | Vibe Coding、Agent 与工具链机制、Spring AI 生态 |
+| [AI 应用](/ai/) | AI 辅助研发（Vibe Coding、Agent）、AI 能力集成（Spring AI、数字人） |
 | [项目实战](/projects/) | 大型集团绩效系统难点专题、SaaS 平台云原生与数仓落地 |
 | [面试专题](/interview/) | 横向串联各板块的高频考点索引 |
 

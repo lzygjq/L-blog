@@ -22,7 +22,7 @@ export default defineConfig({
       { text: '消息队列', link: '/middleware/' },
       { text: '数据仓库', link: '/bigdata/' },
       { text: '云原生', link: '/cloud-native/' },
-      { text: 'AI 编程', link: '/ai/' },
+      { text: 'AI 应用', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
       { text: '面试专题', link: '/interview/' },
       { text: '关于本站', link: '/about/' }
@@ -154,14 +154,29 @@ export default defineConfig({
         ]
       },
       {
-        text: 'AI 编程',
+        text: 'AI 应用',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/ai/' },
-          { text: 'Vibe Coding', link: '/ai/vibe-coding/' },
-          { text: 'Agent 与 Harness', link: '/ai/agent-harness/' },
-          { text: 'Spring AI', link: '/ai/spring-ai/' },
-          { text: 'Spring AI Alibaba', link: '/ai/spring-ai-alibaba/' }
+          {
+            text: 'AI 辅助研发',
+            collapsed: true,
+            items: [
+              { text: 'Vibe Coding', link: '/ai/vibe-coding/' },
+              { text: 'Agent 与 Harness', link: '/ai/agent-harness/' }
+            ]
+          },
+          {
+            text: 'AI 能力集成',
+            collapsed: true,
+            items: [
+              { text: 'Spring AI', link: '/ai/spring-ai/' },
+              { text: 'Spring AI Alibaba', link: '/ai/spring-ai-alibaba/' },
+              { text: '数字人导览', link: '/ai/digital-human/' },
+              { text: '实时互动数字人', link: '/ai/digital-human/interactive-avatar' },
+              { text: '集成清单', link: '/ai/digital-human/integration-checklist' }
+            ]
+          }
         ]
       },
       {

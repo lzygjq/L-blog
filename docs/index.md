@@ -38,8 +38,8 @@ features:
     details: Docker、Kubernetes、CI/CD 与可观测性 —— 从微服务到云原生的落地路径
     link: /cloud-native/
   - icon: 🤖
-    title: AI 编程
-    details: Vibe Coding 工作流、Agent 与工具链机制、Spring AI / Spring AI Alibaba 实践
+    title: AI 应用
+    details: AI 辅助研发（Vibe Coding、Agent 与工具链）+ AI 能力集成（Spring AI、数字人）
     link: /ai/
   - icon: 🎯
     title: 项目实战
