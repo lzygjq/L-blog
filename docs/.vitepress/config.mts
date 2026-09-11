@@ -47,7 +47,27 @@ export default defineConfig({
               { text: 'Spring Cloud 微服务', link: '/java/spring/spring-cloud/' }
             ]
           },
-          { text: '设计模式', link: '/java/design-patterns/' }
+          {
+            text: '设计模式',
+            collapsed: true,
+            items: [
+              { text: '导览', link: '/java/design-patterns/' },
+              { text: '设计原则与 UML', link: '/java/design-patterns/principles/' },
+              {
+                text: '创建型（5 种）',
+                collapsed: true,
+                items: [
+                  { text: '导览', link: '/java/design-patterns/creational/' },
+                  { text: '单例模式', link: '/java/design-patterns/creational/singleton' },
+                  { text: '工厂模式', link: '/java/design-patterns/creational/factory' },
+                  { text: '原型模式', link: '/java/design-patterns/creational/prototype' },
+                  { text: '建造者模式', link: '/java/design-patterns/creational/builder' }
+                ]
+              },
+              { text: '结构型（7 种）', link: '/java/design-patterns/structural/' },
+              { text: '行为型（11 种）', link: '/java/design-patterns/behavioral/' }
+            ]
+          }
         ]
       },
       {
