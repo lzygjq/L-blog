@@ -4,6 +4,14 @@
  * 品牌色对齐站点图标（favicon.svg）的绿色 #3eaf7c。
  */
 
+/* 始终为窗口竖向滚动条预留位置：
+   部分导览页内容恰好不满一屏（如 /database/），从长页（如 /java/）切过去时
+   窗口滚动条消失，内容区宽度会瞬间多出滚动条宽度，产生一次横向闪动。
+   scrollbar-gutter: stable 固定预留，页面可滚动与否都不再影响布局宽度 */
+html {
+  scrollbar-gutter: stable;
+}
+
 :root {
   --vp-c-brand-1: #3eaf7c;
   --vp-c-brand-2: #35926b;
