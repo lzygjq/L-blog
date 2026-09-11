@@ -127,11 +127,15 @@ const sidebarSpec = [
   { text: '关于本站', children: [{ text: '站点说明', link: '/about/' }] }
 ]
 
+// 部署 base：GitHub Actions 上构建时仓库部署在 /L-blog/ 子路径，本地构建/dev 用根路径
+const base = process.env.GITHUB_ACTIONS ? '/L-blog/' : '/'
+
 export default defineConfig({
+  base,
   lang: 'zh-CN',
   title: 'L知识库',
   description: 'Java 后端知识库 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / AI 应用，附项目实战难点复盘',
-  head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
+  head: [['link', { rel: 'icon', href: base + 'favicon.svg' }]],
 
   markdown: {
     lineNumbers: true,
@@ -156,7 +160,7 @@ export default defineConfig({
 
     sidebar: buildSidebar(sidebarSpec),
 
-    socialLinks: [{ icon: 'github', link: 'https://github.com/your-name/tech-blog' }],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/lzygjq/L-blog' }],
 
     outline: { level: [2, 3], label: '本页目录' },
     docFooter: { prev: '上一篇', next: '下一篇' },
