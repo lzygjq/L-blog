@@ -2,7 +2,7 @@
 
 按「项目 → 技术难点专题」组织，每个专题独立成文：背景 → 方案对比 → 落地实现 → 压测/效果数据 → 复盘。
 
-## 绩效系统（6 万人规模）
+## 大型集团绩效系统
 - [十万人组织架构同步](/projects/perf-system/org-sync-100k/)
 - [高峰期并发填报](/projects/perf-system/peak-filling/)
 - [多级审批消息实时推送](/projects/perf-system/approval-push/)

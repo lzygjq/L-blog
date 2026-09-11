@@ -5,7 +5,7 @@ import { defineConfig } from 'vitepress'
 export default defineConfig({
   lang: 'zh-CN',
   title: 'L知识体系',
-  description: 'Java 后端 / 微服务与云原生 / 大数据 / AI 编程 — 个人知识沉淀与项目实战复盘',
+  description: 'Java 后端知识体系 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / AI 编程，附项目实战难点复盘',
   head: [['link', { rel: 'icon', href: '/favicon.svg' }]],
 
   markdown: {
@@ -17,12 +17,12 @@ export default defineConfig({
     siteTitle: 'L知识体系',
     nav: [
       { text: '首页', link: '/' },
-      { text: 'Java 技术栈', link: '/java/' },
-      { text: '数据库原理', link: '/database/' },
-      { text: '中间件实践', link: '/middleware/' },
-      { text: '大数据数仓', link: '/bigdata/' },
-      { text: '云原生实践', link: '/cloud-native/' },
-      { text: 'AI 工程化', link: '/ai/' },
+      { text: 'Java 核心', link: '/java/' },
+      { text: '数据存储', link: '/database/' },
+      { text: '消息队列', link: '/middleware/' },
+      { text: '数据仓库', link: '/bigdata/' },
+      { text: '云原生', link: '/cloud-native/' },
+      { text: 'AI 编程', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
       { text: '面试专题', link: '/interview/' },
       { text: '关于本站', link: '/about/' }
@@ -30,7 +30,7 @@ export default defineConfig({
 
     sidebar: [
       {
-        text: 'Java 技术栈',
+        text: 'Java 核心',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/java/' },
@@ -51,27 +51,27 @@ export default defineConfig({
         ]
       },
       {
-        text: '数据库原理',
+        text: '数据存储',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/database/' },
           { text: 'MySQL', link: '/database/mysql/' },
+          { text: 'Redis 缓存', link: '/database/redis/' },
           { text: '分库分表', link: '/database/sharding/' }
         ]
       },
       {
-        text: '中间件实践',
+        text: '消息队列',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/middleware/' },
-          { text: 'Redis 缓存', link: '/middleware/redis/' },
           { text: 'RabbitMQ', link: '/middleware/rabbitmq/' },
           { text: 'RocketMQ', link: '/middleware/rocketmq/' },
           { text: '物联网 MQTT', link: '/middleware/mqtt/' }
         ]
       },
       {
-        text: '大数据数仓',
+        text: '数据仓库',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/bigdata/' },
@@ -82,7 +82,7 @@ export default defineConfig({
         ]
       },
       {
-        text: '云原生实践',
+        text: '云原生',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/cloud-native/' },
@@ -93,7 +93,7 @@ export default defineConfig({
         ]
       },
       {
-        text: 'AI 工程化',
+        text: 'AI 编程',
         collapsed: true,
         items: [
           { text: '板块导览', link: '/ai/' },
@@ -109,7 +109,7 @@ export default defineConfig({
         items: [
           { text: '板块导览', link: '/projects/' },
           {
-            text: '绩效系统（6 万人）',
+            text: '绩效系统',
             collapsed: true,
             items: [
               { text: '导览', link: '/projects/perf-system/' },
