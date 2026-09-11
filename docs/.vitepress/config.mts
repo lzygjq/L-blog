@@ -191,7 +191,7 @@ export default defineConfig({
               { text: '导览', link: '/projects/perf-system/' },
               { text: '十万人组织架构同步', link: '/projects/perf-system/org-sync-100k/' },
               { text: '高峰期并发填报', link: '/projects/perf-system/peak-filling/' },
-              { text: '多级审批消息实时推送', link: '/projects/perf-system/approval-push/' },
+              { text: '多级审批实时推送', link: '/projects/perf-system/approval-push/' },
               { text: '报表预计算', link: '/projects/perf-system/report-precompute/' }
             ]
           },

@@ -8,6 +8,21 @@
   --vp-c-brand-1: #3eaf7c;
   --vp-c-brand-2: #35926b;
   --vp-c-brand-3: #2f7d5c;
+
+  /* 侧边栏宽度：默认 272px 右侧留白过多，收窄并微调条目内边距（232px 会让最长条目换行） */
+  --vp-sidebar-width: 240px;
+}
+
+/* 侧边栏条目：左右内边距各收 4px，行长更紧凑 */
+.VPSidebarItem.level-2 .item,
+.VPSidebarItem.level-3 .item,
+.VPSidebarItem.level-4 .item,
+.VPSidebarItem.level-5 .item {
+  padding-left: 14px;
+}
+
+.VPSidebarItem .text {
+  padding-right: 8px;
 }
 
 /* ===== 顶部导航菜单：hover / 选中态 ===== */
