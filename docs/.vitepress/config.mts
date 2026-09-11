@@ -64,7 +64,20 @@ export default defineConfig({
                   { text: '建造者模式', link: '/java/design-patterns/creational/builder' }
                 ]
               },
-              { text: '结构型（7 种）', link: '/java/design-patterns/structural/' },
+              {
+                text: '结构型（7 种）',
+                collapsed: true,
+                items: [
+                  { text: '导览', link: '/java/design-patterns/structural/' },
+                  { text: '代理模式', link: '/java/design-patterns/structural/proxy' },
+                  { text: '适配器模式', link: '/java/design-patterns/structural/adapter' },
+                  { text: '装饰者模式', link: '/java/design-patterns/structural/decorator' },
+                  { text: '桥接模式', link: '/java/design-patterns/structural/bridge' },
+                  { text: '外观模式', link: '/java/design-patterns/structural/facade' },
+                  { text: '组合模式', link: '/java/design-patterns/structural/composite' },
+                  { text: '享元模式', link: '/java/design-patterns/structural/flyweight' }
+                ]
+              },
               { text: '行为型（11 种）', link: '/java/design-patterns/behavioral/' }
             ]
           }
