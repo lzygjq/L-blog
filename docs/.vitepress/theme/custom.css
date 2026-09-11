@@ -35,15 +35,13 @@ html {
 
 /* ===== 侧边栏收起/展开（桌面端） ===== */
 
-/* 注册自定义属性，让宽度变化可产生过渡动画（不支持的浏览器退化为瞬切） */
+/* 注册可过渡的宽度变量，让宽度变化产生过渡动画（不支持的浏览器退化为瞬切）。
+   注意：transition 必须写在后面的 :root 块（同时声明两个变量），
+   同名属性后者生效，不要在此重复声明 transition */
 @property --vp-sidebar-width {
   syntax: '<length>';
   inherits: true;
   initial-value: 240px;
-}
-
-:root {
-  transition: --vp-sidebar-width 0.25s ease;
 }
 
 /* 收起态：宽度归零。侧边栏与内容区左留白都引用同一变量，自动联动占满 */
@@ -132,7 +130,59 @@ html.sidebar-collapsed .VPNavBarTitle {
    效果：收起侧边栏腾出的 240px 由阅读列吃掉（688→928px），随宽度变量平滑过渡 */
 html .VPDoc.has-aside .content-container,
 html .VPDoc:not(.has-aside) .content-container {
-  max-width: calc(688px + (240px - var(--vp-sidebar-width))) !important;
+  max-width: calc(688px + (240px - var(--vp-sidebar-width)) + var(--vp-aside-extra)) !important;
+}
+
+/* 注册可过渡的宽度变量：aside 收起腾出的空间（0 / 256px） */
+@property --vp-aside-extra {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+:root {
+  --vp-aside-extra: 0px;
+  transition: --vp-sidebar-width 0.25s ease, --vp-aside-extra 0.25s ease;
+}
+
+/* 收起右侧"本页目录"：隐藏面板（基础态 display:none，≥1280px 媒体查询
+   .VPDoc .aside display:block 特异性 0,2,0，这里 0,2,1 压得住），
+   并把腾出的空间交给正文列 */
+html.aside-collapsed {
+  --vp-aside-extra: 256px;
+}
+
+html.aside-collapsed .VPDoc .aside {
+  display: none;
+}
+
+/* 右侧目录开关：导航栏内图标按钮，与左侧汉堡按钮同款样式。
+   aside 只在 ≥1280px 存在，按钮随之显隐 */
+.aside-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.aside-toggle:hover {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+}
+
+@media (max-width: 1279px) {
+  .aside-toggle {
+    display: none;
+  }
 }
 
 /* ===== 顶部导航菜单：hover / 选中态 ===== */
