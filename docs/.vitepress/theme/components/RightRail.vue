@@ -1,11 +1,13 @@
 <!-- 最右侧竖版工具栏（参考 pdai.tech 右侧悬浮条）：
      - 侧边栏显示/隐藏（原导航栏左上角汉堡按钮移到这里）
      - 本页目录显示/隐藏（原导航栏右侧按钮移到这里）
+     - 全屏阅读（参考 pdai.tech 的全屏图标，浏览器原生 Fullscreen API）
      - 回到顶部（滚动超过 400px 出现）
      整条 fixed 在视口右缘、导航栏以下；Layout 预留 padding-right 让内容不压住工具栏 -->
 <script setup>
 import SidebarToggle from './SidebarToggle.vue'
 import AsideToggle from './AsideToggle.vue'
+import FullScreenToggle from './FullScreenToggle.vue'
 import BackToTop from './BackToTop.vue'
 </script>
 
@@ -14,6 +16,7 @@ import BackToTop from './BackToTop.vue'
     <SidebarToggle />
     <AsideToggle />
     <div class="rail-divider" aria-hidden="true"></div>
+    <FullScreenToggle />
     <BackToTop />
   </div>
 </template>

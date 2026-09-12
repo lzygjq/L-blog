@@ -273,6 +273,34 @@ html.aside-collapsed .VPDoc .aside {
   }
 }
 
+/* 全屏阅读开关（RightRail 内）：样式与另两个开关保持一致，
+   全屏中给一个品牌色底以示「已激活」（不是边框，避免出现线框） */
+.fullscreen-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.fullscreen-toggle:hover {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+}
+
+.fullscreen-toggle.active {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+
 /* ===== 顶部导航菜单：hover / 选中态 ===== */
 
 .VPNavBarMenuLink {
@@ -446,23 +474,42 @@ html .nav-page .vp-doc blockquote {
   font-size: 12.5px;
 }
 
-/* ── 顶部导航菜单居中 ─────────────────────────────
-   默认主题把菜单挤在右侧（搜索/外观/GitHub 之前），改为相对整条导航栏绝对居中；
-   挂在 .container（含左侧站名）上定位，才是视觉上的页面居中 */
-html .VPNavBar .wrapper > .container {
-  position: relative;
+/* ── 顶部导航：菜单栏与搜索框作为一组居中（搜索框紧跟菜单之后） ─────────────
+   默认主题模板里 .content-body 的子节点顺序被写死为
+   [搜索][菜单][主题切换][GitHub][extra][hamburger]（内容区插槽另算），
+   所以「搜索框在菜单栏左边」。用户要求搜索框放到菜单栏后面 → 用 flex `order`
+   把搜索挪到菜单之后（改不了 DOM 顺序，但 order 只影响视觉次序）。
+   居中不再用 absolute + translateX(-50%)：那样只能把菜单单独居中，搜索框带不过去。
+   改用「两个自动外边距等分剩余空间」——菜单 margin-left:auto 吃掉左半边空白、
+   主题切换 margin-left:auto 吃掉右半边，于是 [菜单][搜索] 这一组正好落在容器中心，
+   右侧图标仍然贴右。<=767px 菜单隐藏、搜索框恢复 flex-grow:1 占满，故只在 >=768px 生效 */
+@media (min-width: 768px) {
+  html .VPNavBar .VPNavBarMenu {
+    order: 1;
+    margin-left: auto;
+  }
+
+  html .VPNavBar .VPNavBarSearch {
+    order: 2;
+    /* 默认 flex-grow:1 会让搜索容器横占整行、把菜单挤到左边 */
+    flex-grow: 0 !important;
+    /* 默认 24/32px 是给「搜索独占中间区域」留的间距，紧跟菜单时只需一小段 */
+    padding-left: 14px !important;
+  }
+
+  html .VPNavBar .VPNavBarAppearance {
+    order: 3;
+    margin-left: auto;
+  }
+
+  html .VPNavBar .VPNavBarSocialLinks,
+  html .VPNavBar .VPNavBarExtra,
+  html .VPNavBar .VPNavBarHamburger {
+    order: 4;
+  }
 }
 
-html .VPNavBar .VPNavBarMenu {
-  position: absolute;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
-  height: var(--vp-nav-height);
-  align-items: center;
-}
-
-/* 中窄屏（768–1100px）9 个菜单项较宽，缩字号防与左侧站名重叠 */
+/* 中窄屏（768–1100px）8 个菜单项 + 搜索框较宽，缩字号防与左侧站名重叠 */
 @media (max-width: 1100px) {
   html .VPNavBar .VPNavBarMenu .item .text {
     font-size: 13px;

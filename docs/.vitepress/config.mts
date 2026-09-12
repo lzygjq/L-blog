@@ -173,7 +173,8 @@ export default defineConfig({
   themeConfig: {
     siteTitle: 'L知识库',
     nav: [
-      { text: '首页', link: '/' },
+      // 首页不占用菜单位置：访问根路径 / 即是首页，站名（VPNavBarTitle）本身链回首页
+      { text: '导航', link: '/nav/' },
       { text: 'Java', link: '/java/' },
       // 数据存储 + 消息队列合并入口：两个前缀下都保持高亮
       { text: '存储与消息', link: '/database/', activeMatch: '/(database|middleware)/' },
@@ -181,7 +182,6 @@ export default defineConfig({
       { text: '云原生', link: '/cloud-native/' },
       { text: 'AI 应用', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
-      { text: '导航', link: '/nav/' },
       {
         text: '其他',
         items: [
