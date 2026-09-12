@@ -399,6 +399,16 @@ html .Layout {
   }
 }
 
+/* 关键：宽屏下默认主题给 VPContent 加了巨额左右内边距（实测 480px/240px）用于
+   居中版式，把多出来的空间全部吞掉——强制只保留侧边栏宽度，右侧只留 8px 细缝
+   （工具栏 48px 由 Layout 的 padding-right 独立预留） */
+@media (min-width: 960px) {
+  html .VPContent.has-sidebar {
+    padding-left: var(--vp-sidebar-width) !important;
+    padding-right: var(--lp-gap) !important;
+  }
+}
+
 /* 导航栏：白底 + 下边框细线（与左栏同色，无断层）。
    默认主题 VPNavBar 是 scoped 透明底（滚动前），必须 !important 压住 */
 html .VPNavBar {
@@ -417,13 +427,17 @@ html .VPSidebar {
 }
 
 /* 文档容器：吃满可用宽度，四周只留一圈 8px 细缝露灰底。
-   VPDoc 默认 padding 48px 32px 0（顶缝/左缝/错位的元凶，scoped 特异度高），!important 清零 */
+   VPDoc 默认 padding 48px 32px 0、且宽屏下整块限宽 1152px 居中（scoped 高特异度），全部 !important 打破 */
 html .VPDoc {
   padding: 0 !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
 }
 
 html .VPDoc .container {
-  max-width: 100%;
+  max-width: 100% !important;
+  margin: 0 !important;
   padding: var(--lp-gap);
 }
 
@@ -432,14 +446,20 @@ html .VPDoc .content {
   padding: 0;
 }
 
-/* 目录列与内容列之间的缝也收窄到 8px */
+/* 目录列与内容列之间的缝也收窄到 8px；右侧残余内边距清零让卡片贴工具栏 */
 html .VPDoc .aside {
   padding-left: var(--lp-gap);
+  padding-right: 0 !important;
 }
 
-/* 目录卡片顶缝收窄（默认是 导航高+32px，过大） */
+/* 目录卡片顶缝收窄（默认是 导航高+32px，过大）；右缝清零让卡片贴住右侧工具栏。
+   注意：aside-container 是 position:fixed + 写死 width:224px（百分比会相对视口解析，
+   不能用 100%），列内可用宽度 = 256 列宽 - 8 左缝 = 248px */
 html .VPDoc .aside-container {
+  width: 248px !important;
   padding-top: calc(var(--vp-nav-height) + var(--lp-gap));
+  padding-left: 0;
+  padding-right: 0;
 }
 
 /* 内容列：白底，缝隙外全是白色，与顶栏/左栏同色连成整体 */
@@ -447,10 +467,10 @@ html .VPDoc .content {
   background-color: var(--vp-c-bg);
 }
 
-/* 内容主体：取消默认的居中限宽（688px 基数），改为左对齐吃满，
-   上限 1160px 防超宽屏单行过长；顶距收窄，把空间全给正文减少换行 */
+/* 内容主体：取消默认的居中限宽（688px 基数）与一切上限，左对齐吃满整列，
+   宽屏多出来的空间全给正文（参考 pdai：区间尽量留给内容区） */
 html .VPDoc .content-container {
-  max-width: min(100%, 1160px) !important;
+  max-width: 100% !important;
   margin: 0;
   background-color: var(--vp-c-bg);
   padding: 16px 28px 48px;
