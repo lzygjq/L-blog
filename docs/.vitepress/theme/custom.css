@@ -357,3 +357,29 @@ html .nav-page .vp-doc blockquote {
   margin-top: 40px;
   font-size: 12.5px;
 }
+
+/* ── 顶部导航菜单居中 ─────────────────────────────
+   默认主题把菜单挤在右侧（搜索/外观/GitHub 之前），改为相对整条导航栏绝对居中；
+   挂在 .container（含左侧站名）上定位，才是视觉上的页面居中 */
+html .VPNavBar .wrapper > .container {
+  position: relative;
+}
+
+html .VPNavBar .VPNavBarMenu {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  transform: translateX(-50%);
+  height: var(--vp-nav-height);
+  align-items: center;
+}
+
+/* 中窄屏（768–1100px）9 个菜单项较宽，缩字号防与左侧站名重叠 */
+@media (max-width: 1100px) {
+  html .VPNavBar .VPNavBarMenu .item .text {
+    font-size: 13px;
+  }
+  html .VPNavBar .VPNavBarMenu .item {
+    padding: 0 8px;
+  }
+}
