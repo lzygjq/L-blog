@@ -1,6 +1,8 @@
 // 开发者导航数据：内容参考 pdai.tech 开发百宝箱 + cxy521（程序员521）分类体系
-// 结构：categories[] { id, icon, title, desc?, items[] { name, desc, url } }
-// 维护约定：只改这个文件即可增删导航条目，页面自动渲染；hot 区 = 各分类中最常用的精选
+// 结构：categories[] { id, icon, title, desc?, virtual?, items[] { name, desc, url, hot? } }
+// 维护约定：只改这个文件即可增删导航条目，页面自动渲染
+// 「高频常用」是 virtual 分类：不再静态渲染，仅作为默认收藏来源（hot: true 的条目）；
+//   用户在页面上点星标/拖拽排序后，选择保存在浏览器 localStorage（key: nav-favorites）
 
 export const navCategories = [
   {
@@ -8,12 +10,14 @@ export const navCategories = [
     icon: '⭐',
     title: '高频常用',
     desc: '日常开发最常打开的入口，精选置顶',
+    virtual: true,
     items: [
       { name: 'GitHub', desc: '全球最大的代码托管与开源协作平台', url: 'https://github.com', hot: true },
       { name: 'Gitee 码云', desc: '开源中国旗下代码托管，国内访问快', url: 'https://gitee.com', hot: true },
       { name: 'Stack Overflow', desc: '全球最大程序员问答社区，报错先搜它', url: 'https://stackoverflow.com', hot: true },
       { name: 'Maven 仓库检索', desc: '查依赖坐标与版本，后端高频必备', url: 'https://mvnrepository.com', hot: true },
       { name: 'DeepSeek', desc: '国产大模型对话助手，代码与技术问答', url: 'https://chat.deepseek.com', hot: true },
+      { name: 'OSChina 开源中国', desc: '开源资讯与国内开源社区', url: 'https://www.oschina.net', hot: true },
       { name: '掘金', desc: '面向开发者的内容社区，技术干货多', url: 'https://juejin.cn', hot: true },
       { name: 'Spring 官方文档', desc: 'Spring Boot / Cloud 项目文档总入口', url: 'https://spring.io/projects', hot: true },
       { name: 'ToolFu 工具箱', desc: 'JSON 格式化、正则、编解码等综合工具箱', url: 'https://tool.lu', hot: true },
