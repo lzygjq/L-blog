@@ -383,3 +383,60 @@ html .VPNavBar .VPNavBarMenu {
     padding: 0 8px;
   }
 }
+
+/* ===== pdai 风格卡片式布局：灰色画布 + 白色卡片 + 间隙 =====
+   画布（Layout 背景）浅灰；导航栏、左栏、内容区、右侧目录、最右工具栏都是白卡片，
+   卡片之间留缝露出灰底，形成空间层次 */
+
+:root {
+  --lp-canvas: #f3f5f7;
+}
+
+/* 画布灰底；右侧预留 48px 给竖版工具栏（内容不压工具栏） */
+html .Layout {
+  background-color: var(--lp-canvas);
+  padding-right: 48px;
+}
+
+@media (max-width: 767px) {
+  html .Layout {
+    padding-right: 0;
+  }
+}
+
+/* 导航栏：白底 + 下边框 + 微阴影，与下方内容卡片之间露灰缝 */
+html .VPNavBar {
+  background-color: var(--vp-c-bg);
+  border-bottom: 1px solid var(--vp-c-divider);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+/* 左侧边栏：白底 + 右边框（与内容卡片之间的灰色缝隙由内容卡片 margin 提供） */
+html .VPSidebar {
+  background-color: var(--vp-c-bg);
+  border-right: 1px solid var(--vp-c-divider);
+}
+
+/* 内容区白卡片：与导航栏、左栏、页面底部都留缝 */
+html .VPDoc .content-container {
+  background-color: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding: 24px 32px 40px;
+}
+
+/* 右侧"本页目录"白卡片：与内容卡片之间露灰缝 */
+html .VPDoc .VPDocAside {
+  background-color: var(--vp-c-bg);
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 10px;
+  margin-top: 16px;
+  padding: 14px 16px;
+}
+
+/* nav 导航页的卡片网格在白卡片内已有边界，弱化卡片内搜索框下间距 */
+html .nav-page .VPDoc .content-container {
+  padding-bottom: 24px;
+}

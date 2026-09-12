@@ -31,30 +31,24 @@ function toTop() {
 </template>
 
 <style scoped>
+/* 回到顶部：挂在 RightRail 竖版工具栏内（static 布局，占位随排列） */
 .back-to-top {
-  position: fixed;
-  right: 20px;
-  bottom: 32px;
-  z-index: 999;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   padding: 0;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 50%;
-  background: var(--vp-c-bg);
+  border: none;
+  border-radius: 8px;
+  background: transparent;
   color: var(--vp-c-text-2);
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: color 0.2s, background-color 0.2s;
 }
 .back-to-top:hover {
   color: var(--vp-c-brand-1);
-  border-color: var(--vp-c-brand-1);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.14);
+  background: var(--vp-c-bg-soft);
 }
 
 .btt-fade-enter-active,
