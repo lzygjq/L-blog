@@ -49,9 +49,12 @@ html.sidebar-collapsed {
   --vp-sidebar-width: 0px;
 }
 
+/* 收起态：padding/边框一并清掉，否则收起后屏幕左缘残留一条 29px 的空白细条 */
 html.sidebar-collapsed .VPSidebar {
   visibility: hidden;
   overflow: hidden;
+  padding: 0 !important;
+  border-right: none;
 }
 
 /* 收起/展开按钮：导航栏内的汉堡菜单按钮（后台管理系统风格），
