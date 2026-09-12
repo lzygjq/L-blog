@@ -505,3 +505,42 @@ html .nav-page .VPDoc .content-container {
     display: block !important;
   }
 }
+
+/* ===== 宽屏（≥1440px）「居中留白」版式覆盖 =====
+   默认主题在 ≥1440px 切到另一种版式：gutter = (100vw - 1440px)/2，
+   侧边栏宽度变成 gutter + 侧边栏宽 - 32（1920 下实测 448px），导航栏标题/内容也按
+   gutter 右移。本站已改为「左对齐、内容吃满」布局，这些公式会让侧边栏白底一路盖到
+   正文左侧（正文被遮住开头几个字），必须全部按「左侧固定侧边栏宽度」重算 */
+@media (min-width: 1440px) {
+  /* 侧边栏：固定为 --vp-sidebar-width，不再随视口变宽 */
+  html .VPSidebar {
+    width: var(--vp-sidebar-width) !important;
+    padding-left: 14px !important;
+  }
+
+  /* 导航栏容器：取消 1440px 居中限宽，站名回到屏幕左缘 */
+  html .VPNavBar .container {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+
+  /* 导航栏标题区：取消 gutter 内边距与固定宽度 */
+  html .VPNavBar.has-sidebar .title {
+    width: auto !important;
+    padding-left: 24px !important;
+  }
+
+  /* 导航栏内容区（搜索/图标）：取消 gutter 内边距，贴到右侧 */
+  html .VPNavBar.has-sidebar .content {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  html .VPNavBar.has-sidebar .divider {
+    padding-left: 0 !important;
+  }
+
+  html .VPLocalNav.has-sidebar {
+    padding-left: 0 !important;
+  }
+}
