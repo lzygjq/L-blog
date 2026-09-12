@@ -125,6 +125,8 @@ function onDragStart(i, e) {
 }
 function onDragOver(i, e) {
   if (dragIndex.value < 0 || dragIndex.value === i) return
+  // HTML5 DnD 规范：dragover 必须 preventDefault 目标才是合法放置区，否则 drop 不会触发
+  e.preventDefault()
   e.dataTransfer.dropEffect = 'move'
 }
 function onDrop(i) {
