@@ -20,25 +20,108 @@ html {
      会让「选中态」出现绿字紫底的撞色（本页目录、导航页分类选中都用它） */
   --vp-c-brand-soft: rgba(62, 175, 124, 0.14);
 
-  /* 侧边栏宽度：默认 272px 右侧留白过多，收窄让空间给内容列；
-     208px 下短条目单行、超长条目换行（本来 240px 时也在换行） */
-  --vp-sidebar-width: 208px;
+  /* 侧边栏宽度：默认 272px 右侧留白过多，收窄让空间给内容列。
+     改左侧目录为「pdai 式全展开 + 逐级缩进」后，224px 是缩进三级后
+     仍能单行容纳「微服务 → K8s 云原生演进」这类长条目的最小宽度 */
+  --vp-sidebar-width: 224px;
 }
 
 html.dark {
   --vp-c-brand-soft: rgba(62, 175, 124, 0.18);
 }
 
-/* 侧边栏条目：左右内边距各收 4px，行长更紧凑 */
-.VPSidebarItem.level-2 .item,
-.VPSidebarItem.level-3 .item,
-.VPSidebarItem.level-4 .item,
-.VPSidebarItem.level-5 .item {
-  padding-left: 14px;
+/* ===== 左侧目录（参考 pdai.tech）：恒定全展开 / 逐级缩进 / 选中态色块 =====
+   目标（用户定稿）：① 不要折叠箭头、不要能收起的层级，一次性全展开；
+   ② 逐级缩进 + 一级条目离左缘留出内边距（原来太贴边）；
+   ③ 选中/悬停都是圆角色块，不要竖条、不要边框线 */
+
+/* ① 恒定展开：sidebar.mjs 已不输出 collapsed 字段，VitePress 的
+   collapsible = (item.collapsed != null) 恒为 false —— 不渲染 chevron 箭头、
+   点击分组标题也不再有收起动作。这里再兜一层：万一将来手写 collapsed，
+   用 CSS 强制展开（v-show 的内联 display:none 只有 !important 压得住） */
+html .VPSidebar .VPSidebarItem.collapsed > .items {
+  display: block !important;
 }
 
-.VPSidebarItem .text {
-  padding-right: 8px;
+/* ② 缩进阶梯：默认主题只在 level-1..5 的 .items 上给 padding-left:16px，
+   level-0 的 .items 完全没有缩进 —— 所以「分组标题」和它的「子条目」
+   原先挤在同一列（实测都在 x=14）。补上 level-0 的缩进形成阶梯 */
+html .VPSidebar .VPSidebarItem.level-0 > .items {
+  padding-left: 18px !important;
+}
+
+/* 子级 .items 去掉默认的竖引导线（pdai 无引导线，层级靠缩进表达） */
+html .VPSidebar .VPSidebarItem.level-1 > .items,
+html .VPSidebar .VPSidebarItem.level-2 > .items,
+html .VPSidebar .VPSidebarItem.level-3 > .items,
+html .VPSidebar .VPSidebarItem.level-4 > .items,
+html .VPSidebar .VPSidebarItem.level-5 > .items {
+  border-left: none !important;
+  padding-left: 16px !important;
+}
+
+/* ③ 行内边距：一级条目原来只有 14px 内边距（太靠左），统一内缩 14px；
+   同时给行本身圆角，供 hover / 选中的色块使用 */
+html .VPSidebar .VPSidebarItem > .item {
+  box-sizing: border-box;
+  padding-left: 14px !important;
+  padding-right: 4px;
+  border-radius: 6px;
+}
+
+html .VPSidebar .VPSidebarItem > .item > .link > .text,
+html .VPSidebar .VPSidebarItem > .item > .text {
+  padding-right: 6px;
+}
+
+/* ④ 层级字重：无 link 的纯标题节点（分组/子组标题）加深加粗，带 link 的
+   正文条目保持常规灰 —— 对应 pdai 的「1.Java 基础 加粗 / 1.1 语法基础 常规」 */
+html .VPSidebar .VPSidebarItem:not(.is-link) > .item > .text {
+  font-weight: 700 !important;
+  color: var(--vp-c-text-1) !important;
+}
+
+html .VPSidebar .VPSidebarItem.is-link > .item > .link > .text {
+  font-weight: 500 !important;
+  color: var(--vp-c-text-2) !important;
+}
+
+/* ⑤ hover / 选中：只用圆角色块，不要竖条也不要边框。
+   默认主题的选中态是 .indicator 一根 2px 小竖条（left:-17px，还悬在行外），
+   直接隐藏 */
+html .VPSidebar .VPSidebarItem > .item > .indicator {
+  display: none !important;
+}
+
+html .VPSidebar .VPSidebarItem.is-link > .item {
+  transition: background-color 0.18s ease;
+}
+
+html .VPSidebar .VPSidebarItem.is-link:not(.is-active) > .item:hover {
+  background-color: var(--vp-c-default-soft) !important;
+}
+
+html .VPSidebar .VPSidebarItem.is-active > .item {
+  background-color: var(--vp-c-brand-soft) !important;
+}
+
+html .VPSidebar .VPSidebarItem.is-active > .item > .link > .text,
+html .VPSidebar .VPSidebarItem.is-active > .item > .text {
+  color: var(--vp-c-brand-1) !important;
+  font-weight: 600 !important;
+}
+
+/* ⑥ 节奏：全展开后默认 24px 组底距 + 组间 10px 上距太松散，收成 pdai 的紧凑排布 */
+html .VPSidebar .VPSidebarItem.level-0 {
+  padding-bottom: 10px !important;
+}
+
+/* 分组容器：默认被写死 width = 侧边栏宽 - 64（208px 时只有 144px），
+   条目右侧白白空掉一截还导致长标题换行；改为吃满，并去掉组间的横分隔线 */
+html .VPSidebar .group {
+  width: 100% !important;
+  border-top: none !important;
+  padding-top: 6px !important;
 }
 
 /* ===== 侧边栏收起/展开（桌面端） ===== */
@@ -49,7 +132,7 @@ html.dark {
 @property --vp-sidebar-width {
   syntax: '<length>';
   inherits: true;
-  initial-value: 208px;
+  initial-value: 224px;
 }
 
 /* 收起态：宽度归零。侧边栏与内容区左留白都引用同一变量，自动联动占满 */
@@ -434,12 +517,13 @@ html .VPNavBar {
 
 /* 左侧边栏：白底与导航栏连成整体，右缘一条细分隔线。
    默认主题用 --vp-sidebar-bg-color（浅灰 #f6f6f7）控制底色，须一并覆盖；
-   默认 padding 64px 32px 96px 左侧太空，侧边收窄到 14px 贴近屏幕左缘 */
+   默认 padding 64px 32px 96px 左侧太空，这里只留 8px —— 条目自身的内边距
+   （见文末「左侧目录」段）才是一级菜单的缩进来源，色块也能贴边留出细缝 */
 html .VPSidebar {
   --vp-sidebar-bg-color: var(--vp-c-bg);
   background-color: var(--vp-c-bg) !important;
   border-right: 1px solid var(--vp-c-divider);
-  padding: 64px 14px 48px !important;
+  padding: 64px 8px 48px !important;
 }
 
 /* 文档容器：吃满可用宽度，四周只留一圈 8px 细缝露灰底。
@@ -527,7 +611,7 @@ html .nav-page .VPDoc .content-container {
   /* 侧边栏：固定为 --vp-sidebar-width，不再随视口变宽 */
   html .VPSidebar {
     width: var(--vp-sidebar-width) !important;
-    padding-left: 14px !important;
+    padding-left: 8px !important;
   }
 
   /* 导航栏容器：取消 1440px 居中限宽，站名回到屏幕左缘 */

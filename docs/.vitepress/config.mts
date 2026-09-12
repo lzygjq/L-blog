@@ -9,7 +9,7 @@ import { buildSidebar } from './sidebar.mjs'
 // 侧边栏由 sidebar.mjs 扫目录自动生成（新增 md 落对目录 + 重启 dev 即自动出现）：
 //   - { text, link }            静态条目
 //   - { text, dir }             目录型条目：index 为条目，目录内其他 md 自动追加为兄弟条目
-//   - { text, dir, indexLabel } 折叠子组：整个目录扫描展开，index 显示为 indexLabel
+//   - { text, dir, indexLabel } 子组：整个目录扫描展开，index 显示为 indexLabel
 //   - { text, children }        手写子组
 // 自动命名优先级：frontmatter.sidebar > sidebar.mjs OVERRIDES > frontmatter.title > H1 去英文括号 > 文件名
 // 排序：frontmatter.order > date > 文件名

@@ -120,16 +120,22 @@ function dirItems(dir, indexLabel) {
  * 条目节点类型（children 数组里混用）：
  *   { text, link }                          静态条目
  *   { text, dir }                           目录型条目：index 为条目，目录内其他 md 自动追加为兄弟条目
- *   { text, dir, indexLabel, collapsed }    折叠子组：条目列表由目录扫描生成
- *   { text, collapsed, children }           手写子组（children 里可再混用以上类型）
+ *   { text, dir, indexLabel }               子组：条目列表由目录扫描生成
+ *   { text, children }                      手写子组（children 里可再混用以上类型）
+ *
+ * 重要约定：**不输出 collapsed 字段**（参考 pdai.tech 的左侧目录）。
+ * VitePress 的 useSidebarControl 里 collapsible = (item.collapsed != null)：
+ * 只要不给 collapsed，侧边栏就不会渲染折叠箭头、点击也不会收起，分组恒定全展开。
+ * 曾经的 collapsed:true 会导致：① 每层带一个 chevron 箭头；② 非当前章节默认收起，
+ * 需要用户逐层点开才能看到全貌。现在改为「一次性全部展开」。
  */
 function buildNode(node) {
   if (node.children) {
-    return { text: node.text, collapsed: node.collapsed ?? true, items: node.children.map(buildNode).flat() }
+    return { text: node.text, items: node.children.map(buildNode).flat() }
   }
   if (node.dir && node.indexLabel !== undefined) {
     // 子组：目录扫描展开
-    return { text: node.text, collapsed: node.collapsed ?? true, items: dirItems(node.dir, node.indexLabel) }
+    return { text: node.text, items: dirItems(node.dir, node.indexLabel) }
   }
   if (node.dir) {
     // 目录型条目 + 目录内额外文件追加为兄弟条目
