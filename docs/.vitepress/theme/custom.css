@@ -17,8 +17,9 @@ html {
   --vp-c-brand-2: #35926b;
   --vp-c-brand-3: #2f7d5c;
 
-  /* 侧边栏宽度：默认 272px 右侧留白过多，收窄并微调条目内边距（232px 会让最长条目换行） */
-  --vp-sidebar-width: 240px;
+  /* 侧边栏宽度：默认 272px 右侧留白过多，收窄让空间给内容列；
+     208px 下短条目单行、超长条目换行（本来 240px 时也在换行） */
+  --vp-sidebar-width: 208px;
 }
 
 /* 侧边栏条目：左右内边距各收 4px，行长更紧凑 */
@@ -41,7 +42,7 @@ html {
 @property --vp-sidebar-width {
   syntax: '<length>';
   inherits: true;
-  initial-value: 240px;
+  initial-value: 208px;
 }
 
 /* 收起态：宽度归零。侧边栏与内容区左留白都引用同一变量，自动联动占满 */
@@ -490,4 +491,17 @@ html .VPDoc .VPDocAside {
 /* nav 导航页：卡片内底部留白收窄 */
 html .nav-page .VPDoc .content-container {
   padding-bottom: 24px;
+}
+
+/* 页面没有任何可列标题时，右侧「本页目录」卡片是一块空白白板——整列隐藏，
+   空间交还给内容列。用「正向 :has」翻转判断（Chrome 不支持 :not(:has()) 嵌套写法）：
+   基础态隐藏整列，仅当目录里真实存在链接时才显示；aside-collapsed 开关不受影响 */
+@media (min-width: 1280px) {
+  html .VPDoc .aside {
+    display: none !important;
+  }
+
+  html .VPDoc .aside:has(.VPDocAside a) {
+    display: block !important;
+  }
 }

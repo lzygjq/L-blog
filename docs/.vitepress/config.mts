@@ -81,7 +81,7 @@ const sidebarSpec = [
       { text: '板块导览', link: '/bigdata/' },
       { text: 'Canal 数据同步', dir: 'bigdata/canal' },
       { text: 'Doris 数仓', dir: 'bigdata/doris' },
-      { text: 'Lakehouse：Iceberg / MinIO / 冷热分层', dir: 'bigdata/lakehouse' },
+      { text: 'Lakehouse / 冷热分层', dir: 'bigdata/lakehouse' },
       { text: '数仓分层建模', dir: 'bigdata/warehouse-design' }
     ]
   },
