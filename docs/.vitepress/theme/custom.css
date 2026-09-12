@@ -339,3 +339,21 @@ html .VPHome .VPFeature .title {
 html .VPHome .VPFeature .details {
   flex: 1 1 100% !important;
 }
+
+/* ── 开发者导航页（/nav/）────────────────────────────
+   frontmatter navRail:true + pageClass:nav-page（pageClass 挂在根 .Layout 上）；
+   保留右侧 aside（分类导航走 aside-outline-before 插槽），布局与文档页一致：
+   内容紧贴左侧菜单、右侧 sticky 分类栏，内容列加宽适配卡片网格 */
+html .nav-page .VPDoc.has-aside .content-container {
+  max-width: 1200px !important;
+}
+
+html .nav-page .VPDoc .container {
+  max-width: 100% !important;
+}
+
+/* 页尾说明引用块弱化，不与卡片抢视觉 */
+html .nav-page .vp-doc blockquote {
+  margin-top: 40px;
+  font-size: 12.5px;
+}

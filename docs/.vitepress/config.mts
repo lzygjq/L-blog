@@ -154,6 +154,7 @@ export default defineConfig({
       { text: 'AI 应用', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
       { text: '面试专题', link: '/interview/' },
+      { text: '导航', link: '/nav/' },
       { text: '归档', link: '/archives/' },
       { text: '关于本站', link: '/about/' }
     ],
