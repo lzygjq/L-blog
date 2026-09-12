@@ -1,5 +1,6 @@
 // 开发者导航数据：内容参考 pdai.tech 开发百宝箱 + cxy521（程序员521）分类体系
-// 结构：categories[] { id, icon, title, desc?, virtual?, items[] { name, desc, url, hot? } }
+// 结构：categories[] { id, icon, title, desc?, virtual?, items[] { name, desc, url, hot?, icon? } }
+// icon 字段可选：站点 /favicon.ico 直连失败时手动指定真实图标地址
 // 维护约定：只改这个文件即可增删导航条目，页面自动渲染
 // 「高频常用」是 virtual 分类：不再静态渲染，仅作为默认收藏来源（hot: true 的条目）；
 //   用户在页面上点星标/拖拽排序后，选择保存在浏览器 localStorage（key: nav-favorites）
@@ -14,12 +15,12 @@ export const navCategories = [
     items: [
       { name: 'GitHub', desc: '全球最大的代码托管与开源协作平台', url: 'https://github.com', hot: true },
       { name: 'Gitee 码云', desc: '开源中国旗下代码托管，国内访问快', url: 'https://gitee.com', hot: true },
-      { name: 'Stack Overflow', desc: '全球最大程序员问答社区，报错先搜它', url: 'https://stackoverflow.com', hot: true },
+      { name: 'Stack Overflow', desc: '全球最大程序员问答社区，报错先搜它', url: 'https://stackoverflow.com', icon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico', hot: true },
       { name: 'Maven 仓库检索', desc: '查依赖坐标与版本，后端高频必备', url: 'https://mvnrepository.com', hot: true },
-      { name: 'DeepSeek', desc: '国产大模型对话助手，代码与技术问答', url: 'https://chat.deepseek.com', hot: true },
+      { name: 'DeepSeek', desc: '国产大模型对话助手，代码与技术问答', url: 'https://chat.deepseek.com', icon: 'https://fe-static.deepseek.com/chat/favicon.svg', hot: true },
       { name: 'OSChina 开源中国', desc: '开源资讯与国内开源社区', url: 'https://www.oschina.net', hot: true },
       { name: '掘金', desc: '面向开发者的内容社区，技术干货多', url: 'https://juejin.cn', hot: true },
-      { name: 'Spring 官方文档', desc: 'Spring Boot / Cloud 项目文档总入口', url: 'https://spring.io/projects', hot: true },
+      { name: 'Spring 官方文档', desc: 'Spring Boot / Cloud 项目文档总入口', url: 'https://spring.io/projects', icon: 'https://spring.io/favicon-32x32.png', hot: true },
       { name: 'ToolFu 工具箱', desc: 'JSON 格式化、正则、编解码等综合工具箱', url: 'https://tool.lu', hot: true },
       { name: 'iconfont', desc: '阿里巴巴矢量图标库，找图标首选', url: 'https://www.iconfont.cn', hot: true },
       { name: '菜鸟教程', desc: '语法速查与入门教程大全', url: 'https://www.runoob.com', hot: true }
@@ -31,6 +32,7 @@ export const navCategories = [
     title: 'AI 工具',
     desc: '对话助手 / AI 编程 / 绘图与视频，参考 cxy521 AI 专区',
     items: [
+      { name: 'DeepSeek', desc: '国产大模型对话助手，代码与技术问答', url: 'https://chat.deepseek.com', icon: 'https://fe-static.deepseek.com/chat/favicon.svg' },
       { name: 'ChatGPT', desc: 'OpenAI 出品，全球标杆大模型对话助手', url: 'https://chatgpt.com' },
       { name: 'Claude', desc: 'Anthropic 出品，长文本与代码能力强', url: 'https://claude.ai' },
       { name: 'Kimi', desc: '月之暗面出品，长上下文中文助手', url: 'https://kimi.moonshot.cn' },
@@ -68,7 +70,7 @@ export const navCategories = [
     title: '技术社区',
     desc: '问答、博客与开源资讯',
     items: [
-      { name: 'Stack Overflow', desc: '程序相关 IT 技术问答第一站', url: 'https://stackoverflow.com' },
+      { name: 'Stack Overflow', desc: '程序相关 IT 技术问答第一站', url: 'https://stackoverflow.com', icon: 'https://cdn.sstatic.net/Sites/stackoverflow/Img/favicon.ico' },
       { name: 'CSDN', desc: '国内最大 IT 技术社区与博客平台', url: 'https://www.csdn.net' },
       { name: '博客园', desc: '老牌开发者博客家园', url: 'https://www.cnblogs.com' },
       { name: '掘金', desc: '面向互联网技术人的内容平台', url: 'https://juejin.cn' },
@@ -84,9 +86,9 @@ export const navCategories = [
     title: '后端开发（Java）',
     desc: '框架文档、构建工具与规范',
     items: [
-      { name: 'Spring Projects', desc: 'Spring 全家桶项目入口', url: 'https://spring.io/projects' },
-      { name: 'Spring Boot 文档', desc: 'Spring Boot Reference（含中文版）', url: 'https://spring.io/projects/spring-boot' },
-      { name: 'Spring Cloud 文档', desc: '微服务框架官方文档', url: 'https://spring.io/projects/spring-cloud' },
+      { name: 'Spring Projects', desc: 'Spring 全家桶项目入口', url: 'https://spring.io/projects', icon: 'https://spring.io/favicon-32x32.png' },
+      { name: 'Spring Boot 文档', desc: 'Spring Boot Reference（含中文版）', url: 'https://spring.io/projects/spring-boot', icon: 'https://spring.io/favicon-32x32.png' },
+      { name: 'Spring Cloud 文档', desc: '微服务框架官方文档', url: 'https://spring.io/projects/spring-cloud', icon: 'https://spring.io/favicon-32x32.png' },
       { name: 'MyBatis', desc: '持久层框架官方中文文档', url: 'https://mybatis.org/mybatis-3/zh/index.html' },
       { name: 'MyBatis Plus', desc: '只做增强不做改变的字段自动映射增强包', url: 'https://baomidou.com' },
       { name: 'Maven 官方文档', desc: '构建生命周期与 POM 配置文档', url: 'https://maven.apache.org/guides/index.html' },
@@ -178,7 +180,7 @@ export const navCategories = [
       { name: 'W3School 中文', desc: 'Web 开发教程与在线实例', url: 'https://www.w3school.com.cn' },
       { name: 'W3Cschool', desc: '在线教程与技术资料查询', url: 'https://www.w3cschool.cn' },
       { name: 'JavaGuide', desc: 'Java 面试与进阶知识体系开源仓库', url: 'https://javaguide.cn' },
-      { name: '小林 coding', desc: '图解网络、图解系统，面试热门', url: 'https://xiaolincoding.com' },
+      { name: '小林 coding', desc: '图解网络、图解系统，面试热门', url: 'https://xiaolincoding.com', icon: 'https://cdn.xiaolincoding.com/icon.webp' },
       { name: 'pdai.tech', desc: 'Java 全栈知识体系（本页导航参考来源）', url: 'https://pdai.tech' },
       { name: 'LeetCode 力扣', desc: '算法刷题与面试题库', url: 'https://leetcode.cn' },
       { name: 'B 站技术区', desc: '海量视频教程与公开课', url: 'https://www.bilibili.com' },

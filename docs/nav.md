@@ -7,5 +7,3 @@ pageClass: nav-page
 ---
 
 <NavBoard />
-
-> 内容参考了 [pdai.tech 开发百宝箱](https://pdai.tech/md/resource/tools.html) 与 [cxy521 AI 专区](https://www.cxy521.com/ai/) 的分类体系，并按本站 Java 后端 + AI 的定位做了取舍。增删条目只需修改 `docs/.vitepress/theme/data/navData.mjs`。

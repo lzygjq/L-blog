@@ -3,9 +3,36 @@
      高频常用：点击卡片右上角星标标记/取消，拖拽卡片排序，选择存 localStorage -->
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { navCategories, navTotal } from '../data/navData.mjs'
+import { withBase } from 'vitepress'
+import { navCategories } from '../data/navData.mjs'
+import faviconManifest from '../data/faviconManifest.json'
 
 const keyword = ref('')
+
+// ── 站点图标 ──────────────────────────────
+// 三级策略：scripts/fetch-favicons.mjs 抓取到本地的图标（首选）
+//   → 无本地文件时远程直连（icon 覆盖字段或 {origin}/favicon.ico）
+//   → 加载失败回退为首字母圆形图标
+const hostOf = (url) => {
+  try {
+    return new URL(url).host.replace(/^www\./, '')
+  } catch {
+    return ''
+  }
+}
+const faviconUrl = (item) => {
+  const local = faviconManifest[hostOf(item.url)]
+  if (local) return withBase(local)
+  return item.url.replace(/^(https?:\/\/[^/]+).*$/, '$1') + '/favicon.ico'
+}
+const iconFailed = ref(new Set())
+function onIconError(item) {
+  if (!iconFailed.value.has(item.url)) {
+    iconFailed.value.add(item.url)
+    // Set 响应性：重新赋值触发更新
+    iconFailed.value = new Set(iconFailed.value)
+  }
+}
 
 // ── 条目池与收藏状态 ──────────────────────
 // 条目唯一标识：name + url（同站点在不同分类出现时视为同一条目）
@@ -195,7 +222,18 @@ const countText = computed(() =>
             title="取消高频常用"
             @click.prevent="toggleFav(itemId(item))"
           >★</button>
-          <span class="nav-card-name">{{ item.name }}</span>
+          <span class="nav-card-head">
+            <img
+              v-if="faviconUrl(item) && !iconFailed.has(item.url)"
+              class="nav-card-icon"
+              :src="faviconUrl(item)"
+              alt=""
+              loading="lazy"
+              @error="onIconError(item)"
+            />
+            <span v-else class="nav-card-icon-fallback">{{ item.name[0] }}</span>
+            <span class="nav-card-name">{{ item.name }}</span>
+          </span>
           <span class="nav-card-desc">{{ item.desc }}</span>
           <span class="nav-card-link">
             {{ item.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') }}
@@ -241,7 +279,18 @@ const countText = computed(() =>
             :title="isFav(itemId(item)) ? '取消高频常用' : '标记为高频常用'"
             @click.prevent="toggleFav(itemId(item))"
           >{{ isFav(itemId(item)) ? '★' : '☆' }}</button>
-          <span class="nav-card-name">{{ item.name }}</span>
+          <span class="nav-card-head">
+            <img
+              v-if="faviconUrl(item) && !iconFailed.has(item.url)"
+              class="nav-card-icon"
+              :src="faviconUrl(item)"
+              alt=""
+              loading="lazy"
+              @error="onIconError(item)"
+            />
+            <span v-else class="nav-card-icon-fallback">{{ item.name[0] }}</span>
+            <span class="nav-card-name">{{ item.name }}</span>
+          </span>
           <span class="nav-card-desc">{{ item.desc }}</span>
           <span class="nav-card-link">
             {{ item.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') }}
@@ -424,11 +473,42 @@ const countText = computed(() =>
 .nav-star.is-on:hover {
   color: #ca8a04;
 }
+/* 卡片头部：图标 + 名称同行 */
+.nav-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-right: 28px;
+  min-height: 22px;
+}
+.nav-card-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border-radius: 4px;
+  object-fit: contain;
+  background: var(--vp-c-bg-soft);
+}
+.nav-card-icon-fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 4px;
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
 .nav-card-name {
   font-size: 14.5px;
   font-weight: 600;
   color: var(--vp-c-text-1);
-  padding-right: 40px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .nav-card-desc {
   font-size: 12.5px;
