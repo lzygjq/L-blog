@@ -181,11 +181,11 @@ export default defineConfig({
       { text: '云原生', link: '/cloud-native/' },
       { text: 'AI 应用', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
-      { text: '面试专题', link: '/interview/' },
       { text: '导航', link: '/nav/' },
       {
         text: '其他',
         items: [
+          { text: '面试专题', link: '/interview/' },
           { text: '归档', link: '/archives/' },
           { text: '关于本站', link: '/about/' }
         ]
