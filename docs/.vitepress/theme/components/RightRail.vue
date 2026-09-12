@@ -21,16 +21,16 @@ import BackToTop from './BackToTop.vue'
 <style scoped>
 .right-rail {
   position: fixed;
-  right: 0;
-  /* 与顶栏脱开：顶部留 8px 灰缝（与内容区各处缝隙一致），底部同样留缝，
-     整条变成圆角浮动卡片（左侧圆角，右缘贴屏幕边） */
+  /* 四边都留 8px 灰缝（与内容区各处缝隙一致），不再贴屏幕右缘——
+     整条是一张独立浮动卡片（参考 pdai.tech 右侧悬浮条） */
+  right: var(--lp-gap);
   top: calc(var(--vp-nav-height) + var(--lp-gap));
   bottom: var(--lp-gap);
   width: 48px;
   background: var(--vp-c-bg);
   border: 1px solid var(--vp-c-divider);
-  border-right: none;
-  border-radius: 10px 0 0 10px;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;

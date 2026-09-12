@@ -391,10 +391,10 @@ html .VPNavBar .VPNavBarMenu {
   --lp-gap: 8px;
 }
 
-/* 画布灰底；右侧预留 48px 给竖版工具栏（内容不压工具栏） */
+/* 画布灰底；右侧预留「工具栏宽 48px + 8px 缝」给竖版工具栏（内容不压工具栏） */
 html .Layout {
   background-color: var(--lp-canvas);
-  padding-right: 48px;
+  padding-right: calc(48px + var(--lp-gap));
 }
 
 @media (max-width: 767px) {
@@ -409,6 +409,11 @@ html .Layout {
 @media (min-width: 960px) {
   html .VPContent.has-sidebar {
     padding-left: var(--vp-sidebar-width) !important;
+    padding-right: var(--lp-gap) !important;
+  }
+
+  /* 导航栏右侧（搜索/主题/GitHub 图标）同样留 8px 缝，与右侧工具栏、内容区对齐 */
+  html .VPNavBar.has-sidebar .content {
     padding-right: var(--lp-gap) !important;
   }
 }
@@ -530,10 +535,10 @@ html .nav-page .VPDoc .content-container {
     padding-left: 24px !important;
   }
 
-  /* 导航栏内容区（搜索/图标）：取消 gutter 内边距，贴到右侧 */
+  /* 导航栏内容区（搜索/图标）：取消 gutter 内边距，右侧留 8px 缝对齐工具栏 */
   html .VPNavBar.has-sidebar .content {
     padding-left: 0 !important;
-    padding-right: 0 !important;
+    padding-right: var(--lp-gap) !important;
   }
 
   html .VPNavBar.has-sidebar .divider {
