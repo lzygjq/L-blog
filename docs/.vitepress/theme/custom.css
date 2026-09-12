@@ -16,10 +16,17 @@ html {
   --vp-c-brand-1: #3eaf7c;
   --vp-c-brand-2: #35926b;
   --vp-c-brand-3: #2f7d5c;
+  /* 品牌柔和底色：默认主题是紫蓝 rgba(100,108,255,.14)，与本站绿色不搭，
+     会让「选中态」出现绿字紫底的撞色（本页目录、导航页分类选中都用它） */
+  --vp-c-brand-soft: rgba(62, 175, 124, 0.14);
 
   /* 侧边栏宽度：默认 272px 右侧留白过多，收窄让空间给内容列；
      208px 下短条目单行、超长条目换行（本来 240px 时也在换行） */
   --vp-sidebar-width: 208px;
+}
+
+html.dark {
+  --vp-c-brand-soft: rgba(62, 175, 124, 0.18);
 }
 
 /* 侧边栏条目：左右内边距各收 4px，行长更紧凑 */
@@ -535,17 +542,56 @@ html .nav-page .VPDoc .content-container {
     padding-left: 24px !important;
   }
 
-  /* 导航栏内容区（搜索/图标）：取消 gutter 内边距，右侧留 8px 缝对齐工具栏 */
+  /* 导航栏内容区（搜索/图标）：去掉 gutter 增量（否则搜索框被推到站名上），
+     但必须保留「侧边栏宽度 + 32px」的左内边距——默认值就是它，清零会让搜索框
+     直接画到站名「L知识库」上面（1440+ 实测重叠 73px）。右侧留 8px 缝对齐工具栏 */
   html .VPNavBar.has-sidebar .content {
-    padding-left: 0 !important;
+    padding-left: calc(var(--vp-sidebar-width) + 32px) !important;
     padding-right: var(--lp-gap) !important;
   }
 
   html .VPNavBar.has-sidebar .divider {
-    padding-left: 0 !important;
+    padding-left: var(--vp-sidebar-width) !important;
   }
 
   html .VPLocalNav.has-sidebar {
     padding-left: 0 !important;
   }
+}
+
+/* ===== 本页目录：高度自适应 + 选中态（参考 pdai.tech） =====
+   ① 默认主题的 .VPDocAside 是 flex-grow:1 撑满整屏，目录条目少时卡片下方留一大块
+      空白（1440 下实测 566px）——改为高度只包住内容，超过上限才滚动；
+   ② 默认选中态只有一根 2px 绝对定位小竖条、文字几乎不变色（选中感很弱）——
+      隐藏竖条，改为「品牌色文字 + 加粗 + 浅色底块」，与站内导航页/侧边栏选中态一致 */
+html .VPDoc .VPDocAside {
+  flex-grow: 0 !important;   /* 关键：默认 flex-grow:1 会把它撑满整屏高度 */
+  height: auto !important;
+  max-height: calc(100vh - var(--vp-nav-height) - 3 * var(--lp-gap));
+  overflow: hidden auto;
+}
+
+html .VPDocAsideOutline .outline-marker {
+  display: none !important;
+}
+
+html .VPDocAsideOutline .outline-title {
+  padding: 0 8px !important;
+}
+
+html .VPDocAsideOutline .outline-link {
+  padding: 3px 8px !important;
+  border-radius: 6px;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+html .VPDocAsideOutline .outline-link:hover {
+  color: var(--vp-c-text-1) !important;
+  background-color: var(--vp-c-default-soft) !important;
+}
+
+html .VPDocAsideOutline .outline-link.active {
+  color: var(--vp-c-brand-1) !important;
+  font-weight: 600 !important;
+  background-color: var(--vp-c-brand-soft) !important;
 }
