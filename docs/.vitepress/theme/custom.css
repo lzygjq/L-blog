@@ -399,15 +399,18 @@ html .Layout {
   }
 }
 
-/* 导航栏：白底 + 下边框细线（与左栏同色，无断层） */
+/* 导航栏：白底 + 下边框细线（与左栏同色，无断层）。
+   默认主题 VPNavBar 是 scoped 透明底（滚动前），必须 !important 压住 */
 html .VPNavBar {
-  background-color: var(--vp-c-bg);
+  background-color: var(--vp-c-bg) !important;
   border-bottom: 1px solid var(--vp-c-divider);
 }
 
-/* 左侧边栏：白底与导航栏连成整体，右缘一条细分隔线 */
+/* 左侧边栏：白底与导航栏连成整体，右缘一条细分隔线。
+   默认主题用 --vp-sidebar-bg-color（浅灰 #f6f6f7）控制底色，须一并覆盖 */
 html .VPSidebar {
-  background-color: var(--vp-c-bg);
+  --vp-sidebar-bg-color: var(--vp-c-bg);
+  background-color: var(--vp-c-bg) !important;
   border-right: 1px solid var(--vp-c-divider);
 }
 
