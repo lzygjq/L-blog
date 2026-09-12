@@ -50,21 +50,29 @@ const sidebarSpec = [
     ]
   },
   {
-    prefix: '/database/',
+    // 数据存储 + 消息队列合并板块：两个 URL 前缀共用同一份侧边栏
+    prefix: ['/database/', '/middleware/'],
     items: [
-      { text: '板块导览', link: '/database/' },
-      { text: 'MySQL', dir: 'database/mysql' },
-      { text: 'Redis 缓存', dir: 'database/redis' },
-      { text: '分库分表', dir: 'database/sharding' }
-    ]
-  },
-  {
-    prefix: '/middleware/',
-    items: [
-      { text: '板块导览', link: '/middleware/' },
-      { text: 'RabbitMQ', dir: 'middleware/rabbitmq' },
-      { text: 'RocketMQ', dir: 'middleware/rocketmq' },
-      { text: '物联网 MQTT', dir: 'middleware/mqtt' }
+      { text: '数据存储导览', link: '/database/' },
+      { text: '消息队列导览', link: '/middleware/' },
+      {
+        text: '数据存储',
+        children: [
+          { text: 'MySQL', dir: 'database/mysql' },
+          { text: 'Redis 缓存', dir: 'database/redis' },
+          { text: '分库分表', dir: 'database/sharding' },
+          { text: 'PostgreSQL（规划中）' }
+        ]
+      },
+      {
+        text: '消息队列',
+        children: [
+          { text: 'RabbitMQ', dir: 'middleware/rabbitmq' },
+          { text: 'RocketMQ', dir: 'middleware/rocketmq' },
+          { text: '物联网 MQTT', dir: 'middleware/mqtt' },
+          { text: 'ELK（规划中）' }
+        ]
+      }
     ]
   },
   {
@@ -135,16 +143,15 @@ const sidebarSpec = [
   {
     prefix: '/interview/',
     items: [{ text: '板块导览', link: '/interview/' }]
-  },
-  {
-    prefix: '/about/',
-    items: [{ text: '站点说明', link: '/about/' }]
   }
 ]
 
-// 前缀映射 → VitePress 多侧边栏；'/' 为兜底：首页 / 导航 / 归档等不显示侧边栏
+// 前缀映射 → VitePress 多侧边栏（prefix 支持数组：多前缀共用同一份侧边栏）；
+// '/' 为兜底：首页 / 导航 / 归档 / 关于等不显示侧边栏
 const sidebar = Object.fromEntries([
-  ...sidebarSpec.map((s) => [s.prefix, buildSidebar(s.items)]),
+  ...sidebarSpec.flatMap((s) =>
+    (Array.isArray(s.prefix) ? s.prefix : [s.prefix]).map((p) => [p, buildSidebar(s.items)])
+  ),
   ['/', []]
 ])
 
@@ -168,16 +175,21 @@ export default defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: 'Java', link: '/java/' },
-      { text: '数据存储', link: '/database/' },
-      { text: '消息队列', link: '/middleware/' },
+      // 数据存储 + 消息队列合并入口：两个前缀下都保持高亮
+      { text: '存储与消息', link: '/database/', activeMatch: '/(database|middleware)/' },
       { text: '数据仓库', link: '/bigdata/' },
       { text: '云原生', link: '/cloud-native/' },
       { text: 'AI 应用', link: '/ai/' },
       { text: '项目实战', link: '/projects/' },
       { text: '面试专题', link: '/interview/' },
       { text: '导航', link: '/nav/' },
-      { text: '归档', link: '/archives/' },
-      { text: '关于本站', link: '/about/' }
+      {
+        text: '其他',
+        items: [
+          { text: '归档', link: '/archives/' },
+          { text: '关于本站', link: '/about/' }
+        ]
+      }
     ],
 
     sidebar,
