@@ -20,9 +20,14 @@ const sidebarSpec = [
     prefix: '/java/',
     items: [
       { text: '板块导览', link: '/java/' },
-      { text: 'Java 基础', dir: 'java/basics' },
-      { text: '并发与 JUC', dir: 'java/concurrent' },
-      { text: 'JVM', dir: 'java/jvm' },
+      {
+        text: 'Java 核心',
+        children: [
+          { text: 'Java 基础', dir: 'java/basics' },
+          { text: 'Java 并发', dir: 'java/concurrent' },
+          { text: 'Java 虚拟机', dir: 'java/jvm' }
+        ]
+      },
       {
         text: 'Spring 生态',
         children: [
@@ -162,7 +167,7 @@ export default defineConfig({
     siteTitle: 'L知识库',
     nav: [
       { text: '首页', link: '/' },
-      { text: 'Java 核心', link: '/java/' },
+      { text: 'Java', link: '/java/' },
       { text: '数据存储', link: '/database/' },
       { text: '消息队列', link: '/middleware/' },
       { text: '数据仓库', link: '/bigdata/' },
