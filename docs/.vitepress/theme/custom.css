@@ -124,16 +124,10 @@ html.sidebar-collapsed .VPNavBarTitle {
   background: rgba(100, 116, 139, 0.5);
 }
 
-/* 阅读列宽度与侧边栏联动：
-   默认主题把正文列硬性限宽 688px，且是 scoped 样式（编译后带 [data-v-xxx] 属性
-   选择器，特异性 0,4,0），普通选择器压不住，只能用 !important。
-   效果：收起侧边栏腾出的 240px 由阅读列吃掉（688→928px），随宽度变量平滑过渡 */
-html .VPDoc.has-aside .content-container,
-html .VPDoc:not(.has-aside) .content-container {
-  max-width: calc(688px + (240px - var(--vp-sidebar-width)) + var(--vp-aside-extra)) !important;
-}
+/* 阅读列宽度：已改为左对齐吃满可用宽度（见文末 pdai 布局段的 max-width: min(100%, 1160px)），
+   收起侧边栏/目录腾出的空间由 100% 自动吸收，不再需要这里的 calc 限宽公式 */
 
-/* 注册可过渡的宽度变量：aside 收起腾出的空间（0 / 256px） */
+/* 注册可过渡的宽度变量：aside 收起腾出的空间（保留变量定义兼容既有过渡动画） */
 @property --vp-aside-extra {
   syntax: '<length>';
   inherits: true;
@@ -384,12 +378,13 @@ html .VPNavBar .VPNavBarMenu {
   }
 }
 
-/* ===== pdai 风格卡片式布局：灰色画布 + 白色卡片 + 间隙 =====
-   画布（Layout 背景）浅灰；导航栏、左栏、内容区、右侧目录、最右工具栏都是白卡片，
-   卡片之间留缝露出灰底，形成空间层次 */
+/* ===== pdai 风格布局：白色顶栏+白色左栏无缝，浅灰细缝分隔，空间利用率优先 =====
+   画布浅灰只在 8px 细缝处可见：导航栏下沿 / 侧边栏与内容之间 / 内容与目录之间；
+   顶栏、左栏、内容区同为白色连成整体；右侧目录是带边框的白卡片贴着最右工具栏 */
 
 :root {
-  --lp-canvas: #f3f5f7;
+  --lp-canvas: #eef0f3;
+  --lp-gap: 8px;
 }
 
 /* 画布灰底；右侧预留 48px 给竖版工具栏（内容不压工具栏） */
@@ -404,39 +399,57 @@ html .Layout {
   }
 }
 
-/* 导航栏：白底 + 下边框 + 微阴影，与下方内容卡片之间露灰缝 */
+/* 导航栏：白底 + 下边框细线（与左栏同色，无断层） */
 html .VPNavBar {
   background-color: var(--vp-c-bg);
   border-bottom: 1px solid var(--vp-c-divider);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
-/* 左侧边栏：白底 + 右边框（与内容卡片之间的灰色缝隙由内容卡片 margin 提供） */
+/* 左侧边栏：白底与导航栏连成整体，右缘一条细分隔线 */
 html .VPSidebar {
   background-color: var(--vp-c-bg);
   border-right: 1px solid var(--vp-c-divider);
 }
 
-/* 内容区白卡片：与导航栏、左栏、页面底部都留缝 */
-html .VPDoc .content-container {
-  background-color: var(--vp-c-bg);
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 10px;
-  margin-top: 16px;
-  margin-bottom: 24px;
-  padding: 24px 32px 40px;
+/* 文档容器：吃满可用宽度，四周只留一圈 8px 细缝露灰底 */
+html .VPDoc .container {
+  max-width: 100%;
+  padding: var(--lp-gap);
 }
 
-/* 右侧"本页目录"白卡片：与内容卡片之间露灰缝 */
+/* 目录列与内容列之间的缝也收窄到 8px */
+html .VPDoc .aside {
+  padding-left: var(--lp-gap);
+}
+
+/* 目录卡片顶缝收窄（默认是 导航高+32px，过大） */
+html .VPDoc .aside-container {
+  padding-top: calc(var(--vp-nav-height) + var(--lp-gap));
+}
+
+/* 内容列：白底，缝隙外全是白色，与顶栏/左栏同色连成整体 */
+html .VPDoc .content {
+  background-color: var(--vp-c-bg);
+}
+
+/* 内容主体：取消默认的居中限宽（688px 基数），改为左对齐吃满，
+   上限 1160px 防超宽屏单行过长；顶距收窄，把空间全给正文减少换行 */
+html .VPDoc .content-container {
+  max-width: min(100%, 1160px) !important;
+  margin: 0;
+  background-color: var(--vp-c-bg);
+  padding: 16px 28px 48px;
+}
+
+/* 右侧"本页目录"：白底细边框卡片，贴右侧工具栏 */
 html .VPDoc .VPDocAside {
   background-color: var(--vp-c-bg);
   border: 1px solid var(--vp-c-divider);
   border-radius: 10px;
-  margin-top: 16px;
   padding: 14px 16px;
 }
 
-/* nav 导航页的卡片网格在白卡片内已有边界，弱化卡片内搜索框下间距 */
+/* nav 导航页：卡片内底部留白收窄 */
 html .nav-page .VPDoc .content-container {
   padding-bottom: 24px;
 }
