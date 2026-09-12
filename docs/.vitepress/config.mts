@@ -1,8 +1,11 @@
 import { defineConfig } from 'vitepress'
 import { buildSidebar } from './sidebar.mjs'
 
-// 站点配置：导航 + 全局侧边栏
+// 站点配置：导航 + 多侧边栏
 // 约定：目录名英文、侧边栏标题中文；每个板块 index.md 为导览页
+// 布局约定：顶部 nav = 大分类；左侧 sidebar = 当前大分类下的子分类。
+// sidebar 按路径前缀（prefix）映射，只展示对应板块的子分类，避免与顶部菜单重复；
+// 未命中任何前缀的页面（首页 / 导航 / 归档 / 关于）回落到 '/' → 无侧边栏。
 // 侧边栏由 sidebar.mjs 扫目录自动生成（新增 md 落对目录 + 重启 dev 即自动出现）：
 //   - { text, link }            静态条目
 //   - { text, dir }             目录型条目：index 为条目，目录内其他 md 自动追加为兄弟条目
@@ -11,10 +14,11 @@ import { buildSidebar } from './sidebar.mjs'
 // 自动命名优先级：frontmatter.sidebar > sidebar.mjs OVERRIDES > frontmatter.title > H1 去英文括号 > 文件名
 // 排序：frontmatter.order > date > 文件名
 
+// 每项：{ prefix: URL 前缀, items: 该板块的侧边栏条目 }
 const sidebarSpec = [
   {
-    text: 'Java 核心',
-    children: [
+    prefix: '/java/',
+    items: [
       { text: '板块导览', link: '/java/' },
       { text: 'Java 基础', dir: 'java/basics' },
       { text: '并发与 JUC', dir: 'java/concurrent' },
@@ -41,8 +45,8 @@ const sidebarSpec = [
     ]
   },
   {
-    text: '数据存储',
-    children: [
+    prefix: '/database/',
+    items: [
       { text: '板块导览', link: '/database/' },
       { text: 'MySQL', dir: 'database/mysql' },
       { text: 'Redis 缓存', dir: 'database/redis' },
@@ -50,8 +54,8 @@ const sidebarSpec = [
     ]
   },
   {
-    text: '消息队列',
-    children: [
+    prefix: '/middleware/',
+    items: [
       { text: '板块导览', link: '/middleware/' },
       { text: 'RabbitMQ', dir: 'middleware/rabbitmq' },
       { text: 'RocketMQ', dir: 'middleware/rocketmq' },
@@ -59,8 +63,8 @@ const sidebarSpec = [
     ]
   },
   {
-    text: '数据仓库',
-    children: [
+    prefix: '/bigdata/',
+    items: [
       { text: '板块导览', link: '/bigdata/' },
       { text: 'Canal 数据同步', dir: 'bigdata/canal' },
       { text: 'Doris 数仓', dir: 'bigdata/doris' },
@@ -69,8 +73,8 @@ const sidebarSpec = [
     ]
   },
   {
-    text: '云原生',
-    children: [
+    prefix: '/cloud-native/',
+    items: [
       { text: '板块导览', link: '/cloud-native/' },
       { text: 'Docker', dir: 'cloud-native/docker' },
       { text: 'Kubernetes', dir: 'cloud-native/kubernetes' },
@@ -79,8 +83,8 @@ const sidebarSpec = [
     ]
   },
   {
-    text: 'AI 应用',
-    children: [
+    prefix: '/ai/',
+    items: [
       { text: '板块导览', link: '/ai/' },
       {
         text: 'AI 辅助研发',
@@ -100,8 +104,8 @@ const sidebarSpec = [
     ]
   },
   {
-    text: '项目实战',
-    children: [
+    prefix: '/projects/',
+    items: [
       { text: '板块导览', link: '/projects/' },
       {
         text: '绩效系统',
@@ -123,9 +127,21 @@ const sidebarSpec = [
       }
     ]
   },
-  { text: '面试专题', children: [{ text: '板块导览', link: '/interview/' }] },
-  { text: '关于本站', children: [{ text: '站点说明', link: '/about/' }] }
+  {
+    prefix: '/interview/',
+    items: [{ text: '板块导览', link: '/interview/' }]
+  },
+  {
+    prefix: '/about/',
+    items: [{ text: '站点说明', link: '/about/' }]
+  }
 ]
+
+// 前缀映射 → VitePress 多侧边栏；'/' 为兜底：首页 / 导航 / 归档等不显示侧边栏
+const sidebar = Object.fromEntries([
+  ...sidebarSpec.map((s) => [s.prefix, buildSidebar(s.items)]),
+  ['/', []]
+])
 
 // 部署 base：GitHub Actions 上构建时仓库部署在 /L-blog/ 子路径，本地构建/dev 用根路径
 const base = process.env.GITHUB_ACTIONS ? '/L-blog/' : '/'
@@ -159,7 +175,7 @@ export default defineConfig({
       { text: '关于本站', link: '/about/' }
     ],
 
-    sidebar: buildSidebar(sidebarSpec),
+    sidebar,
 
     socialLinks: [{ icon: 'github', link: 'https://github.com/lzygjq/L-blog' }],
 
