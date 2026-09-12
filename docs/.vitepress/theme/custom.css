@@ -407,17 +407,29 @@ html .VPNavBar {
 }
 
 /* 左侧边栏：白底与导航栏连成整体，右缘一条细分隔线。
-   默认主题用 --vp-sidebar-bg-color（浅灰 #f6f6f7）控制底色，须一并覆盖 */
+   默认主题用 --vp-sidebar-bg-color（浅灰 #f6f6f7）控制底色，须一并覆盖；
+   默认 padding 64px 32px 96px 左侧太空，侧边收窄到 14px 贴近屏幕左缘 */
 html .VPSidebar {
   --vp-sidebar-bg-color: var(--vp-c-bg);
   background-color: var(--vp-c-bg) !important;
   border-right: 1px solid var(--vp-c-divider);
+  padding: 64px 14px 48px !important;
 }
 
-/* 文档容器：吃满可用宽度，四周只留一圈 8px 细缝露灰底 */
+/* 文档容器：吃满可用宽度，四周只留一圈 8px 细缝露灰底。
+   VPDoc 默认 padding 48px 32px 0（顶缝/左缝/错位的元凶，scoped 特异度高），!important 清零 */
+html .VPDoc {
+  padding: 0 !important;
+}
+
 html .VPDoc .container {
   max-width: 100%;
   padding: var(--lp-gap);
+}
+
+/* 内容列默认 padding 0 32px 128px，同样清零（左缝/底缝来源） */
+html .VPDoc .content {
+  padding: 0;
 }
 
 /* 目录列与内容列之间的缝也收窄到 8px */
