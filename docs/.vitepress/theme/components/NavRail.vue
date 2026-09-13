@@ -1,12 +1,17 @@
 <!-- 导航页右侧分类栏：挂在主题 aside-outline-before 插槽，sticky 跟随滚动；
-     内置 scroll-spy：滚动时高亮当前浏览到的分类 -->
+     内置 scroll-spy：滚动时高亮当前浏览到的分类
+     分类顺序与 NavBoard 共享（composables/useNavOrder.mjs）—— 内容区拖动分类后这里自动同步 -->
 <script setup>
 import { useData } from 'vitepress'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { navCategories } from '../data/navData.mjs'
+import { initNavOrder, orderCategories } from '../composables/useNavOrder.mjs'
 
 // 只在声明了 navRail: true 的页面渲染
 const { frontmatter } = useData()
+
+// 分类列表按用户偏好排序（高频常用是 virtual，恒占原位）
+const railCats = computed(() => orderCategories(navCategories))
 
 // ── scroll-spy：高亮当前滚动所在分类 ──────
 // activeId 与模板中分类一一对应；筛选态下区块被 v-if 移除时自动置空
@@ -50,6 +55,8 @@ function onScroll() {
 }
 
 onMounted(() => {
+  // 恢复用户的分类排序偏好（幂等；NavBoard 也会调用）
+  initNavOrder()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onScroll, { passive: true })
   updateActive()
@@ -65,7 +72,7 @@ onUnmounted(() => {
   <nav v-if="frontmatter.navRail" class="nav-rail">
     <p class="nav-rail-title">分类导航</p>
     <a
-      v-for="cat in navCategories"
+      v-for="cat in railCats"
       :key="cat.id"
       class="nav-rail-item"
       :class="{ 'is-active': activeId === cat.id }"

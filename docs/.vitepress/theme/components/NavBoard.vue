@@ -1,11 +1,25 @@
-<!-- 开发者导航组件：分类锚点 + 即时筛选 + 卡片网格 + 可自定义高频常用
+<!-- 开发者导航组件：分类锚点 + 即时筛选 + 卡片网格 + 全站可自定义排序
      数据源：../data/navData.mjs（增删条目只改数据文件）
-     高频常用：点击卡片右上角星标标记/取消，拖拽卡片排序，选择存 localStorage -->
+     个性化排序（存 localStorage，见 ../composables/useNavOrder.mjs）：
+       ① 高频常用：点卡片右上角星标标记/取消，拖拽卡片排序
+       ② 分类内卡片：直接拖拽卡片调整该分类内的站点顺序
+       ③ 分类整体：拖分类标题左侧把手，调整各分类之间的先后顺序（右侧分类栏同步） -->
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
 import { navCategories } from '../data/navData.mjs'
 import faviconManifest from '../data/faviconManifest.json'
+import {
+  initNavOrder,
+  itemId,
+  itemOrder,
+  normalCategories,
+  orderCategories,
+  orderItems,
+  catOrder,
+  persistCatOrder,
+  persistItemOrder
+} from '../composables/useNavOrder.mjs'
 
 const keyword = ref('')
 
@@ -35,8 +49,7 @@ function onIconError(item) {
 }
 
 // ── 条目池与收藏状态 ──────────────────────
-// 条目唯一标识：name + url（同站点在不同分类出现时视为同一条目）
-const itemId = (it) => it.name + '|' + it.url
+// 条目唯一标识 itemId 复用 useNavOrder 里的实现（同站点在不同分类出现时视为同一条目）
 
 // 全量条目池（含 virtual 高频分类，保证 DeepSeek 等仅在高频默认区的条目可被引用）
 const itemPool = new Map()
@@ -49,9 +62,7 @@ for (const cat of navCategories) {
     }
   }
 }
-
-// 普通分类（virtual 高频分类不参与静态渲染，改为收藏驱动）
-const normalCategories = navCategories.filter((cat) => !cat.virtual)
+// 普通分类列表来自 useNavOrder（virtual 高频分类不参与静态渲染，改为收藏驱动）
 
 // 收藏 id 列表：顺序即高频区展示顺序；SSR/首屏先渲染默认值，挂载后读 localStorage
 const favIds = ref([...defaultFavIds])
@@ -61,6 +72,8 @@ const REMOVED_KEY = 'nav-favorites-removed'
 const removedDefaults = ref(new Set())
 
 onMounted(() => {
+  // 先恢复用户的分类 / 条目排序偏好（与 NavRail 共享的模块级状态）
+  initNavOrder()
   try {
     const saved = JSON.parse(localStorage.getItem(STORAGE_KEY))
     const removed = JSON.parse(localStorage.getItem(REMOVED_KEY) || '[]')
@@ -116,7 +129,15 @@ const favItems = computed(() =>
   favIds.value.map((id) => itemPool.get(id)).filter(Boolean)
 )
 
-// ── 拖拽排序（仅高频区）────────────────────
+// ── 拖拽排序 ─────────────────────────────────
+// 三套互相独立的拖拽，靠各自的 state 区分，互不抢事件：
+//   ① dragIndex   高频常用卡片（顺序即收藏顺序，存 nav-favorites）
+//   ② itemDrag    分类内卡片（存 nav-item-order）
+//   ③ catDragId   整个分类区块（存 nav-cat-order）
+// 关键：HTML5 DnD 里 dragover 必须 preventDefault，目标才算合法放置区，否则 drop 根本不触发。
+// 同理，若某个位置不该接收当前拖拽物，就「不要」preventDefault —— 浏览器会自动显示禁止光标。
+
+// ① 高频常用
 const dragIndex = ref(-1)
 
 function onDragStart(i, e) {
@@ -125,7 +146,6 @@ function onDragStart(i, e) {
 }
 function onDragOver(i, e) {
   if (dragIndex.value < 0 || dragIndex.value === i) return
-  // HTML5 DnD 规范：dragover 必须 preventDefault 目标才是合法放置区，否则 drop 不会触发
   e.preventDefault()
   e.dataTransfer.dropEffect = 'move'
 }
@@ -140,20 +160,93 @@ function onDragEnd() {
   dragIndex.value = -1
 }
 
+// ② 分类内卡片：只允许在本分类内部重排（分类归属由数据文件决定，跨分类移动无法持久化）
+const itemDrag = ref({ catId: '', index: -1 })
+
+function onItemDragStart(cat, i, e) {
+  itemDrag.value = { catId: cat.id, index: i }
+  e.dataTransfer.effectAllowed = 'move'
+}
+function onItemDragOver(cat, i, e) {
+  const d = itemDrag.value
+  if (!d.catId || d.catId !== cat.id || d.index === i) return
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'move'
+}
+function onItemDrop(cat, i) {
+  const d = itemDrag.value
+  if (!d.catId || d.catId !== cat.id || d.index < 0 || d.index === i) return
+  // 基于「完整顺序」重排：拖拽在筛选态下被禁用，故渲染下标 === 完整列表下标
+  const list = orderItems(cat).slice()
+  list.splice(i, 0, list.splice(d.index, 1)[0])
+  itemOrder.value = { ...itemOrder.value, [cat.id]: list.map(itemId) }
+  persistItemOrder()
+  itemDrag.value = { catId: '', index: -1 }
+}
+function onItemDragEnd() {
+  itemDrag.value = { catId: '', index: -1 }
+}
+
+// ③ 分类区块
+const catDragId = ref('')
+const catOverId = ref('')
+
+function onCatDragStart(cat, e) {
+  catDragId.value = cat.id
+  e.dataTransfer.effectAllowed = 'move'
+  // 拖拽影像用整行标题（默认会用小小的把手图标，看不出在搬哪一块）
+  const head = e.target.closest?.('.nav-section-head')
+  try {
+    if (head) e.dataTransfer.setDragImage(head, 16, 16)
+  } catch {
+    /* 某些环境下 setDragImage 会抛错（如合成事件），失败不影响排序逻辑 */
+  }
+}
+function onCatDragOver(cat, e) {
+  if (!catDragId.value) return
+  if (catDragId.value === cat.id) {
+    e.preventDefault() // 自身也是合法区域（避免指针滑回原处时指示器乱跳）
+    return
+  }
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'move'
+  catOverId.value = cat.id
+}
+function onCatDrop(cat) {
+  const from = catOrder.value.indexOf(catDragId.value)
+  const to = catOrder.value.indexOf(cat.id)
+  catDragId.value = ''
+  catOverId.value = ''
+  if (from < 0 || to < 0 || from === to) return
+  const list = catOrder.value.slice()
+  list.splice(to, 0, list.splice(from, 1)[0])
+  catOrder.value = list
+  persistCatOrder()
+}
+function onCatDragEnd() {
+  catDragId.value = ''
+  catOverId.value = ''
+}
+
 // ── 筛选 ─────────────────────────────────
 // 筛选：按名称/描述匹配；空关键字展示全部；过滤后为空的分类自动隐藏
+// 分类顺序与分类内顺序都按用户偏好渲染（orderCategories / orderItems）
 const filtered = computed(() => {
   const kw = keyword.value.trim().toLowerCase()
-  if (!kw) return normalCategories
-  return normalCategories
+  const cats = orderCategories(normalCategories)
+  if (!kw) return cats.map((cat) => ({ ...cat, items: orderItems(cat) }))
+  return cats
     .map((cat) => ({
       ...cat,
-      items: cat.items.filter(
+      items: orderItems(cat).filter(
         (it) => it.name.toLowerCase().includes(kw) || it.desc.toLowerCase().includes(kw)
       )
     }))
     .filter((cat) => cat.items.length > 0)
 })
+
+// 分类锚点 / 右侧分类栏用的完整顺序（含 virtual 高频常用）
+const orderedAllCats = computed(() => orderCategories(navCategories))
 
 const matchCount = computed(() =>
   filtered.value.reduce((sum, c) => sum + c.items.length, 0)
@@ -168,12 +261,13 @@ const countText = computed(() =>
 </script>
 
 <template>
-  <div class="nav-board">
+  <div class="nav-board" :class="{ 'is-filtering': !!keyword }">
     <!-- 顶部工具条：标题 + 计数 + 筛选框 -->
     <div class="nav-toolbar">
       <div class="nav-headline">
         <h2 class="nav-title">开发者导航</h2>
         <span class="nav-count">{{ countText }}</span>
+        <span class="nav-hint">拖拽卡片可调整分类内顺序，拖分类标题左侧把手可调整分类顺序</span>
       </div>
       <input
         v-model="keyword"
@@ -186,7 +280,7 @@ const countText = computed(() =>
     <!-- 分类锚点（筛选时隐藏，避免锚点失效） -->
     <div v-if="!keyword" class="nav-anchor">
       <a
-        v-for="cat in navCategories"
+        v-for="cat in orderedAllCats"
         :key="cat.id"
         class="nav-anchor-item"
         :href="'#nav-' + cat.id"
@@ -253,14 +347,37 @@ const countText = computed(() =>
       </div>
     </section>
 
-    <!-- 分类区块 -->
+    <!-- 分类区块：整块可拖拽排序（拖标题左侧把手） -->
     <section
       v-for="cat in filtered"
       :id="'nav-' + cat.id"
       :key="cat.id"
       class="nav-section"
+      :class="{
+        'is-cat-dragging': catDragId === cat.id,
+        'is-cat-over': catOverId === cat.id
+      }"
+      @dragover="onCatDragOver(cat, $event)"
+      @drop.prevent="onCatDrop(cat)"
     >
       <div class="nav-section-head">
+        <span
+          v-if="!keyword"
+          class="nav-drag-handle"
+          draggable="true"
+          title="拖拽调整分类顺序"
+          @dragstart="onCatDragStart(cat, $event)"
+          @dragend="onCatDragEnd"
+        >
+          <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
+            <circle cx="5.5" cy="3" r="1.35" fill="currentColor" />
+            <circle cx="10.5" cy="3" r="1.35" fill="currentColor" />
+            <circle cx="5.5" cy="8" r="1.35" fill="currentColor" />
+            <circle cx="10.5" cy="8" r="1.35" fill="currentColor" />
+            <circle cx="5.5" cy="13" r="1.35" fill="currentColor" />
+            <circle cx="10.5" cy="13" r="1.35" fill="currentColor" />
+          </svg>
+        </span>
         <span class="nav-section-icon">{{ cat.icon }}</span>
         <h3 class="nav-section-title">{{ cat.title }}</h3>
         <span class="nav-section-desc">{{ cat.desc }}</span>
@@ -268,12 +385,18 @@ const countText = computed(() =>
 
       <div class="nav-grid">
         <a
-          v-for="item in cat.items"
+          v-for="(item, idx) in cat.items"
           :key="itemId(item)"
           class="nav-card"
+          :class="{ 'is-dragging': itemDrag.catId === cat.id && itemDrag.index === idx }"
           :href="item.url"
           target="_blank"
           rel="noopener noreferrer"
+          :draggable="!keyword"
+          @dragstart="onItemDragStart(cat, idx, $event)"
+          @dragover="onItemDragOver(cat, idx, $event)"
+          @drop.prevent="onItemDrop(cat, idx)"
+          @dragend="onItemDragEnd"
         >
           <button
             class="nav-star"
@@ -391,13 +514,62 @@ const countText = computed(() =>
 
 /* ── 分类区块 ───────────────────────── */
 .nav-section {
+  position: relative;
   scroll-margin-top: 96px;
 }
 .nav-section-head {
+  position: relative;
   display: flex;
   align-items: baseline;
   gap: 8px;
   margin-bottom: 14px;
+  /* 给左侧拖拽把手留位：高频常用没有把手，靠这个 padding 保证所有分类标题对齐 */
+  padding-left: 20px;
+}
+/* 拖拽把手：默认低存在感，hover 才点亮，避免干扰阅读 */
+.nav-drag-handle {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--vp-c-text-3);
+  opacity: 0.4;
+  cursor: grab;
+  user-select: none;
+  transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+}
+.nav-drag-handle:hover {
+  opacity: 1;
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+.nav-drag-handle:active {
+  cursor: grabbing;
+}
+.nav-drag-handle svg {
+  /* 让拖拽事件的 target 恒为把手本体（否则会是 svg/circle，取不到最近的 .nav-section-head） */
+  pointer-events: none;
+}
+/* 正在搬动的分类：整块淡出 */
+.nav-section.is-cat-dragging {
+  opacity: 0.4;
+}
+/* 目标插入位：区块上方的品牌色横线（语义=放到这一块之前） */
+.nav-section.is-cat-over::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: -18px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--vp-c-brand-1);
 }
 .nav-section-icon {
   font-size: 20px;
@@ -410,6 +582,15 @@ const countText = computed(() =>
 .nav-section-desc {
   font-size: 12px;
   opacity: 0.6;
+}
+.nav-hint {
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+}
+@media (max-width: 1180px) {
+  .nav-hint {
+    display: none;
+  }
 }
 
 /* ── 卡片网格 ───────────────────────── */
@@ -428,20 +609,24 @@ const countText = computed(() =>
   border-radius: 10px;
   background: var(--vp-c-bg);
   text-decoration: none;
+  cursor: grab;
   transition: all 0.2s;
+}
+.nav-card:active {
+  cursor: grabbing;
+}
+/* 筛选态下拖拽被禁用（顺序变更无法与筛选结果对应），光标回归普通链接 */
+.nav-board.is-filtering .nav-card {
+  cursor: pointer;
 }
 .nav-card:hover {
   transform: translateY(-2px);
   border-color: var(--vp-c-brand-1);
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
 }
-/* 高频区卡片：金色描边 + 可拖拽光标 */
+/* 高频区卡片：金色描边 */
 .nav-card.is-fav {
   border-color: rgba(234, 179, 8, 0.45);
-  cursor: grab;
-}
-.nav-card.is-fav:active {
-  cursor: grabbing;
 }
 .nav-card.is-dragging {
   opacity: 0.45;
