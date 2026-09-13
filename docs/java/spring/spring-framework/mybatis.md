@@ -2,7 +2,7 @@
 order: 5
 date: 2026-09-11
 title: MyBatis 执行流程与集成
-desc: 四大对象、#{} vs ${}、两级缓存的坑、SqlSessionTemplate
+desc: 四大对象、#{} vs ${}、延迟加载的代理原理、两级缓存的坑、SqlSessionTemplate
 ---
 
 # MyBatis 执行流程与 Spring 集成
@@ -143,7 +143,132 @@ public List<User> list(String orderBy) {
 }
 ```
 
-## 五、一级缓存与二级缓存
+## 五、延迟加载：关联数据的按需触发
+
+### 要解决的问题
+
+一对多关联查询里，主表数据几乎一定会被用到，**关联数据却未必**：
+
+```java
+List<Order> orders = orderMapper.selectAll();       // 查 100 个订单
+for (Order o : orders) {
+    // 如果这里只需要订单号，却把 100 个订单的明细一起查出来 —— 白干
+    System.out.println(o.getOrderNo());
+}
+```
+
+**如果关联数据在查询时就一并取出，等于为"可能不用的数据"付了查询代价。** 延迟加载（懒加载）的思路是：**关联属性先留空，等真正 `get` 的时候再查库**。
+
+### 实现原理：代理 + 拦截器
+
+MyBatis 用 **CGLIB 为目标对象生成代理子类**（`JavassistProxyFactory` 是另一种可选实现）：
+
+```
+orderMapper.selectAll()
+      ▼
+ResultSetHandler 映射结果 → 对每个 Order 对象
+      ├─ 立即填充普通字段（id / orderNo / amount ...）
+      └─ 关联字段 orderItems 保持为 null，但对象已被包成代理
+                ▼
+        返回给业务代码的是「Order 的 CGLIB 代理子类」
+      ▼
+业务调用 order.getOrderItems()
+      ▼
+进入代理的拦截逻辑（MapMethodProxy / lazyLoader）
+      ├─ 判断 orderItems 是否已加载？
+      │     ├─ 已加载 → 直接返回字段值
+      │     └─ 未加载 → 执行预先登记的关联 SQL（ResultLoader）
+      │                   → 查询结果 setOrderItems(list)
+      │                   → 返回
+      └─ 标记为已加载（同一对象只触发一次）
+```
+
+**三个关键点：**
+
+**① 延迟加载只对"嵌套查询"生效。** 触发的前提是关联是通过**独立的子查询**（`<association select="...">` / `<collection select="...">`）完成的——只有这时才有"待执行"的 SQL 可以推迟。如果用的是 **join 查询**（一条 SQL 用 `LEFT JOIN` 把数据全取回来），关联数据已经随主查询一起返回了，**没有可延迟的余地**：
+
+```xml
+<!-- ✓ 可延迟：嵌套查询，子 SQL 等被调用时才执行 -->
+<resultMap id="orderMap" type="Order">
+    <id column="id" property="id"/>
+    <collection property="items" column="id"
+                select="com.example.mapper.ItemMapper.selectByOrderId"/>
+</resultMap>
+
+<!-- ✗ 不可延迟：join 一次性取回，数据已在手上了 -->
+<resultMap id="orderJoinMap" type="Order">
+    <id column="id" property="id"/>
+    <collection property="items" resultMap="itemMap"/>
+</resultMap>
+<select id="selectAll" resultMap="orderJoinMap">
+    SELECT o.*, i.* FROM orders o LEFT JOIN order_items i ON i.order_id = o.id
+</select>
+```
+
+**② 代理会在"关联属性被加载"后正常返回字段值**，不重复查库——所以同一对象的 `getOrderItems()` 调用多次也只执行一次 SQL。
+
+**③ 代理对象会影响 `equals` / `hashCode` 与类型判断。** 返回对象的实际类型是 CGLIB 子类（如 `Order$$EnhancerByCGLIB$$xxx`），在需要按类名做逻辑分支、或用 `instanceof` 严格匹配时要注意。序列化（如转 JSON 返回前端）也可能触发全量加载——**这是"接口明明只查了订单，数据库却突然多出一堆子查询"的常见原因**。
+
+### 配置
+
+| 配置项 | 默认值 | 说明 |
+|---|---|---|
+| `lazyLoadingEnabled` | **`false`** | 全局开关，**默认关闭**，需显式打开 |
+| `aggressiveLazyLoading` | `false`（3.4.1+；此前为 `true`） | `true` 时"调用任一 getter 就加载全部延迟属性"，通常需要保持 `false` |
+| `fetchType`（`<association>` / `<collection>` 上） | `lazy` | **局部覆盖**全局配置，取 `lazy` / `eager` |
+
+```xml
+<settings>
+    <setting name="lazyLoadingEnabled" value="true"/>
+    <setting name="aggressiveLazyLoading" value="false"/>   <!-- 按需加载单个属性 -->
+</settings>
+```
+
+```yaml
+# Spring Boot application.yml 等价写法
+mybatis:
+  configuration:
+    lazy-loading-enabled: true
+    aggressive-lazy-loading: false
+```
+
+**关于 `aggressiveLazyLoading`**：它的语义容易被误解——不是说"更积极地加载"，而是"**任一属性的访问都会触发该对象身上所有延迟属性的加载**"。值为 `true` 时，读一次 `orderNo` 就会连带把 `orderItems` 全查出来，等于废掉了按需加载的意义（但仍比全量立即加载多一次判断开销）。**所以绝大多数情况下应显式设为 `false`。**
+
+### 三个真实的坑
+
+**坑一：循环中访问延迟属性 → 退化成 N+1 查询。** 延迟加载的初衷是减少查询，但如果代码在循环里访问了关联属性，每个对象各触发一次 SQL，总查询次数 = 1 + N：
+
+```java
+List<Order> orders = orderMapper.selectAll();        // 1 次 SQL
+for (Order o : orders) {
+    System.out.println(o.getItems().size());         // ✗ N 次 SQL —— N+1 问题
+}
+```
+
+**正确做法**：确实要遍历关联数据时，**改用 join 一次性查回**（或批量查询后手工组装）。**判断标准是"关联数据的使用比例"**——少量对象会用到才用延迟加载；大部分都要用就直接 join。
+
+**坑二：事务/会话关闭后访问延迟属性 → 抛 `LazyInitializationException`。** 延迟加载依赖 `SqlSession` 仍然可用——它要靠会话去执行那条子 SQL。一旦会话关闭，代理就失去了执行能力：
+
+```java
+@Transactional
+public Order getOrder(Long id) {
+    return orderMapper.selectById(id);      // 事务结束、SqlSession 关闭
+}
+
+// 调用方（事务之外）
+Order o = service.getOrder(1L);
+o.getItems().size();                        // ✗ LazyInitializationException
+```
+
+**这是最典型的生产事故**：Service 内查完数据返回，Controller 层（或转 JSON 序列化时）才访问关联属性。**三种解法**：① 在事务内就访问完需要的数据（或用 DTO 装配好再返回）；② 该关联改为 `fetchType="eager"` 或 join 查询；③ 保持 `OpenSessionInView`（Spring Boot 默认开启 `spring.jpa.open-in-view` 之于 JPA；MyBatis 侧则依赖 `SqlSessionTemplate` 在请求内的会话保持）——**但这会把数据库会话一直挂到视图渲染结束，是不推荐的做法**。
+
+**推荐 ①**：在 Service 层把需要的数据装配成 DTO 返回，让返回对象**不再携带任何"待加载"状态**——这既消除了异常风险，也避免了把持久层结构泄漏到上层。
+
+**坑三：序列化触发隐式全量加载。** 直接把实体对象返回并转 JSON 时，Jackson 会遍历所有 getter，**每个延迟属性都被触发一次**——表面上"只查了订单"，实际执行了 1 + N 条 SQL。**这也是"延迟加载反而变慢"的常见原因**。
+
+> **生产建议**：MyBatis 的延迟加载在实际项目中使用率不高，原因是它与会话生命周期强耦合、隐性触发点难以预测。**更可控的替代方案是显式装配**——在 Mapper 层用 join 或批量查询把需要的数据一次取回，在 Service 层组装成 DTO；或用 `<collection>` 的 `select` 配合"批量查询 + 内存分组"（把 N 次单条查询改成 1 次 `IN` 查询）来消除 N+1。
+
+## 六、一级缓存与二级缓存
 
 | 维度 | 一级缓存 | 二级缓存 |
 |---|---|---|
@@ -183,7 +308,7 @@ public void demo() {
 
 **生产建议**：二级缓存**慎用**。主要原因：① 跨 namespace 的关联更新导致脏读；② 分布式环境下本地缓存不一致（需换成 Redis 等集中式实现）；③ 缓存粒度粗（按 namespace 整体失效）。**业务层面的缓存（Redis + 明确的 key 设计 + 主动失效）通常比 MyBatis 二级缓存更可控。**
 
-## 六、Spring 集成：`SqlSessionTemplate` 解决什么
+## 七、Spring 集成：`SqlSessionTemplate` 解决什么
 
 `SqlSession` **线程不安全**（内部持有 `Executor` 和事务状态）。而 Spring 的 Bean 默认是单例——如果直接把 `SqlSession` 注入为单例 Bean，多线程下必然出错。
 
@@ -233,7 +358,7 @@ public Object invoke(Object proxy, Method method, Object[] args) throws Throwabl
 
 **`@MapperScan` 的实现**：`MapperScannerConfigurer` 是 `BeanDefinitionRegistryPostProcessor`——在容器启动的最早期扫描指定包下的接口，为每个 Mapper 接口注册一个 `MapperFactoryBean` 类型的 `BeanDefinition`。这就是"Mapper 接口能作为 Bean 被注入"的原因（结合 [IoC 容器](/java/spring/spring-framework/ioc-container) 的扩展点顺序理解：它在第 5 步最早执行，早于所有 Bean 实例化）。
 
-## 七、面试问答
+## 八、面试问答
 
 **Q1：MyBatis 的执行流程？**
 
@@ -262,3 +387,15 @@ MyBatis 允许拦截四大对象（`Executor`、`StatementHandler`、`ParameterH
 **Q7：`@Param` 什么时候必须用？**
 
 Mapper 方法有**多个参数**时必须用（否则 MyBatis 只能用 `arg0`/`param1` 这类默认名，SQL 里无法明确引用）；参数是**集合或数组**且需要在 `<foreach>` 中引用时建议用；单个参数且类型是普通对象时可省略（MyBatis 会自动展开属性）。**建议统一都加 `@Param`**——可读性更好，也避免后续加参数时遗漏导致的隐性错误。
+
+**Q8：MyBatis 的延迟加载是怎么实现的？**
+
+**代理 + 拦截器**。对"嵌套查询"方式（`<association select="...">` / `<collection select="...">`）映射出的结果对象，MyBatis 用 CGLIB 生成**代理子类**，关联属性初始为 `null` 并登记好待执行的子 SQL（`ResultLoader`）。当业务代码调用该属性的 getter 时，进入代理的拦截逻辑：若尚未加载则执行子 SQL、把结果 set 回属性并标记为已加载，之后再次调用直接返回字段值。
+
+开启方式：全局 `lazyLoadingEnabled = true`（**默认 false**），或用 `fetchType="lazy"` 局部声明。**它只对嵌套查询生效**——join 查询的数据已随主查询返回，没有延迟的余地。
+
+**Q9：延迟加载有哪些坑？**
+
+① **N+1 退化成 1+N**——在循环中访问关联属性，每个对象各触发一次子查询；② **`LazyInitializationException`**——延迟属性依赖 `SqlSession` 可用，事务/会话关闭后再访问就会抛异常，这是最典型的生产事故（Service 查完返回、Controller 才触碰关联数据）；③ **序列化隐式触发**——直接把实体转 JSON 会遍历所有 getter，导致延迟属性全量加载，"只查了订单却多出一堆子查询"。另外 `aggressiveLazyLoading` 为 `true` 时任一 getter 都会触发全部延迟属性加载，通常需显式设为 `false`。
+
+**实践建议**：延迟加载与会话生命周期强耦合、触发点难预测，生产项目使用率不高。更可控的做法是**显式装配**——需要关联数据时用 join 一次取回，或批量查询后在内存分组（把 N 次单条查询合并为 1 次 `IN` 查询），再在 Service 层组装 DTO。
