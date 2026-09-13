@@ -30,7 +30,7 @@ const sidebarSpec = [
           { text: 'Java 基础', dir: 'java/basics' },
           { text: 'Java 集合', dir: 'java/collections', group: true },
           { text: 'Java 并发', dir: 'java/concurrent' },
-          { text: 'Java 虚拟机', dir: 'java/jvm' }
+          { text: 'Java 虚拟机', dir: 'java/jvm', group: true }
         ]
       },
       {
