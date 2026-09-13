@@ -78,6 +78,19 @@ const sidebarSpec = [
     ]
   },
   {
+    prefix: '/frontend/',
+    items: [
+      { text: '板块导览', link: '/frontend/' },
+      { text: '小程序起步', dir: 'frontend/miniprogram-start' },
+      { text: '模板与样式', dir: 'frontend/miniprogram-template' },
+      { text: '导航与生命周期', dir: 'frontend/miniprogram-logic' },
+      { text: '组件化与工程化', dir: 'frontend/miniprogram-component' },
+      { text: 'uni-app 核心', dir: 'frontend/uniapp-core' },
+      { text: '跨端项目实战', dir: 'frontend/uniapp-practice' },
+      { text: '发布与多端打包', dir: 'frontend/release' }
+    ]
+  },
+  {
     prefix: '/bigdata/',
     items: [
       { text: '板块导览', link: '/bigdata/' },
@@ -175,7 +188,7 @@ export default defineConfig({
   base,
   lang: 'zh-CN',
   title: 'L知识库',
-  description: 'Java 后端知识库 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / AI 应用，附项目实战难点复盘',
+  description: 'Java 后端与大前端知识库 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / 跨端开发 / AI 应用，附项目实战难点复盘',
   head: [['link', { rel: 'icon', href: base + 'favicon.svg' }]],
 
   markdown: {
@@ -189,6 +202,7 @@ export default defineConfig({
       // 首页不占用菜单位置：访问根路径 / 即是首页，站名（VPNavBarTitle）本身链回首页
       { text: '导航', link: '/nav/' },
       { text: 'Java', link: '/java/' },
+      { text: '大前端', link: '/frontend/', activeMatch: '/frontend/' },
       // 数据存储 + 消息队列合并入口：两个前缀下都保持高亮
       { text: '存储与消息', link: '/database/', activeMatch: '/(database|middleware)/' },
       { text: '数据仓库', link: '/bigdata/' },

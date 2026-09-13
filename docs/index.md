@@ -4,7 +4,7 @@ layout: home
 hero:
   name: L知识库
   text: 夯实基础 · 构建体系 · 沉淀实战
-  tagline: 系统化梳理 Java 后端知识主线 —— 从语言与框架原理，到数据存储、消息队列、云原生与数据仓库，再到项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
+  tagline: 系统化梳理 Java 后端与大前端知识主线 —— 从语言与框架原理，到数据存储、消息队列、云原生与数据仓库，再到跨端开发与项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
   actions:
     - theme: brand
       text: 知识库总览
@@ -21,6 +21,10 @@ features:
     title: Java 核心
     details: 语言基础、并发与 JUC、JVM 原理、Spring 全家桶、设计模式 —— 讲原理也讲演进
     link: /java/
+  - icon: 📱
+    title: 大前端
+    details: 微信小程序双线程模型、uni-app 跨端机制、组件化与分包、发布与多端打包
+    link: /frontend/
   - icon: 🗄️
     title: 数据存储
     details: MySQL 索引与事务、Redis 缓存体系、分库分表与扩容方案
