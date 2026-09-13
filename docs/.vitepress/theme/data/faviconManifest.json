@@ -88,5 +88,8 @@
   "nginx.org": "/favicons/nginx.org.ico",
   "aliyun.com": "/favicons/aliyun.com.ico",
   "cloud.tencent.com": "/favicons/cloud.tencent.com.ico",
-  "bt.cn": "/favicons/bt.cn.ico"
+  "bt.cn": "/favicons/bt.cn.ico",
+  "doc.iocoder.cn": "/favicons/doc.iocoder.cn.ico",
+  "macrozheng.com": "/favicons/macrozheng.com.ico",
+  "hangge.com": "/favicons/hangge.com.ico"
 }

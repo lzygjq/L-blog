@@ -91,6 +91,8 @@ export const navCategories = [
       { name: 'Spring Cloud 文档', desc: '微服务框架官方文档', url: 'https://spring.io/projects/spring-cloud', icon: 'https://spring.io/favicon-32x32.png' },
       { name: 'MyBatis', desc: '持久层框架官方中文文档', url: 'https://mybatis.org/mybatis-3/zh/index.html' },
       { name: 'MyBatis Plus', desc: '只做增强不做改变的字段自动映射增强包', url: 'https://baomidou.com' },
+      { name: '芋道 yudao 文档', desc: '快速开发平台：Boot 单体 / Cloud 微服务全文档', url: 'https://doc.iocoder.cn/' },
+      { name: 'mall 项目文档', desc: 'Spring Boot 电商实战项目（macrozheng）', url: 'https://www.macrozheng.com/' },
       { name: 'Maven 官方文档', desc: '构建生命周期与 POM 配置文档', url: 'https://maven.apache.org/guides/index.html' },
       { name: 'Gradle 文档', desc: '灵活的构建工具官方文档', url: 'https://docs.gradle.org/current/userguide/userguide.html' },
       { name: 'Jackson / fastjson2', desc: 'fastjson2 GitHub 仓库与文档', url: 'https://github.com/alibaba/fastjson2' },
@@ -182,6 +184,7 @@ export const navCategories = [
       { name: 'JavaGuide', desc: 'Java 面试与进阶知识体系开源仓库', url: 'https://javaguide.cn' },
       { name: '小林 coding', desc: '图解网络、图解系统，面试热门', url: 'https://xiaolincoding.com', icon: 'https://cdn.xiaolincoding.com/icon.webp' },
       { name: 'pdai.tech', desc: 'Java 全栈知识体系（本页导航参考来源）', url: 'https://pdai.tech' },
+      { name: '航歌 hangge', desc: '多端开发教程与代码示例合集（iOS / Android / 后端）', url: 'https://www.hangge.com/' },
       { name: 'LeetCode 力扣', desc: '算法刷题与面试题库', url: 'https://leetcode.cn' },
       { name: 'B 站技术区', desc: '海量视频教程与公开课', url: 'https://www.bilibili.com' },
       { name: 'MDN Learn', desc: 'Web 标准学习路径（中文）', url: 'https://developer.mozilla.org/zh-CN/docs/Learn' }
