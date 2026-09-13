@@ -10,11 +10,12 @@ Java 是整个知识体系的主干，按「基础 → 并发 → JVM → Spring
 
 | # | 板块 | 内容 | 状态 |
 |---|---|---|---|
-| 1 | [Java 基础](/java/basics/) | 集合（**4 篇已成篇**）→ 泛型、反射、IO、新特性 | 部分完成 |
-| 2 | [并发与 JUC](/java/concurrent/) | 线程模型、AQS、并发容器、线程池 | 写作中 |
-| 3 | [JVM](/java/jvm/) | 内存结构、类加载、GC 与调优 | 写作中 |
-| 4 | [Spring 生态](/java/spring/) | Framework 原理（**5 篇已成篇**）→ Boot → Cloud | 部分完成 |
-| 5 | [设计模式](/java/design-patterns/) | 设计原则 + 23 种模式 | **已完成 25 篇** |
+| 1 | [Java 基础](/java/basics/) | 泛型、反射、注解、IO/NIO、新特性 | 写作中 |
+| 2 | [Java 集合](/java/collections/) | 数据结构与复杂度、`ArrayList` 源码与扩容、`HashMap` 原理与扩容（**4 篇已成篇**） | 部分完成 |
+| 3 | [并发与 JUC](/java/concurrent/) | 线程模型、AQS、并发容器、线程池 | 写作中 |
+| 4 | [JVM](/java/jvm/) | 内存结构、类加载、GC 与调优 | 写作中 |
+| 5 | [Spring 生态](/java/spring/) | Framework 原理（**5 篇已成篇**）→ Boot → Cloud | 部分完成 |
+| 6 | [设计模式](/java/design-patterns/) | 设计原则 + 23 种模式 | **已完成 25 篇** |
 
 ## 阅读建议
 

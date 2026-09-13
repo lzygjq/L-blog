@@ -4,13 +4,11 @@ draft: true
 ---
 
 # Java 基础
-> 写作中。计划覆盖：集合框架（HashMap/ConcurrentHashMap 源码）、泛型、反射、注解、IO/NIO、Java 8~21 新特性。
+> 写作中。计划覆盖：泛型、反射、注解、IO/NIO、Java 8~21 新特性。
 
 ## 已成篇
 
-| 篇目 | 内容 |
-|---|---|
-| [Java 集合](/java/basics/collections/) | 数据结构与算法复杂度、`ArrayList` 源码与扩容、`HashMap` 实现原理与扩容机制 |
+> 集合框架内容较多，已独立为 [Java 集合](/java/collections/) 板块（4 篇），与「Java 基础」平级；本页只收录 Java 基础自身的篇目。
 
 ## 待补
 

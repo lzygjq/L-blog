@@ -23,13 +23,9 @@ const sidebarSpec = [
       {
         text: 'Java 核心',
         children: [
-          {
-            text: 'Java 基础',
-            children: [
-              { text: '导览', link: '/java/basics/' },
-              { text: 'Java 集合', dir: 'java/basics/collections', indexLabel: '导览' }
-            ]
-          },
+          // 单条：目录内只有 index.md 时，「目录型条目」自动退化为一个可点击条目，不再多包一层
+          { text: 'Java 基础', dir: 'java/basics' },
+          { text: 'Java 集合', dir: 'java/collections', indexLabel: '导览' },
           { text: 'Java 并发', dir: 'java/concurrent' },
           { text: 'Java 虚拟机', dir: 'java/jvm' }
         ]
