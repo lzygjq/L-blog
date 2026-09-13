@@ -10,7 +10,7 @@ Java 是整个知识体系的主干，按「基础 → 并发 → JVM → Spring
 
 | # | 板块 | 内容 | 状态 |
 |---|---|---|---|
-| 1 | [Java 基础](/java/basics/) | 集合、泛型、反射、IO、新特性 | 写作中 |
+| 1 | [Java 基础](/java/basics/) | 集合（**4 篇已成篇**）→ 泛型、反射、IO、新特性 | 部分完成 |
 | 2 | [并发与 JUC](/java/concurrent/) | 线程模型、AQS、并发容器、线程池 | 写作中 |
 | 3 | [JVM](/java/jvm/) | 内存结构、类加载、GC 与调优 | 写作中 |
 | 4 | [Spring 生态](/java/spring/) | Framework 原理（**5 篇已成篇**）→ Boot → Cloud | 部分完成 |
