@@ -14,7 +14,7 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 
 | 子菜单 | 主题 | 回答的核心问题 | 面试权重 |
 |---|---|---|---|
-| **IoC** | [IoC 容器与依赖注入](/java/spring/spring-framework/ioc/) | 容器怎么组织、怎么启动、依赖怎么注入、注解怎么装配 | ★★★★★ |
+| **IoC** | [IoC 容器与依赖注入](/java/spring/spring-framework/ioc/) | 容器怎么组织、一行 `main()` 到容器就绪经历了什么、图纸怎么入库、依赖怎么注入 | ★★★★★ |
 | **Bean** | [Bean 生命周期与扩展点](/java/spring/spring-framework/bean/) | Bean 从实例化到销毁经历什么、哪些环节能介入 | ★★★★★ |
 | | ↳ [循环依赖与三级缓存](/java/spring/spring-framework/bean/circular-dependency) | A 依赖 B、B 依赖 A，Spring 凭什么能启动 | ★★★★★ |
 | | ↳ [作用域与线程安全](/java/spring/spring-framework/bean/thread-safety) | 单例 Bean 能并发用吗、有状态对象怎么处理 | ★★★★★ |

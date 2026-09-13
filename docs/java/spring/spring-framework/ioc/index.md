@@ -2,7 +2,7 @@
 date: 2026-09-11
 sidebar: IoC 容器
 title: IoC 容器与依赖注入
-desc: IoC 与 DI 的关系、BeanFactory 与 ApplicationContext、BeanDefinition、refresh() 十二步、注解式装配与候选注入优先级
+desc: IoC 与 DI 的关系、BeanFactory 与 ApplicationContext、BeanDefinition、从 main() 到容器就绪、图纸分批注册、refresh() 十二步、注解式装配与候选注入优先级
 ---
 
 # IoC 容器与依赖注入
@@ -118,17 +118,109 @@ DI 的三种注入方式：
 - **`BeanDefinitionReader`**：三种实现的对应关系——XML 配置用 `XmlBeanDefinitionReader`，注解配置用 `AnnotatedBeanDefinitionReader`，Properties 用 `PropertiesBeanDefinitionReader`。**这一步回答"配置从哪来"**。
 - **`BeanDefinitionRegistry`**：负责"图纸入库"。**`DefaultListableBeanFactory` 本身实现了这个接口**——这一点很关键：IoC 容器同时是注册表，所以"容器"和"Bean 定义仓库"在实现上是同一个对象。
 
-## 五、容器启动流程：`refresh()` 十二步
+## 五、容器启动：从 `main()` 到容器就绪
 
-`AbstractApplicationContext.refresh()` 是容器启动的模板方法（**模板方法模式的教科书级应用**），十二个步骤各司其职：
+前面讲了"图纸长什么样""仓库是谁"，这一节把它们串起来——**一行 `main()` 到容器可用，中间到底发生了什么**。以最常用的注解容器为例：
+
+```java
+public static void main(String[] args) {
+    // 这一行里发生了：构造容器 → 注册配置类 → refresh()
+    ApplicationContext ctx = new AnnotationConfigApplicationContext(AppConfig.class);
+    ctx.getBean(OrderService.class);   // 此时业务 Bean 已经建好，直接命中单例
+}
+```
+
+### 构造器只做了三件事
+
+`refresh()` 还没进来之前，构造器先铺好地基：
+
+| 阶段 | 动作 | 结果 |
+|---|---|---|
+| `this()` | 创建 `DefaultListableBeanFactory`、`AnnotatedBeanDefinitionReader`、`ClassPathBeanDefinitionScanner` | 容器 + 注册表就位（回顾 §四：**两者是同一个对象**） |
+| `register(AppConfig.class)` | 把**配置类本身**注册为 `BeanDefinition` | 注册表里只有**第一张图纸**（种子） |
+| 调 `refresh()` | 十二步启动流程（见下一节） | 图纸补齐 → 单例创建完毕 |
+
+**关键点在这里**：此刻容器里只有 `AppConfig` 一张图纸，`OrderService`、`OrderDao` 这些业务类**一张图纸都没有**。那它们从哪来？
+
+### 扫描发生在第 5 步：`ConfigurationClassPostProcessor`
+
+答案在 `refresh()` 第 5 步。`invokeBeanFactoryPostProcessors()` 会执行容器里所有的 `BeanFactoryPostProcessor`，其中**优先级最高**的一个是 `ConfigurationClassPostProcessor`（由 `AnnotationConfigApplicationContext` 在构造阶段就注册进去）。它的职责就是把"注解"翻译成"图纸"：
+
+| 动作 | 做什么 |
+|---|---|
+| 解析 `@Configuration` | 为配置类生成 CGLIB 子类（`@Bean` 方法互调返回单例的底层机制，详见 §七） |
+| 处理 `@ComponentScan` | 交给 `ClassPathBeanDefinitionScanner.doScan()` → **扫包 → 过滤 → 注册 `BeanDefinition`** |
+| 处理 `@Import` / `@Bean` 方法 | `@Import` 的三种形态在此生效；`@Bean` 方法被登记成 `BeanDefinition`（`factoryBeanName` + `factoryMethodName`） |
+
+**扫包的具体链路**（`@ComponentScan("com.foo")` 最终落到这里）：
+
+```
+@ComponentScan("com.foo")
+        ↓  由 ConfigurationClassPostProcessor 触发（refresh() 第 5 步）
+ClassPathBeanDefinitionScanner.doScan(basePackages)
+        ↓
+  ① 找到 basePackages 下所有 .class        ← PathMatchingResourcePatternResolver
+  ② 用 MetadataReader 读字节码元数据        ← 不触发类加载，速度快
+  ③ 按 includeFilters 判断是否候选          ← @Component 已被 @ComponentScan 默认收进 includeFilters
+  ④ 生成 ScannedGenericBeanDefinition      ← 校验 Bean 名称唯一性
+  ⑤ 注册进 BeanDefinitionRegistry          ← 即 DefaultListableBeanFactory
+```
+
+> **`@ComponentScan` 的默认值是启动类所在包**。这就是 Spring Boot 启动类必须放在根包的原因——放在子包里，上层和兄弟包下的类全都扫不到。跨模块时需显式声明 `@ComponentScan({"com.foo.a", "com.foo.b"})`。
+
+### 由此得出：图纸是分两批入库的
+
+| 批次 | 时机 | 内容 |
+|---|---|---|
+| 第一批（种子） | 构造器 `register()` | 配置类（`AppConfig` / Boot 启动类）本身 |
+| 第二批（主体） | `refresh()` 第 5 步 | `@ComponentScan` 扫出的业务类 + `@Import` 导入的类 + `@Bean` 方法 |
+
+**这也顺带解释了 §六 里"第 5、6 步顺序不能颠倒"的深层原因**：`@Bean` 方法可能定义一个 `BeanPostProcessor`，而它必须先被**扫描登记**（第 5 步），第 6 步才能把它注册进容器。扫描必然在第 6 步之前完成。
+
+> 顺带一提，MyBatis 的 `@MapperScan` 走的是**同一位置但更早**的一步——`MapperScannerConfigurer` 实现的是 `BeanDefinitionRegistryPostProcessor`，它的执行时机早于所有普通 `BeanFactoryPostProcessor`。这是 Mapper 接口能被当成 Bean 注入的原因，详见 [MyBatis 集成](/java/spring/spring-framework/mybatis/)。
+
+### 一张图看清全流程
+
+```
+main()
+  │
+  ├─ new AnnotationConfigApplicationContext(AppConfig.class)
+  │     ├─ this()                → new DefaultListableBeanFactory（容器 + 注册表）
+  │     ├─ register(AppConfig)   → 注册配置类 BeanDefinition              ← 种子图纸
+  │     └─ refresh()
+  │          ① prepareRefresh               准备环境、记录启动时间
+  │          ② obtainFreshBeanFactory       拿到 ① 建好的 BeanFactory
+  │          ③ prepareBeanFactory           装配容器自身基础设施
+  │          ④ postProcessBeanFactory       子类扩展点
+  │          ⑤ invokeBeanFactoryPostProcessors
+  │               └─ ConfigurationClassPostProcessor
+  │                     ├─ 解析 @Configuration（CGLIB 增强）
+  │                     ├─ @ComponentScan → 扫包 → 注册业务 BeanDefinition  ← 主体图纸
+  │                     └─ @Import / @Bean 方法 → 注册 BeanDefinition
+  │          ⑥ registerBeanPostProcessors   注册（注意：不执行）
+  │          ⑦ initMessageSource            国际化
+  │          ⑧ initApplicationEventMulticaster
+  │          ⑨ onRefresh                    Boot 在这里创建 Web 服务器
+  │          ⑩ registerListeners
+  │          ⑪ finishBeanFactoryInitialization  实例化所有非懒加载单例 ← 单个 Bean 生命周期起点
+  │          ⑫ finishRefresh                发布 ContextRefreshedEvent
+  │
+  └─ 容器就绪，getBean() 直接命中单例
+```
+
+**一句话总结**：`main()` 里那行 `new` 触发的 `refresh()`，前半程（①~⑤）在**造图纸**，中期（⑥~⑩）在**装基础设施**，后半程（⑪）才**照图纸造对象**。启动耗时集中在第 11 步，根源就在这个分工上。
+
+## 六、`refresh()` 十二步：容器启动骨架
+
+`AbstractApplicationContext.refresh()` 是容器启动的模板方法（**模板方法模式的教科书级应用**）。上一节讲的注解扫描就发生在第 5 步，十二个步骤各司其职：
 
 | 序号 | 方法 | 职责 |
 |---|---|---|
 | 1 | `prepareRefresh()` | 记录启动时间、初始化属性源、校验必需属性 |
-| 2 | `obtainFreshBeanFactory()` | 创建 `DefaultListableBeanFactory`，**加载并注册所有 BeanDefinition** |
+| 2 | `obtainFreshBeanFactory()` | 创建 `DefaultListableBeanFactory`。**注意**：XML 容器在此解析配置文件注册 BeanDefinition；**注解容器不在这里扫包**，扫包要等到第 5 步（见上一节） |
 | 3 | `prepareBeanFactory()` | 装配容器自身的基础设施（`ClassLoader`、`Environment`、`ApplicationContextAwareProcessor` 等） |
 | 4 | `postProcessBeanFactory()` | 子类扩展点（如 Web 容器注册 request/session 作用域） |
-| 5 | `invokeBeanFactoryPostProcessors()` | **执行所有 `BeanFactoryPostProcessor`**：修改 BeanDefinition（`@Configuration` 的解析、占位符替换在此发生） |
+| 5 | `invokeBeanFactoryPostProcessors()` | **执行所有 `BeanFactoryPostProcessor`**：修改/补齐 BeanDefinition——**注解扫描、`@Import`、`@Bean` 登记全在这一步**（见上一节） |
 | 6 | `registerBeanPostProcessors()` | **注册所有 `BeanPostProcessor`**（注意：只是注册，尚未执行） |
 | 7 | `initMessageSource()` | 初始化国际化支持 |
 | 8 | `initApplicationEventMulticaster()` | 初始化事件广播器 |
@@ -144,9 +236,9 @@ DI 的三种注入方式：
 
 > 第 11 步之后的**单个 Bean 内部**发生了什么，就是 [Bean 生命周期](/java/spring/spring-framework/bean/) 的内容。
 
-## 六、注解式装配
+## 七、注解式装配
 
-容器启动的十二步是"骨架"，日常开发接触到的却是注解。这一节把**装配相关的注解**集中讲清——按"注册 → 注入 → 配置"三类组织。
+第五节讲的是**机制**（扫描器怎么把类变成图纸），日常开发接触到的却是**注解本身**——扫描器靠注解判断谁是 Bean，靠注解决定依赖怎么给。这一节把装配相关的注解集中讲清，按"注册 → 注入 → 配置"三类组织。
 
 ### 把对象交给容器
 
@@ -249,7 +341,7 @@ public class BadConfig {
 
 **实践建议**：需要 `@Bean` 方法之间互相调用时必须用 `@Configuration`；如果确定不会互相调用，可用 `@Configuration(proxyBeanMethods = false)` 关闭代理以**加快启动**（Spring Boot 内部的自动配置类全部这么做了）。
 
-## 七、手写一个最小 IoC 容器
+## 八、手写一个最小 IoC 容器
 
 理解原理最有效的方式是自己实现一遍。以下是简化版的核心骨架（保留设计结构，去掉工程复杂度）：
 
@@ -342,7 +434,7 @@ public class SimpleBeanFactory implements BeanDefinitionRegistry {
 
 这个骨架与真实 Spring 的差异在于：真实实现有三级缓存处理循环依赖、有 `BeanDefinition` 合并、有作用域管理、有 `FactoryBean` 支持、有并发控制（`DefaultSingletonBeanRegistry` 的双重检查加锁）。但**主干流程完全一致**——这份骨架的价值是让你在面试中能画出上面的流程图并解释每一步的意图。②~⑦ 每一步的细节展开见 [Bean 生命周期](/java/spring/spring-framework/bean/)。
 
-## 八、面试问答
+## 九、面试问答
 
 **Q1：`BeanFactory` 和 `ApplicationContext` 的区别？**
 
@@ -379,3 +471,11 @@ public class SimpleBeanFactory implements BeanDefinitionRegistry {
 **Q9：`@Autowired` 是在哪个阶段被处理的？**
 
 在 Bean 生命周期的**属性填充阶段**（`populateBean` → `AutowiredAnnotationBeanPostProcessor.postProcessProperties`）完成字段/Setter 注入；而该处理器同时实现了 `postProcessBeforeInitialization`，用于处理 `@PostConstruct` 等注解——所以 `@Autowired` 注入完成后才会执行 `@PostConstruct`，这也是 `@PostConstruct` 中能安全使用注入依赖的原因。完整时序见 [Bean 生命周期](/java/spring/spring-framework/bean/)。
+
+**Q10：完整说一下 IoC 容器的初始化流程。**
+
+按"入口 → 十二步 → 就绪"三段说：**① 入口**——`new AnnotationConfigApplicationContext(AppConfig.class)`（或 Boot 的 `SpringApplication.run()`）在构造器里创建 `DefaultListableBeanFactory`（容器即注册表），把**配置类本身**注册为 `BeanDefinition`，此时容器里只有这一张种子图纸；**② 主干**——随后调用 `refresh()` 十二步：①② 准备环境、拿到 BeanFactory，③④ 装配容器基础设施与子类扩展点，**⑤ `invokeBeanFactoryPostProcessors()` 执行 `ConfigurationClassPostProcessor`，完成 `@ComponentScan` 扫包与 `@Import`/`@Bean` 登记**，⑥ 注册 `BeanPostProcessor`（只注册不执行），⑦⑧ 初始化国际化与事件广播器，⑨ `onRefresh`（Boot 在此创建 Web 服务器），⑩ 注册事件监听器，⑪ `finishBeanFactoryInitialization()` **实例化所有非懒加载单例**，⑫ `finishRefresh()` 发布 `ContextRefreshedEvent`；**③ 结果**——容器就绪，`getBean()` 直接命中单例。一句话收口：**①~⑤ 造图纸，⑥~⑩ 装基础设施，⑪ 照图纸造对象**——启动耗时几乎全在第 11 步。
+
+**Q11：`@Component` 标注的类，是在哪一步被扫描并注册成 `BeanDefinition` 的？**
+
+在 `refresh()` 的**第 5 步 `invokeBeanFactoryPostProcessors()`**，由 `ConfigurationClassPostProcessor` 触发（它是 `BeanDefinitionRegistryPostProcessor`，优先级最高，在所有普通 `BeanFactoryPostProcessor` 之前执行）。链路是：解析配置类上的 `@ComponentScan` → `ClassPathBeanDefinitionScanner.doScan()` → 找到候选 `.class` → 用 `MetadataReader` 读字节码元数据（不触发类加载）→ 按 `includeFilters` 过滤（`@Component` 默认已在其中）→ 生成 `ScannedGenericBeanDefinition` → 注册进 `DefaultListableBeanFactory`。所以 `BeanDefinition` 是**分两批**入库的：**构造阶段**先注册配置类本身（种子），**第 5 步**再扫出业务类（主体）。顺带一提，`@MapperScan` 走的是**同一位置但更早**的 `BeanDefinitionRegistryPostProcessor` 阶段，这是 MyBatis Mapper 接口能作为 Bean 注入的原因（见 [MyBatis 集成](/java/spring/spring-framework/mybatis/)）。
