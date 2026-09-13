@@ -120,6 +120,7 @@ const sidebarSpec = [
     prefix: '/projects/',
     items: [
       { text: '板块导览', link: '/projects/' },
+      { text: '架构师路线图', dir: 'projects/architect-roadmap' },
       {
         // 方法层：可验证产出三件套（先读方法，再看项目案例）
         text: '产出工具',
@@ -147,8 +148,7 @@ const sidebarSpec = [
           { text: '微服务 → K8s 云原生演进', dir: 'projects/property-saas/microservice-to-k8s' },
           { text: '大数据架构方案 → 数仓', dir: 'projects/property-saas/data-warehouse' }
         ]
-      },
-      { text: '架构师路线图', dir: 'projects/architect-roadmap' }
+      }
     ]
   },
   {
