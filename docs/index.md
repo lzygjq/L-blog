@@ -27,7 +27,7 @@ features:
     link: /frontend/
   - icon: 🗄️
     title: 数据存储
-    details: MySQL 索引与事务、Redis 缓存体系、分库分表与扩容方案
+    details: MySQL 索引与事务、Redis 原理与高可用、分库分表与扩容方案
     link: /database/
   - icon: ✉️
     title: 消息队列

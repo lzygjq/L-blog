@@ -13,7 +13,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | 板块 | 覆盖范围 |
 |---|---|
 | [Java 核心](/java/) | 语言基础、并发与 JUC、JVM、Spring 全家桶、设计模式 |
-| [数据存储](/database/) | MySQL 原理与调优、Redis 缓存体系、分库分表 |
+| [数据存储](/database/) | MySQL 原理与调优、Redis 原理与高可用、分库分表 |
 | [消息队列](/middleware/) | RabbitMQ、RocketMQ、物联网 MQTT 与选型对比 |
 | [数据仓库](/bigdata/) | Canal 同步、Doris 数仓、Iceberg 冷热分层、分层建模 |
 | [云原生](/cloud-native/) | Docker、Kubernetes、CI/CD、监控与可观测 |

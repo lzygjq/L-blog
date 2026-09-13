@@ -18,7 +18,7 @@ const DOCS = fileURLToPath(new URL('../', import.meta.url))
 /** 手工命名覆盖：自动命名不理想的条目在这里改（key = 相对 docs 的路径，不含 .md） */
 const OVERRIDES = {
   'java/design-patterns/principles': '设计原则与 UML',
-  'database/redis': 'Redis 缓存',
+  'database/redis': 'Redis',
   'database/sharding': '分库分表',
   'middleware/mqtt': '物联网 MQTT',
   'bigdata/canal': 'Canal 数据同步',

@@ -105,3 +105,6 @@ Lettuce 基于 Netty，单连接多路复用、线程安全，连接数不随线
 
 **Q: SET 和 MSET 有什么性能区别？**
 N 次 SET 是 N 次网络往返；MSET 一次批量提交，省 N-1 次 RTT。这个思路展开就是 Pipeline 和批处理优化（见[最佳实践](/database/redis/best-practices)）。
+
+**Q: 「你们项目里 Redis 都用来做什么」怎么答？**
+不要罗列五种数据类型，按**业务问题**回答：热点数据做缓存、并发扣减加锁、点赞阅读量用原子计数、登录令牌靠 TTL 自动失效、异步削峰用 List/Stream、定时关单这类延迟任务用 ZSet。完整的一览表与选型口径见[场景地图与选型叙事](/database/redis/scenarios)。

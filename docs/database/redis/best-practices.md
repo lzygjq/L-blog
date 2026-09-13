@@ -2,7 +2,7 @@
 order: 8
 date: 2026-09-12
 title: 最佳实践：键值设计与运维清单
-desc: 优雅 key 与 44 字节分界、BigKey 的发现与安全删除、批处理三档演进、服务端与集群配置红线
+desc: 优雅 key 与 44 字节分界、BigKey 的发现与安全删除、批处理与原子性（Pipeline/事务/Lua）、服务端与集群配置红线
 ---
 
 # 最佳实践：键值设计与运维清单
@@ -59,7 +59,7 @@ SCAN + MEMORY USAGE / STRLEN / HLEN # 自写脚本精确统计（MEMORY USAGE �
 
 前提是对象足够小：Hash 在元素少时走 ListPack 编码，紧凑程度接近连续内存；一旦超 `hash-max-listpack-entries` 转 Hashtable，内存立刻上一个台阶——「Hash 存对象更省」只在 ListPack 区间成立，别背反了结论。
 
-## 四、批处理：从循环到 Pipeline
+## 四、批处理与原子性：Pipeline / 事务 / Lua {#批处理与原子性}
 
 客户端循环 1000 次 `SET` = 1000 次网络往返。三档优化：
 
@@ -73,7 +73,29 @@ List<Object> results = pipeline.syncAndReturnAll();  // 1000 条命令一次往�
 // 第三档：Lua（批量 + 逻辑判断需原子时）
 ```
 
-辨析三件容易混的事：
+### 1. Redis 事务：MULTI / EXEC / DISCARD / WATCH
+
+```bash
+MULTI              # 开启事务，后续命令只入队、不执行
+SET k1 v1
+LPUSH queue x
+EXEC               # 一次性执行队列中所有命令
+DISCARD            # 放弃事务，清空队列
+WATCH k1           # 乐观锁：EXEC 时若 k1 被别的客户端改过，整个事务不执行（CAS）
+```
+
+和 MySQL 事务放在一起对比，差异比想象中大：
+
+| 维度 | Redis 事务 | MySQL 事务 |
+|---|---|---|
+| 原子性 | **部分支持**：入队阶段语法错误 → 全部不执行；执行阶段某条类型错（对 String 做 LPUSH）→ 该条报错，**其余照常执行、不回滚** | 完全原子，出错整体回滚 |
+| 隔离性 | 单线程串行执行，天然隔离，不需要隔离级别 | 靠 MVCC + 锁，要先选隔离级别 |
+| 持久性 | 取决于 AOF/RDB，`everysec` 下最多丢 1 秒 | WAL + redo log 保证 |
+| 回滚 | **不支持**，官方口径是「这类错误应该在开发阶段发现，保持实现简单高效」 | 支持 |
+
+**为什么生产上更常用 Lua 而不是 MULTI**：Redis 事务「中间看不到结果」，所以做不了「先查一下再决定怎么写」这类条件逻辑；Lua 脚本既在服务端原子执行，又能读中间结果做判断（见[分布式锁与消息队列](/database/redis/lock-and-mq)）。`WATCH + MULTI/EXEC` 实现的是 CAS 乐观锁，适合「读一次、改一次、冲突就重试」的库存扣减——但一旦重试逻辑变复杂，还是会换成 Lua。
+
+### 2. 三者辨析
 
 | | 原子性 | 能否穿插其他客户端命令 | 备注 |
 |---|---|---|---|
@@ -81,7 +103,9 @@ List<Object> results = pipeline.syncAndReturnAll();  // 1000 条命令一次往�
 | MULTI/EXEC 事务 | 打包执行，但无回滚 | 不能 | 某条语法错误全队失败，运行时错误不回滚 |
 | Lua 脚本 | 是（脚本级） | 不能 | 真正的原子复合操作，复杂逻辑首选 |
 
-**集群注意**：Pipeline 在分片集群下要按节点分组拆包（smart client 通常已处理）；原生跨槽 MGET 不支持，需要 hash tag 或分组请求（见[集群](/database/redis/ha-cluster)）。
+⚠️ **Lua 的使用禁忌**：脚本整体原子 = 执行期间阻塞其他所有命令。所以脚本必须短小（判断 + 写回级别），**禁止在脚本里循环遍历大集合**——否则它就从「原子性工具」变成了「自己制造的慢命令」，比不用还糟。
+
+**集群注意**：Pipeline 在分片集群下要按节点分组拆包（smart client 通常已处理）；原生跨槽 MGET 不支持，需要 hash tag 或分组请求（见[集群](/database/redis/ha-cluster)）。Lua 的多 key 脚本同理，在集群下必须是同槽 key。
 
 ## 五、服务端与运维红线
 
@@ -89,7 +113,7 @@ List<Object> results = pipeline.syncAndReturnAll();  // 1000 条命令一次往�
 
 **内存与过期**：
 
-- `maxmemory` 必须显式设置（留 10~20% 余量给 fork/COW 与缓冲区），策略用 `allkeys-lru`/`lfu`（缓存场景）。
+- `maxmemory` 必须显式设置（留 10~20% 余量给 fork/COW 与缓冲区），策略用 `allkeys-lru`/`lfu`（缓存场景，原理与选型见[原理篇](/database/redis/internals)）。
 - 所有缓存 key **必须带 TTL**，没有 TTL 的缓存等于慢性内存泄漏。
 
 **慢诊断三件套**：
@@ -100,15 +124,18 @@ LATENCY HISTORY event   # 延迟事件
 INFO memory/stats       # 内存碎片率、命中率、主从偏移
 ```
 
-**部署纪律**：Redis 不与大数据组件混部（内存型服务怕被吃内存）；开启 `appendfsync everysec` + 混合持久化；主从环境下 `repl-backlog-size` 按断线容忍时长规划。
+**部署纪律**：Redis 不与大数据组件混部（内存型服务怕被吃内存）；开启 `appendfsync everysec` + 混合持久化；主从环境下 `repl-backlog-size` 按断线容忍时长规划（见[集群](/database/redis/ha-cluster)）。
 
 ## 六、面试问答
 
 **Q: 线上发现内存涨得快，排查顺序？**
 ① `INFO memory` 看 used_memory 与碎片率；② `--bigkeys` 扫大 key；③ 抽查无 TTL 的 key（这是最常见根因）；④ 查淘汰策略与 maxmemory 配置是否矛盾；⑤ 大 Dict 扩容窗口的短暂翻倍属正常（渐进式 rehash）。
 
+**Q: Redis 支持事务吗？和 MySQL 事务有什么区别？**
+支持，但只是「打包执行」。用 `MULTI` 开启、`EXEC` 执行、`DISCARD` 取消、`WATCH` 做乐观锁。和 MySQL 的关键差异是**不回滚**：入队时语法错误会让整个事务不执行，但执行期某条命令类型错只影响它自己，其余照常生效。原因是不回滚的实现更简单高效，且这类错误本该在开发期发现。实际开发中更常用 Lua 保证一组命令的原子性。
+
 **Q: Pipeline 和事务的区别？为什么有了事务还要 Lua？**
-Pipeline 是网络层攒包，不保证原子；Redis 事务只保证「打包执行」，不支持回滚且中间看不到结果做不了条件判断；Lua 在服务端原子执行且有逻辑能力，是「事务 + 条件」的正确解。
+Pipeline 是网络层攒包，不保证原子；Redis 事务只保证「打包执行」，不支持回滚且中间看不到结果、做不了条件判断；Lua 在服务端原子执行且有逻辑能力，是「事务 + 条件」的正确解。
 
 **Q: hash tag 用多了会怎样？**
 相关 key 全落同一节点，分片形同虚设，出现内存与流量双倾斜。只在确实需要多 key 原子操作的小范围使用，并评估该组 key 的量级。

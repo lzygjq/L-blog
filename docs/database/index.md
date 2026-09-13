@@ -8,7 +8,7 @@ draft: true
 数据存储板块以「关系型数据库 + 缓存」为两条主线：
 
 - [MySQL](/database/mysql/)：索引原理、事务与 MVCC、锁机制、主从复制、SQL 调优
-- [Redis 缓存](/database/redis/)：数据结构、持久化、主从哨兵集群、缓存穿透/击穿/雪崩
+- [Redis](/database/redis/)：数据结构与底层编码、缓存模式与布隆过滤器、分布式锁、持久化与主从哨兵集群（含脑裂防护）
 - [分库分表](/database/sharding/)：ShardingSphere 分片策略、扩容方案、跨片查询
 
 ## 面试高频
