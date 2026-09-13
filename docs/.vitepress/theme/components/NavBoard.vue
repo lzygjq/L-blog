@@ -3,7 +3,8 @@
      个性化排序（存 localStorage，见 ../composables/useNavOrder.mjs）：
        ① 高频常用：点卡片右上角星标标记/取消，拖拽卡片排序
        ② 分类内卡片：直接拖拽卡片调整该分类内的站点顺序
-       ③ 分类整体：拖分类标题左侧把手，调整各分类之间的先后顺序（右侧分类栏同步） -->
+       ③ 分类整体：拖分类标题左侧把手，调整各分类之间的先后顺序（右侧分类栏同步）
+       ④ 分类折叠：点标题行（或右侧箭头）收起/展开，长分类折叠后更好拖；存 nav-cat-collapsed -->
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
@@ -90,6 +91,13 @@ onMounted(() => {
   } catch {
     /* localStorage 不可用时保持默认 */
   }
+  // 恢复折叠状态（首次访问无记录＝全部展开）
+  try {
+    const collapsedSaved = JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]')
+    if (Array.isArray(collapsedSaved)) collapsedIds.value = collapsedSaved
+  } catch {
+    /* 忽略 */
+  }
 })
 
 const persist = () => {
@@ -128,6 +136,32 @@ function toggleFav(id) {
 const favItems = computed(() =>
   favIds.value.map((id) => itemPool.get(id)).filter(Boolean)
 )
+
+// ── 分类折叠 ──────────────────────────────
+// 长分类折叠后便于拖拽重排（不必拖着跨过整屏卡片）。存 nav-cat-collapsed，
+// 键一律用区块的 DOM id（nav-hot / nav-ai / …），与模板 :id="'nav-' + cat.id" 同源 ——
+// 不要混用 cat.id（裸 "ai"）和 "nav-ai"，否则存储键和 DOM 对不上、排查时白费劲。
+// 用 id 数组而非 Set：10 来个分类下 includes 的开销可忽略，且数组的响应式最直白。
+const COLLAPSED_KEY = 'nav-cat-collapsed'
+const collapsedIds = ref([])
+
+// 筛选态强制展开：否则命中的结果藏在折叠区块里，用户会以为"没匹配到"
+const isCollapsed = (id) => !keyword.value && collapsedIds.value.includes(id)
+
+const persistCollapsed = () => {
+  try {
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsedIds.value))
+  } catch {
+    /* 忽略隐私模式等写入失败 */
+  }
+}
+
+function toggleCollapse(id) {
+  const i = collapsedIds.value.indexOf(id)
+  if (i >= 0) collapsedIds.value.splice(i, 1)
+  else collapsedIds.value.push(id)
+  persistCollapsed()
+}
 
 // ── 拖拽排序 ─────────────────────────────────
 // 三套互相独立的拖拽，靠各自的 state 区分，互不抢事件：
@@ -291,59 +325,80 @@ const countText = computed(() =>
 
     <!-- 高频常用：收藏驱动，星标切换 + 拖拽排序（筛选时隐藏） -->
     <section v-if="!keyword" id="nav-hot" class="nav-section">
-      <div class="nav-section-head">
+      <div class="nav-section-head" @click="toggleCollapse('nav-hot')">
         <span class="nav-section-icon">⭐</span>
         <h3 class="nav-section-title">高频常用</h3>
         <span class="nav-section-desc">点卡片右上角 ☆ 标记常用站点，拖拽卡片调整顺序</span>
+        <span v-if="isCollapsed('nav-hot')" class="nav-section-count">{{ favItems.length }} 个站点</span>
+        <button
+          class="nav-collapse"
+          :class="{ 'is-collapsed': isCollapsed('nav-hot') }"
+          :title="isCollapsed('nav-hot') ? '展开「高频常用」' : '折叠「高频常用」'"
+          :aria-expanded="!isCollapsed('nav-hot')"
+          @click.stop="toggleCollapse('nav-hot')"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path
+              d="M6 9l6 6 6-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
-      <div v-if="favItems.length" class="nav-grid">
-        <a
-          v-for="(item, idx) in favItems"
-          :key="itemId(item)"
-          class="nav-card is-fav"
-          :class="{ 'is-dragging': dragIndex === idx }"
-          :href="item.url"
-          target="_blank"
-          rel="noopener noreferrer"
-          draggable="true"
-          @dragstart="onDragStart(idx, $event)"
-          @dragover="onDragOver(idx, $event)"
-          @drop.prevent="onDrop(idx)"
-          @dragend="onDragEnd"
-        >
-          <button
-            class="nav-star"
-            :class="{ 'is-on': true }"
-            title="取消高频常用"
-            @click.prevent="toggleFav(itemId(item))"
-          >★</button>
-          <span class="nav-card-head">
-            <img
-              v-if="faviconUrl(item) && !iconFailed.has(item.url)"
-              class="nav-card-icon"
-              :src="faviconUrl(item)"
-              alt=""
-              loading="lazy"
-              @error="onIconError(item)"
-            />
-            <span v-else class="nav-card-icon-fallback">{{ item.name[0] }}</span>
-            <span class="nav-card-name">{{ item.name }}</span>
-          </span>
-          <span class="nav-card-desc">{{ item.desc }}</span>
-          <span class="nav-card-link">
-            {{ item.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') }}
-            <svg class="nav-ext-icon" viewBox="0 0 24 24" width="11" height="11">
-              <path
-                d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
-                fill="currentColor"
+      <div v-show="!isCollapsed('nav-hot')">
+        <div v-if="favItems.length" class="nav-grid">
+          <a
+            v-for="(item, idx) in favItems"
+            :key="itemId(item)"
+            class="nav-card is-fav"
+            :class="{ 'is-dragging': dragIndex === idx }"
+            :href="item.url"
+            target="_blank"
+            rel="noopener noreferrer"
+            draggable="true"
+            @dragstart="onDragStart(idx, $event)"
+            @dragover="onDragOver(idx, $event)"
+            @drop.prevent="onDrop(idx)"
+            @dragend="onDragEnd"
+          >
+            <button
+              class="nav-star"
+              :class="{ 'is-on': true }"
+              title="取消高频常用"
+              @click.prevent="toggleFav(itemId(item))"
+            >★</button>
+            <span class="nav-card-head">
+              <img
+                v-if="faviconUrl(item) && !iconFailed.has(item.url)"
+                class="nav-card-icon"
+                :src="faviconUrl(item)"
+                alt=""
+                loading="lazy"
+                @error="onIconError(item)"
               />
-            </svg>
-          </span>
-        </a>
-      </div>
-      <div v-else class="nav-hot-empty">
-        高频常用已清空——点击下方任意卡片右上角的 ☆ 即可添加回来
+              <span v-else class="nav-card-icon-fallback">{{ item.name[0] }}</span>
+              <span class="nav-card-name">{{ item.name }}</span>
+            </span>
+            <span class="nav-card-desc">{{ item.desc }}</span>
+            <span class="nav-card-link">
+              {{ item.url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '') }}
+              <svg class="nav-ext-icon" viewBox="0 0 24 24" width="11" height="11">
+                <path
+                  d="M14 3h7v7h-2V6.41l-9.29 9.3-1.42-1.42 9.3-9.29H14V3zM5 5h6v2H7v10h10v-4h2v6H5V5z"
+                  fill="currentColor"
+                />
+              </svg>
+            </span>
+          </a>
+        </div>
+        <div v-else class="nav-hot-empty">
+          高频常用已清空——点击下方任意卡片右上角的 ☆ 即可添加回来
+        </div>
       </div>
     </section>
 
@@ -360,7 +415,7 @@ const countText = computed(() =>
       @dragover="onCatDragOver(cat, $event)"
       @drop.prevent="onCatDrop(cat)"
     >
-      <div class="nav-section-head">
+      <div class="nav-section-head" @click="toggleCollapse('nav-' + cat.id)">
         <span
           v-if="!keyword"
           class="nav-drag-handle"
@@ -368,6 +423,7 @@ const countText = computed(() =>
           title="拖拽调整分类顺序"
           @dragstart="onCatDragStart(cat, $event)"
           @dragend="onCatDragEnd"
+          @click.stop
         >
           <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true">
             <circle cx="5.5" cy="3" r="1.35" fill="currentColor" />
@@ -381,9 +437,28 @@ const countText = computed(() =>
         <span class="nav-section-icon">{{ cat.icon }}</span>
         <h3 class="nav-section-title">{{ cat.title }}</h3>
         <span class="nav-section-desc">{{ cat.desc }}</span>
+        <span v-if="isCollapsed('nav-' + cat.id)" class="nav-section-count">{{ cat.items.length }} 个站点</span>
+        <button
+          class="nav-collapse"
+          :class="{ 'is-collapsed': isCollapsed('nav-' + cat.id) }"
+          :title="isCollapsed('nav-' + cat.id) ? `展开「${cat.title}」` : `折叠「${cat.title}」`"
+          :aria-expanded="!isCollapsed('nav-' + cat.id)"
+          @click.stop="toggleCollapse('nav-' + cat.id)"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+            <path
+              d="M6 9l6 6 6-6"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
-      <div class="nav-grid">
+      <div class="nav-grid" v-show="!isCollapsed('nav-' + cat.id)">
         <a
           v-for="(item, idx) in cat.items"
           :key="itemId(item)"
@@ -527,6 +602,9 @@ const countText = computed(() =>
   margin-bottom: 14px;
   /* 给左侧拖拽把手留位：高频常用没有把手，靠这个 padding 保证所有分类标题对齐 */
   padding-left: 20px;
+  /* 整行可点 = 折叠/展开（把手自己 stop 掉，见模板） */
+  cursor: pointer;
+  user-select: none;
 }
 /* 拖拽把手：默认低存在感，hover 才点亮，避免干扰阅读 */
 .nav-drag-handle {
@@ -584,6 +662,45 @@ const countText = computed(() =>
 .nav-section-desc {
   font-size: 12px;
   opacity: 0.6;
+}
+/* ── 折叠开关 ─────────────────────────
+   贴在标题行右端（margin-left:auto 顶开），默认低存在感、hover 才点亮，
+   与左侧拖拽把手同一套视觉语言；折叠时箭头转 -90°（朝右＝已收起） */
+.nav-collapse {
+  margin-left: auto;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--vp-c-text-3);
+  opacity: 0.5;
+  cursor: pointer;
+  transition: opacity 0.15s, color 0.15s, background-color 0.15s;
+}
+.nav-section-head:hover .nav-collapse {
+  opacity: 1;
+}
+.nav-collapse:hover {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-brand-soft);
+}
+.nav-collapse svg {
+  transition: transform 0.2s;
+}
+.nav-collapse.is-collapsed svg {
+  transform: rotate(-90deg);
+}
+/* 折叠后补一个计数，避免"不知道里面有多少、要不要展开" */
+.nav-section-count {
+  font-size: 12px;
+  color: var(--vp-c-text-3);
+  white-space: nowrap;
 }
 .nav-hint {
   grid-column: 1 / -1;
