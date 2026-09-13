@@ -115,7 +115,7 @@ Spring AOP 的底层是两种动态代理技术：
 
 ### 代理是在什么时机创建的
 
-回顾 [Bean 生命周期](/java/spring/spring-framework/ioc-container)：代理创建于**初始化阶段的后置处理**——`AbstractAutoProxyCreator.postProcessAfterInitialization()`：
+回顾 [Bean 生命周期](/java/spring/spring-framework/ioc/)：代理创建于**初始化阶段的后置处理**——`AbstractAutoProxyCreator.postProcessAfterInitialization()`：
 
 ```java
 // AbstractAutoProxyCreator 核心逻辑（简化）
@@ -199,15 +199,20 @@ execution(修饰符? 返回类型 包.类.方法名(参数类型) throws?)
 
 ## 七、AOP 在框架中的应用
 
-| 框架能力 | 切面实现 |
-|---|---|
-| `@Transactional` | `TransactionInterceptor`（`MethodInterceptor`） |
-| `@Cacheable` / `@CacheEvict` | `CacheInterceptor` |
-| `@Async` | `AsyncExecutionInterceptor` |
-| `@PreAuthorize` | `AuthorizationManagerBeforeMethodInterceptor` |
-| `@Retryable`（Spring Retry） | `RetryOperationsInterceptor` |
-| `@Validated` 参数校验 | `MethodValidationInterceptor` |
-| MyBatis Mapper 接口 | `MapperProxy`（JDK 动态代理，非切面） |
+Spring 生态里那些"加个注解就有效果"的能力，**几乎全部是 AOP 的产物**。它们有一个共同前提，必须先说清楚：
+
+> **这些注解全部是"声明"，不是"实现"。** 真正干活的是代理链上对应的 `MethodInterceptor`。所以它们的失效场景与第五节列出的完全一致——**排查"注解不生效"时，第一件事永远是确认调用是否经过了代理对象。**
+
+| 注解 | 背后的拦截器 | 易错点 |
+|---|---|---|
+| `@Transactional` | `TransactionInterceptor` | 默认只回滚 `RuntimeException` / `Error`；同类自调用失效 |
+| `@Async` | `AsyncExecutionInterceptor` | 事务上下文不跨线程；返回值需为 `void` / `Future` |
+| `@Cacheable` / `@CacheEvict` | `CacheInterceptor` | 同类自调用失效；key 设计需谨慎 |
+| `@Retryable`（Spring Retry） | `RetryOperationsInterceptor` | 重试需配合幂等设计 |
+| `@PreAuthorize` / `@PostAuthorize` | `AuthorizationManagerBeforeMethodInterceptor` | 需 `@EnableMethodSecurity` 开启 |
+| `@Validated` 方法参数校验 | `MethodValidationInterceptor` | 必须标在**类**上才校验方法参数 |
+| `@Aspect` / `@Pointcut` / `@Before` / `@Around` | — | 同切面内顺序受版本影响；多切面靠 `@Order` |
+| MyBatis Mapper 接口 | `MapperProxy`（JDK 动态代理，**不属于切面**） | 见 [MyBatis](/java/spring/spring-framework/mybatis/) |
 
 **`@Async` 与 `@Transactional` 组合的经典坑**：两者都靠代理生效，若在同一方法上同时使用，**事务上下文不会传播到异步线程**（`ThreadLocal` 不同线程），异步方法内需要独立的事务。若真需要"提交后再异步执行"，正确做法是用 `@TransactionalEventListener(phase = AFTER_COMMIT)`。
 

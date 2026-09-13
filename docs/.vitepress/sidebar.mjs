@@ -17,11 +17,6 @@ const DOCS = fileURLToPath(new URL('../', import.meta.url))
 
 /** 手工命名覆盖：自动命名不理想的条目在这里改（key = 相对 docs 的路径，不含 .md） */
 const OVERRIDES = {
-  'java/spring/spring-framework/ioc-container': 'IoC 与生命周期',
-  'java/spring/spring-framework/circular-dependency': '循环依赖',
-  'java/spring/spring-framework/aop': 'AOP 与代理',
-  'java/spring/spring-framework/transaction': '事务与传播',
-  'java/spring/spring-framework/mybatis': 'MyBatis 集成',
   'java/design-patterns/principles': '设计原则与 UML',
   'database/redis': 'Redis 缓存',
   'database/sharding': '分库分表',

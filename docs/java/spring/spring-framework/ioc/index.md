@@ -1,11 +1,11 @@
 ---
-order: 1
 date: 2026-09-11
-title: IoC 容器与 Bean 生命周期
-desc: 容器体系、BeanDefinition、refresh() 十二步、Bean 生命周期八阶段、扩展点对照
+sidebar: IoC 容器
+title: IoC 容器与依赖注入
+desc: IoC 与 DI 的关系、BeanFactory 与 ApplicationContext、BeanDefinition、refresh() 十二步、注解式装配与候选注入优先级
 ---
 
-# IoC 容器与 Bean 生命周期
+# IoC 容器与依赖注入
 
 ## 一、问题场景
 
@@ -22,6 +22,8 @@ public class OrderService {
 这段代码把三件事绑死在一起：**依赖的具体实现**（`UserDaoImpl`）、**构造参数**（密钥）、**生命周期**（何时创建、何时释放）。结果是无法单测（除非真连支付宝）、换实现要改源码、配置散落各处。
 
 IoC（Inversion of Control，控制反转）的解法：**把"创建对象、装配依赖、管理生命周期"的控制权从业务代码移交容器**，业务类只声明"我需要什么"，容器负责"给什么、怎么给"。
+
+> **本篇范围**：只讲**容器本身的机制**——容器怎么组织、怎么启动、Bean 的"图纸"从哪来、依赖怎么注入。**Bean 创建出来之后的生命周期**（实例化 → 初始化 → 销毁、扩展点、循环依赖、作用域）属于 Bean 话题，见 [Bean 生命周期与扩展点](/java/spring/spring-framework/bean/)。
 
 ## 二、IoC 与 DI 的关系
 
@@ -140,76 +142,114 @@ DI 的三种注入方式：
 - 第 5 步和第 6 步的**顺序不能颠倒**：必须先让 `BeanFactoryPostProcessor` 改完图纸，才能注册 `BeanPostProcessor`——因为 `@Configuration` 类可能通过 `@Bean` 定义 `BeanPostProcessor`。
 - 第 11 步是"实例化"而非"注册"：前面十步处理的是**元数据**，到这里才真正 `new` 对象。
 
-## 六、Bean 生命周期（核心）
+> 第 11 步之后的**单个 Bean 内部**发生了什么，就是 [Bean 生命周期](/java/spring/spring-framework/bean/) 的内容。
 
-这是 Spring 面试出现频率最高的知识点。完整链路如下：
+## 六、注解式装配
 
-```
- ① 实例化          createBeanInstance()
-    │              构造器推断 / 工厂方法 / Supplier
-    ▼
- ② 属性填充        populateBean()
-    │              @Autowired / @Value 注入，依赖在此解析
-    ▼
- ③ Aware 回调      invokeAwareMethods()
-    │              BeanNameAware → BeanClassLoaderAware → BeanFactoryAware
-    ▼
- ④ 前置处理        applyBeanPostProcessorsBeforeInitialization()
-    │              @PostConstruct 在这里执行（CommonAnnotationBeanPostProcessor）
-    ▼
- ⑤ 初始化          invokeInitMethods()
-    │              InitializingBean.afterPropertiesSet() → 自定义 init-method
-    ▼
- ⑥ 后置处理        applyBeanPostProcessorsAfterInitialization()
-    │              ★ AOP 代理在此生成（AbstractAutoProxyCreator）
-    ▼
- ⑦ 使用
-    ▼
- ⑧ 销毁            DisposableBean.destroy() → @PreDestroy → destroy-method
-```
+容器启动的十二步是"骨架"，日常开发接触到的却是注解。这一节把**装配相关的注解**集中讲清——按"注册 → 注入 → 配置"三类组织。
 
-**几个必须理解的细节：**
+### 把对象交给容器
 
-**① Aware 接口的层级**。`BeanNameAware`、`BeanClassLoaderAware`、`BeanFactoryAware` 由 `invokeAwareMethods` 直接回调；而 `ApplicationContextAware`、`EnvironmentAware` 等由 `ApplicationContextAwareProcessor` 这个 `BeanPostProcessor` 处理——**所以它们的执行时机在 ④ 而非 ③**。这个差异说明：并非所有 Aware 回调都在同一阶段，取决于由谁负责回调。
-
-**② `@PostConstruct` 早于 `afterPropertiesSet`**。因为前者由 `BeanPostProcessor` 的 `postProcessBeforeInitialization` 驱动，后者由 `invokeInitMethods` 驱动，而 ④ 在 ⑤ 之前。三种初始化写法的执行顺序：
-
-```
-@PostConstruct  →  InitializingBean.afterPropertiesSet()  →  init-method
-```
-
-同样的顺序规律适用于销毁：`@PreDestroy` → `DisposableBean.destroy()` → `destroy-method`。
-
-**③ AOP 代理生成在 ⑥**。这一点直接决定了事务、缓存、异步注解能否生效——**代理替换的是 Bean 的最终形态**，之后放入单例池的已经是代理对象。理解这一点，才能解释"为什么同类内部方法调用导致 `@Transactional` 失效"（见 [AOP 与代理机制](/java/spring/spring-framework/aop)）。
-
-**④ 循环依赖的破解点在 ① 与 ② 之间**。`createBeanInstance` 完成后就把"早期引用"暴露到三级缓存，使得其它 Bean 在 ② 阶段能拿到一个尚未填充属性的对象——这是 [循环依赖](/java/spring/spring-framework/circular-dependency) 的机制基础。
-
-## 七、扩展点总览（面试高分项）
-
-Spring 的"可扩展性"来自这些扩展点，**能说清它们的执行时机与用途差异，是区分"用过 Spring"与"懂 Spring"的分水岭**：
-
-| 扩展点 | 执行时机 | 典型用途 | 执行次数 |
-|---|---|---|---|
-| `BeanDefinitionRegistryPostProcessor` | 第 5 步最早期 | 动态注册 BeanDefinition（`@MapperScan`） | 一次 |
-| `BeanFactoryPostProcessor` | 第 5 步 | 修改 BeanDefinition（`PropertySourcesPlaceholderConfigurer`） | 一次 |
-| `BeanPostProcessor` | 每个 Bean 初始化前后 | 代理生成、属性注入（`@Autowired`） | 每个 Bean 两次 |
-| `InstantiationAwareBeanPostProcessor` | 实例化前后 | 自定义实例化策略、属性填充增强 | 每个 Bean |
-| `InitializingBean` / `@PostConstruct` | 初始化阶段 | 资源准备 | 每个 Bean |
-| `DisposableBean` / `@PreDestroy` | 容器关闭 | 资源释放 | 每个 Bean |
-| `ApplicationListener` | 事件发布时 | 解耦的业务响应 | 按事件次数 |
-
-**最高频的对比题：`BeanFactoryPostProcessor` vs `BeanPostProcessor`**
-
-| 维度 | BeanFactoryPostProcessor | BeanPostProcessor |
+| 注解 | 作用 | 为什么需要它 |
 |---|---|---|
-| 作用对象 | **BeanDefinition**（图纸） | **Bean 实例**（成品） |
-| 执行时机 | 所有 Bean 实例化**之前** | 每个 Bean 初始化**前后** |
-| 执行次数 | 一次 | 每个 Bean 各两次 |
-| 典型实现 | `ConfigurationClassPostProcessor`、`PropertySourcesPlaceholderConfigurer` | `AutowiredAnnotationBeanPostProcessor`、`AbstractAutoProxyCreator` |
+| **`@Component`** | 通用组件标记，被组件扫描发现后注册为 Bean | 最基础的"注册"手段 |
+| **`@Controller`** | `@Component` 的语义化特化 | 标记 Web 层；让 `DispatcherServlet` 知道它是 Handler 来源 |
+| **`@Service`** | `@Component` 的语义化特化 | 标记业务层，**纯语义**，功能上与 `@Component` 无差别 |
+| **`@Repository`** | `@Component` 的语义化特化 | 标记持久层，**额外能力：把持久层异常翻译为 `DataAccessException`** |
+| **`@Bean`** | 标在**方法**上，返回值注册为 Bean | 注册**第三方类**（无法改源码加 `@Component`）或需手工构造的对象 |
+| **`@Import`** | 导入配置类 / `ImportSelector` / `ImportBeanDefinitionRegistrar` | 框架作者用它把"不该被扫到的类"装配进来（`@EnableXxx` 的底层机制） |
+| **`@ComponentScan`** | 指定扫描的包路径 | 默认只扫启动类所在包及子包，跨模块时需显式声明 |
 
-一句话记忆：**前者改图纸，后者改成品；前者只跑一次，后者每个 Bean 都跑。**
+**四个"语义化特化"注解的功能差异极小**——`@Service` 与 `@Component` 在容器看来完全等价。它们存在的意义是**分层语义**：让代码自解释，也让 AOP 切点可以用 `@within(org.springframework.stereotype.Service)` 精确匹配某一层。**`@Repository` 是唯一有额外功能的**（异常翻译）。
 
-## 八、手写一个最小 IoC 容器
+**`@Component` vs `@Bean`——最高频的对比题：**
+
+| 维度 | `@Component` | `@Bean` |
+|---|---|---|
+| 标注位置 | **类**上 | **方法**上（通常在 `@Configuration` 类中） |
+| 生效方式 | 组件扫描发现 | 方法被调用时返回对象 |
+| 适用对象 | **自己写的类** | **第三方类**、需要复杂构造逻辑的对象 |
+| Bean 名称 | 类名首字母小写（可指定 `value`） | **方法名** |
+| 能否条件化 | 需配合 `@Conditional`（作用在类上，粒度粗） | 可精确控制（方法级、可读参数、可写逻辑） |
+
+**判断标准**：类是自己写的、能被扫描到 → 用 `@Component`；类是第三方的（如 `RedisTemplate`、`DataSource`）、或创建过程需要条件判断和复杂装配 → 用 `@Bean`。
+
+### 向容器要依赖
+
+| 注解 | 作用 |
+|---|---|
+| **`@Autowired`** | **按类型**注入；可标在构造器、Setter、字段上。`required = false` 允许找不到时留空 |
+| **`@Qualifier`** | 配合 `@Autowired` **按名称**筛选，解决"同类型多个候选" |
+| **`@Resource`** | JSR-250 标准注解，**默认按名称**注入，找不到再退化为按类型 |
+| **`@Value`** | 注入配置值（`${...}` 占位符）或 SpEL 表达式（`#{...}`） |
+| **`@Primary`** | 标在 Bean 定义上，同类型多候选时**默认优先选它** |
+
+**同类型多个候选时，Spring 怎么选**——这是 `@Autowired` 最核心的追问，优先级从高到低：
+
+```
+① @Primary 标记的 Bean                      ← 显式声明的"默认选择"
+      ↓ 没有 @Primary
+② @Priority 数值最小的                       ← JSR-250 标准，少用
+      ↓ 没有
+③ @Qualifier 指定的名称                      ← 调用方显式筛选
+      ↓ 没有
+④ 字段名 / 参数名 与 Bean 名称匹配            ← 隐式约定，靠"名字对上了"
+      ↓ 都没有
+⑤ 抛 NoUniqueBeanDefinitionException        ← 必须显式指定，否则启动失败
+```
+
+**第 ④ 条容易被忽略但很实用**：`private UserDao userDao;` 会优先匹配名为 `userDao` 的 Bean。**但它也是隐患**——重命名字段就可能悄悄改变注入目标。生产代码建议**显式用 `@Qualifier`**，让意图清晰。
+
+**`@Autowired` vs `@Resource`：**
+
+| 维度 | `@Autowired` | `@Resource` |
+|---|---|---|
+| 来源 | Spring 自有 | **JSR-250 标准**（`jakarta.annotation`） |
+| 匹配策略 | **先按类型** | **先按名称**，找不到再按类型 |
+| 支持 `@Qualifier` | ✅ | ✅（但部分行为不一致） |
+| 推荐度 | **官方推荐**（与 Spring 生态一致） | 需要"按名字"语义时可用 |
+
+**实践中统一用 `@Autowired` 即可**——Spring 团队的立场是 `@Resource` 的"按名称优先"语义容易与类型注入混淆。**唯一需要 `@Resource` 的场景是框架无关性要求**（如代码要在非 Spring 容器中复用）。
+
+### 构造器注入：唯一可以省掉 `@Autowired` 的写法
+
+```java
+@Service
+public class OrderService {
+    private final OrderDao orderDao;
+
+    // ✓ 单构造器时 @Autowired 可省略（Spring 4.3+）
+    public OrderService(OrderDao orderDao) { this.orderDao = orderDao; }
+}
+```
+
+**为什么推荐构造器注入**：依赖可 `final`（不可变 + 线程安全）、对象创建即完成装配（**不存在"半初始化"状态**，避免 NPE）、依赖关系显式暴露在构造签名上、脱离容器也能 `new` 出来做单测。代价是无法解决构造器循环依赖——但这通常说明设计本身有环，暴露出来是好事（见 [循环依赖](/java/spring/spring-framework/bean/circular-dependency)）。
+
+### `@Configuration` vs `@Component`——一个容易被低估的差异
+
+两者都能注册 `@Bean` 方法，但有一个**行为差异**：
+
+```java
+@Configuration                              // proxyBeanMethods = true（默认）
+public class AppConfig {
+    @Bean public A a() { return new A(); }
+    @Bean public B b() { return new B(a()); }   // ✓ 返回的是容器中的同一个 A（CGLIB 拦截）
+}
+```
+
+```java
+@Component                                  // 不生成 CGLIB 代理
+public class BadConfig {
+    @Bean public A a() { return new A(); }
+    @Bean public B b() { return new B(a()); }   // ✗ 直接调方法 → 又 new 了一个 A！
+}
+```
+
+`@Configuration` **默认会用 CGLIB 生成子类**，拦截 `@Bean` 方法的调用并转发给容器——因此 `a()` 在类内部被调用时返回的仍是**容器中的单例**。`@Component` 没有这层代理，内部调用就是普通方法调用，会**创建出多个实例**。
+
+**实践建议**：需要 `@Bean` 方法之间互相调用时必须用 `@Configuration`；如果确定不会互相调用，可用 `@Configuration(proxyBeanMethods = false)` 关闭代理以**加快启动**（Spring Boot 内部的自动配置类全部这么做了）。
+
+## 七、手写一个最小 IoC 容器
 
 理解原理最有效的方式是自己实现一遍。以下是简化版的核心骨架（保留设计结构，去掉工程复杂度）：
 
@@ -300,32 +340,42 @@ public class SimpleBeanFactory implements BeanDefinitionRegistry {
 }
 ```
 
-这个骨架与真实 Spring 的差异在于：真实实现有三级缓存处理循环依赖、有 `BeanDefinition` 合并、有作用域管理、有 `FactoryBean` 支持、有并发控制（`DefaultSingletonBeanRegistry` 的双重检查加锁）。但**主干流程完全一致**——这份骨架的价值是让你在面试中能画出上面的流程图并解释每一步的意图。
+这个骨架与真实 Spring 的差异在于：真实实现有三级缓存处理循环依赖、有 `BeanDefinition` 合并、有作用域管理、有 `FactoryBean` 支持、有并发控制（`DefaultSingletonBeanRegistry` 的双重检查加锁）。但**主干流程完全一致**——这份骨架的价值是让你在面试中能画出上面的流程图并解释每一步的意图。②~⑦ 每一步的细节展开见 [Bean 生命周期](/java/spring/spring-framework/bean/)。
 
-## 九、面试问答
+## 八、面试问答
 
 **Q1：`BeanFactory` 和 `ApplicationContext` 的区别？**
 
 ① `ApplicationContext` 是 `BeanFactory` 的子接口，额外提供国际化、资源加载、事件发布、环境配置四项企业级能力；② **装配时机不同**——`BeanFactory` 懒加载，`ApplicationContext` 启动时预实例化所有单例（`AbstractApplicationContext` 的 `refresh()` 第 11 步）；③ `ApplicationContext` 会自动注册 `BeanPostProcessor`，`BeanFactory` 需手动添加。实践中用 `ApplicationContext`，因为"启动即暴露问题"优于"运行时才发现"。
 
-**Q2：Bean 的完整生命周期？**
-
-实例化 → 属性填充（依赖注入）→ Aware 回调 → `BeanPostProcessor.postProcessBeforeInitialization`（`@PostConstruct` 在此）→ `InitializingBean.afterPropertiesSet()` → `init-method` → `BeanPostProcessor.postProcessAfterInitialization`（**AOP 代理在此生成**）→ 使用 → 销毁（`@PreDestroy` → `DisposableBean.destroy()` → `destroy-method`）。
-
-三个易错点：`@PostConstruct` 早于 `afterPropertiesSet`；AOP 代理在初始化完成后才创建；循环依赖的破解发生在实例化与属性填充之间。
-
-**Q3：`BeanFactoryPostProcessor` 和 `BeanPostProcessor` 的区别？**
-
-核心区别是作用对象与执行时机：`BeanFactoryPostProcessor` 作用于 `BeanDefinition`（图纸），在所有 Bean 实例化之前执行一次；`BeanPostProcessor` 作用于 Bean 实例（成品），每个 Bean 初始化前后各执行一次。典型代表分别是 `ConfigurationClassPostProcessor`（解析 `@Configuration`）与 `AutowiredAnnotationBeanPostProcessor`（处理 `@Autowired`）。
-
-**Q4：`@Autowired` 是什么时候被处理的？**
-
-在 Bean 生命周期的两个不同阶段：**属性填充阶段**（`populateBean` → `AutowiredAnnotationBeanPostProcessor.postProcessProperties`）完成字段/Setter 注入；而该处理器同时实现了 `postProcessBeforeInitialization`，用于处理 `@PostConstruct` 等注解。所以 `@Autowired` 注入完成后才会执行 `@PostConstruct`——这也是 `@PostConstruct` 中能安全使用注入依赖的原因。
-
-**Q5：为什么推荐构造器注入？**
+**Q2：为什么推荐构造器注入？**
 
 ① 依赖可声明为 `final`，保证不可变与线程安全；② 对象创建即完成装配，**不存在"半初始化"状态**，避免 NPE；③ 依赖关系显式暴露在构造签名上，依赖过多时一眼可见（提示该类职责可能过重）；④ 脱离 Spring 容器也能直接 `new` 出来做单元测试。代价是无法解决构造器循环依赖——但这通常说明设计本身有环，暴露出来是好事。
 
-**Q6：Spring 容器启动慢，可能是什么原因？**
+**Q3：Spring 容器启动慢，可能是什么原因？**
 
-主要耗时在第 11 步 `finishBeanFactoryInitialization`——实例化所有非懒加载单例。常见原因：① Bean 数量多且初始化逻辑重（如连接池、缓存预热）；② `@PostConstruct` 中有阻塞操作（远程调用、大批量查询）；③ 组件扫描范围过大（扫描到无关包）；④ AOP 代理创建量大。排查手段：开 `debug` 日志观察 Bean 创建耗时，或对可疑 Bean 设置 `@Lazy` 延迟初始化验证。**注意**：`spring.main.lazy-initialization=true` 能显著加快启动，但会把问题推迟到运行期，只在开发环境开启比较稳妥。
+主要耗时在 `refresh()` 第 11 步 `finishBeanFactoryInitialization`——实例化所有非懒加载单例。常见原因：① Bean 数量多且初始化逻辑重（如连接池、缓存预热）；② `@PostConstruct` 中有阻塞操作（远程调用、大批量查询）；③ 组件扫描范围过大（扫描到无关包）；④ AOP 代理创建量大。排查手段：开 `debug` 日志观察 Bean 创建耗时，或对可疑 Bean 设置 `@Lazy` 延迟初始化验证。**注意**：`spring.main.lazy-initialization=true` 能显著加快启动，但会把问题推迟到运行期，只在开发环境开启比较稳妥。
+
+**Q4：`@Component`、`@Service`、`@Repository`、`@Controller` 有什么区别？**
+
+`@Service` 和 `@Controller` 是 `@Component` 的**语义化别名**，功能上完全等价（容器一视同仁），作用是表达分层语义、并让 AOP 切点可以按层匹配。`@Repository` 除语义外**还有实际功能：它会启用持久层异常翻译**，把 JDBC / JPA 的原生异常转成 Spring 统一的 `DataAccessException` 体系——这是它与其他三个的实质差异。
+
+**Q5：`@Component` 和 `@Bean` 怎么选？**
+
+`@Component` 标在**类**上，靠组件扫描生效，适用于**自己写的类**；`@Bean` 标在**方法**上，适用于**第三方类**（无法在源码上加注解）或**需要复杂构造逻辑、条件判断**的对象。另外 `@Bean` 的 Bean 名称是方法名，粒度更细、可条件化（配合 `@ConditionalOnXxx`），而 `@Component` 的条件只能作用在类级。
+
+**Q6：同类型的多个 Bean，`@Autowired` 会注入哪个？**
+
+按优先级：① `@Primary` 标记的；② `@Priority` 数值最小的；③ `@Qualifier` 显式指定的名称；④ 字段名/参数名与 Bean 名称匹配的；⑤ 都不满足则抛 `NoUniqueBeanDefinitionException`。**建议显式用 `@Qualifier`**——依赖字段名的隐式匹配一旦重命名就可能改变注入目标。
+
+**Q7：`@Autowired` 和 `@Resource` 的区别？**
+
+`@Autowired` 是 Spring 自有注解，**按类型注入**，可配合 `@Qualifier` 按名称筛选；`@Resource` 是 JSR-250 标准注解，**默认按名称注入**，找不到同名的再按类型兜底。实践中统一用 `@Autowired`（与 Spring 生态一致）；只有需要框架无关性时才选 `@Resource`。
+
+**Q8：`@Configuration` 和 `@Component` 都能定义 `@Bean`，有区别吗？**
+
+有实际差别。`@Configuration` **默认（`proxyBeanMethods = true`）会用 CGLIB 生成子类**，拦截类内部对 `@Bean` 方法的调用并转发给容器，因此 `b()` 里调用 `a()` 拿到的是**容器中的同一个单例**；`@Component` 没有这层代理，内部调用就是普通方法调用，会**重复创建实例**。所以需要 `@Bean` 方法互相调用时必须用 `@Configuration`；确定不互相调用时可用 `@Configuration(proxyBeanMethods = false)` 关闭代理加快启动。
+
+**Q9：`@Autowired` 是在哪个阶段被处理的？**
+
+在 Bean 生命周期的**属性填充阶段**（`populateBean` → `AutowiredAnnotationBeanPostProcessor.postProcessProperties`）完成字段/Setter 注入；而该处理器同时实现了 `postProcessBeforeInitialization`，用于处理 `@PostConstruct` 等注解——所以 `@Autowired` 注入完成后才会执行 `@PostConstruct`，这也是 `@PostConstruct` 中能安全使用注入依赖的原因。完整时序见 [Bean 生命周期](/java/spring/spring-framework/bean/)。

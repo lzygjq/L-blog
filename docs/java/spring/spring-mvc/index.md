@@ -30,7 +30,7 @@ public class OrderServlet extends HttpServlet {
 }
 ```
 
-问题很明确：**请求分发、参数解析、结果序列化这些与业务无关的逻辑，在每个 Servlet 里重复**。这和 [AOP](/java/spring/spring-framework/aop) 篇描述的"横切逻辑散落各处"是同一类病症。
+问题很明确：**请求分发、参数解析、结果序列化这些与业务无关的逻辑，在每个 Servlet 里重复**。这和 [AOP](/java/spring/spring-framework/aop/) 篇描述的"横切逻辑散落各处"是同一类病症。
 
 Spring MVC 的解法是引入**前端控制器（Front Controller）**：所有请求先经过一个统一的 `DispatcherServlet`，由它负责调度，业务代码只写 Controller 方法。
 
@@ -111,7 +111,7 @@ Spring MVC：    请求 ──▶ DispatcherServlet ──┬──▶ 分发（
 
 **流程中三个必须理解的细节：**
 
-**① 拦截器是"包"在 Handler 外面的。** `preHandle` 按注册顺序**正序**执行，`postHandle` 与 `afterCompletion` 按**逆序**执行——形成包裹结构，与 [AOP 通知](/java/spring/spring-framework/aop) 的执行模型完全一致。
+**① 拦截器是"包"在 Handler 外面的。** `preHandle` 按注册顺序**正序**执行，`postHandle` 与 `afterCompletion` 按**逆序**执行——形成包裹结构，与 [AOP 通知](/java/spring/spring-framework/aop/) 的执行模型完全一致。
 
 **② 有异常时的路径。** 如果 Handler 抛异常，`postHandle` **不会**执行（它只在成功时调用），而是交给 `HandlerExceptionResolver` 处理：`@ExceptionHandler` / `@ControllerAdvice` 在这里生效；无论是否处理成功，`afterCompletion` 都会执行（适合做资源清理、耗时统计）。
 
@@ -128,7 +128,7 @@ Spring MVC：    请求 ──▶ DispatcherServlet ──┬──▶ 分发（
 | 响应内容 | JSON / XML | 渲染后的 HTML |
 | 标注 | `@ResponseBody`（或 `@RestController`） | 无（或 `@Controller`） |
 
-**历史包袱提示**：`@Controller` 与 `@RestController` 的差异正是在这里——前者默认走视图解析，后者把 `@ResponseBody` 作为类级默认值。混用会导致"方法返回对象却被当成视图名去找 JSP"这类 404 问题。详见[注解速查](/java/spring/spring-framework/annotations)。
+**历史包袱提示**：`@Controller` 与 `@RestController` 的差异正是在这里——前者默认走视图解析，后者把 `@ResponseBody` 作为类级默认值。混用会导致"方法返回对象却被当成视图名去找 JSP"这类 404 问题。详见下文[第八节的辨析](/java/spring/spring-mvc/#三组必考辨析)。
 
 ## 五、为什么 HandlerMapping 和 HandlerAdapter 要分开
 
@@ -243,7 +243,68 @@ Controller 方法的参数五花八门，靠的是 `HandlerMethodArgumentResolve
 
 **工程建议：统一用 `ResponseEntity<Result<T>>` 或自定义 `Result<T>` 返回包装类**——既避免 `null` 语义歧义，又能统一携带错误码与提示信息。
 
-## 八、拦截器 vs 过滤器
+## 八、Web 层注解速查
+
+| 注解 | 作用 |
+|---|---|
+| **`@RequestMapping`** | 路径映射，可限定 `method` / `consumes` / `produces` / `headers` |
+| **`@GetMapping` / `@PostMapping`** 等 | `@RequestMapping` 的语义化简写，**自带 `method` 限定** |
+| **`@PathVariable`** | 取 URL 路径模板变量（`/order/{id}`） |
+| **`@RequestParam`** | 取查询串 / 表单参数 |
+| **`@RequestBody`** | 取**请求体**并交给 `HttpMessageConverter` 反序列化（JSON → 对象） |
+| **`@ResponseBody`** | 把返回值作为响应体序列化，**不经过视图解析** |
+| **`@RequestHeader` / `@CookieValue`** | 取请求头 / Cookie |
+| **`@RestControllerAdvice`** | `@ControllerAdvice` + `@ResponseBody`，全局异常 / 数据绑定处理 |
+| **`@ExceptionHandler`** | 声明处理哪种异常 |
+| **`@Valid` / `@Validated`** | 触发参数校验（Bean Validation） |
+
+### 三组必考辨析
+
+**① `@RequestParam` vs `@PathVariable`**
+
+```java
+@GetMapping("/orders/{id}")                                        // {id} 是路径的一部分
+public Order get(@PathVariable Long id,                            // ← 取 /orders/123 中的 123
+                 @RequestParam(required = false) String fields) {   // ← 取 ?fields=name
+    ...
+}
+```
+
+| 维度 | `@RequestParam` | `@PathVariable` |
+|---|---|---|
+| 数据来源 | 查询串 `?k=v` / 表单 | URL 路径模板 `{id}` |
+| REST 语义 | 过滤、分页、排序等**条件** | **资源标识** |
+| 可否省略 | 参数名一致时可省略注解 | **不可省略**（必须标注） |
+
+**② `@RequestBody` vs `@RequestParam`**
+
+| 维度 | `@RequestBody` | `@RequestParam` |
+|---|---|---|
+| 数据位置 | 请求体（Body） | URL / 表单 |
+| 内容类型 | `application/json` 等 | `application/x-www-form-urlencoded` |
+| 处理者 | `HttpMessageConverter` | `ArgumentResolver` 直接取值 |
+| 数量限制 | **一个方法只能一个** | 可多个 |
+
+**忘了加 `@RequestBody` 是最常见的 400 / 字段全 null 来源**——此时 Spring 会走无注解的"属性绑定"路径，从请求参数里找字段，而 JSON body 里的内容根本不在请求参数中。
+
+**③ `@Controller` vs `@RestController`**
+
+```java
+@Controller
+public class A {
+    @GetMapping("/a") public String a() { return "index"; }        // → 走 ViewResolver，渲染 index 视图
+    @GetMapping("/b") @ResponseBody public String b() { return "hi"; }  // → 直接返回 "hi" 文本
+}
+
+@RestController                                                     // = @Controller + @ResponseBody
+public class B {
+    @GetMapping("/c") public Order c() { return order; }            // → JSON 序列化
+}
+```
+
+**踩坑提醒**：用 `@Controller` 返回对象却忘了加 `@ResponseBody`，会得到一个 404（Spring 拿返回值去当视图名找了）。**现在写 API 一律用 `@RestController`。**
+
+## 九、拦截器 vs 过滤器
 
 这两个概念极易混淆，但**它们处于完全不同的层次**：
 
@@ -279,7 +340,7 @@ Controller 方法的参数五花八门，靠的是 `HandlerMethodArgumentResolve
 
 **一个常见的坑**：在 `Interceptor` 里 `@Autowired` 一个 Service 是可行的（它由 Spring 管理），但在 `Filter` 里直接 `@Autowired` **会注入失败**（Filter 由 Tomcat 创建，早于 Spring 容器完成初始化）。需要时通过 `FilterRegistrationBean` 注册，或实现 `ApplicationContextAware` 手动取。
 
-## 九、面试问答
+## 十、面试问答
 
 **Q1：Spring MVC 的执行流程？**
 
@@ -311,4 +372,4 @@ Controller 方法的参数五花八门，靠的是 `HandlerMethodArgumentResolve
 
 **Q7：`@ControllerAdvice` 是怎么生效的？**
 
-它是 `HandlerExceptionResolver` 体系的入口。`DispatcherServlet` 捕获 Handler 抛出的异常后交给 `HandlerExceptionResolver` 处理链，其中 `ExceptionHandlerExceptionResolver` 会扫描所有 `@ControllerAdvice` 类中匹配异常类型的 `@ExceptionHandler` 方法并调用，把返回值按正常流程（走 `HttpMessageConverter`）写成响应。所以它能在**业务代码完全不感知**的情况下统一异常出口——这也是它与 [AOP](/java/spring/spring-framework/aop) 的思路一致的地方：把横切逻辑从业务方法中抽走。
+它是 `HandlerExceptionResolver` 体系的入口。`DispatcherServlet` 捕获 Handler 抛出的异常后交给 `HandlerExceptionResolver` 处理链，其中 `ExceptionHandlerExceptionResolver` 会扫描所有 `@ControllerAdvice` 类中匹配异常类型的 `@ExceptionHandler` 方法并调用，把返回值按正常流程（走 `HttpMessageConverter`）写成响应。所以它能在**业务代码完全不感知**的情况下统一异常出口——这也是它与 [AOP](/java/spring/spring-framework/aop/) 的思路一致的地方：把横切逻辑从业务方法中抽走。

@@ -1,5 +1,5 @@
 ---
-order: 6
+order: 3
 date: 2026-09-13
 sidebar: 作用域与线程安全
 title: Bean 作用域与线程安全
@@ -43,6 +43,15 @@ desc: 六种作用域对比、单例线程安全的准确结论、无状态与�
 **③ `request` / `session` 只在 Web 环境下有效。** 非 Web 容器中声明这两个作用域会直接启动失败（`IllegalStateException: No Scope registered`）。早期用 `RequestContextListener` 注册，Boot 集成 Web 时自动生效。
 
 **④ `request` 作用域注入到单例中，靠的是代理。** 这是"作用域不同却能被注入"的关键机制——单例 Bean 里注入的 `request` 作用域对象，实际是一个**代理**，每次方法调用时才去 `RequestContextHolder` 里查当前线程绑定的真实对象（`ThreadLocal` 承载）。这也解释了为什么在线程池的子线程里访问会拿到错误对象。
+
+### 与作用域相关的注解
+
+| 注解 | 作用 | 注意 |
+|---|---|---|
+| **`@Scope`** | 指定作用域：`singleton`（默认）/ `prototype` / `request` / `session` / `application` | `prototype` 注入到单例会失效，见下文第四节 |
+| **`@Lazy`** | 延迟创建。标在**类**上 = 该 Bean 懒加载；标在**注入点** = 注入代理以打破循环依赖 | 标在注入点时，注入的是代理对象而非真实对象 |
+| **`@Primary`** | 同类型多候选时优先选中 | 与 `@Qualifier` 是"全局默认"与"局部指定"的关系 |
+| **`@DependsOn`** | 强制目标 Bean 先于当前 Bean 初始化 | 一般用不到；需要时通常说明存在隐式初始化顺序依赖 |
 
 ## 三、准确结论：单例 Bean 安全吗
 
@@ -105,7 +114,7 @@ public class OrderService {
 **"无状态"的定义就是：对象上没有可变字段，所有中间数据都活在方法栈帧里。** 栈帧是线程私有的，所以天然不存在竞态——这正是 Service / DAO / Controller 这些"只有方法、没有可变字段"的 Bean 能安全共享的原因。
 
 > 一个常见疑问：Controller 是单例，多个请求并发打进来不会互相覆盖数据吗？
-> 不会。因为请求相关的数据（`HttpServletRequest`、`@RequestBody` 解析出的对象、`@PathVariable` 绑定的值）**全部通过方法参数传入，是局部变量**，而不是 Controller 的字段。这也是[Spring MVC](/java/spring/spring-framework/spring-mvc) 能放心用单例 Controller 处理高并发的前提。
+> 不会。因为请求相关的数据（`HttpServletRequest`、`@RequestBody` 解析出的对象、`@PathVariable` 绑定的值）**全部通过方法参数传入，是局部变量**，而不是 Controller 的字段。这也是[Spring MVC](/java/spring/spring-mvc/) 能放心用单例 Controller 处理高并发的前提。
 
 ### 判断标准：三步自检
 
@@ -146,7 +155,7 @@ public class OrderService {
 }
 ```
 
-因为**依赖注入发生在 Bean 创建阶段，只执行一次**（见 [Bean 生命周期](/java/spring/spring-framework/ioc-container) 第 ② 步属性填充）。单例 Bean 的属性只被填充一次，此后 `context` 字段永远指向同一个实例——`prototype` 形同虚设。
+因为**依赖注入发生在 Bean 创建阶段，只执行一次**（见 [Bean 生命周期](/java/spring/spring-framework/ioc/) 第 ② 步属性填充）。单例 Bean 的属性只被填充一次，此后 `context` 字段永远指向同一个实例——`prototype` 形同虚设。
 
 正确用法是**让容器在每次需要时创建**，三种方式：
 
@@ -236,7 +245,7 @@ public class RateLimitService {
 | **`StringBuilder`** | 内部可变字符数组 | 方法内局部使用，绝不做成员变量 |
 | **`HttpServletRequest`** | 请求级，随请求变化 | 通过方法参数获取，不缓存到字段 |
 | **`Model` / `ModelMap`** | 请求级数据容器 | 方法参数传入 |
-| **`SqlSession`** | 持有 `Executor` 与事务状态 | 由 `SqlSessionTemplate` 代理管理，见 [MyBatis 集成](/java/spring/spring-framework/mybatis) |
+| **`SqlSession`** | 持有 `Executor` 与事务状态 | 由 `SqlSessionTemplate` 代理管理，见 [MyBatis 集成](/java/spring/spring-framework/mybatis/) |
 | **`DefaultListableBeanFactory`** | 内部大量 `ConcurrentHashMap` | 框架已做并发控制，业务不直接操作 |
 
 **`SimpleDateFormat` 是最高频的例子**——它有静态实例被共享导致日期错乱的经典事故。JDK 8 之后用 `DateTimeFormatter` 即可彻底规避（它被设计为不可变）。

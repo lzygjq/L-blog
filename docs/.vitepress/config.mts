@@ -38,8 +38,21 @@ const sidebarSpec = [
         text: 'Spring 生态',
         link: '/java/spring/',
         children: [
-          { text: 'Spring Framework', dir: 'java/spring/spring-framework', group: true },
-          { text: 'Spring Boot', dir: 'java/spring/spring-boot' },
+          {
+            // Spring 核心：标题链到导览页，下挂四块子菜单
+            text: 'Spring',
+            link: '/java/spring/spring-framework/',
+            children: [
+              // 单篇目录（只有 index.md）→ 不加 group，自动退化为一个可点击条目
+              { text: 'IoC', dir: 'java/spring/spring-framework/ioc' },
+              { text: 'Bean', dir: 'java/spring/spring-framework/bean', group: true },
+              { text: 'AOP', dir: 'java/spring/spring-framework/aop', group: true },
+              { text: 'MyBatis', dir: 'java/spring/spring-framework/mybatis' }
+            ]
+          },
+          // Spring MVC 与 Spring 平级：Web 层独立成菜单
+          { text: 'Spring MVC', dir: 'java/spring/spring-mvc' },
+          { text: 'Spring Boot', dir: 'java/spring/spring-boot', group: true },
           { text: 'Spring Cloud', dir: 'java/spring/spring-cloud' }
         ]
       },

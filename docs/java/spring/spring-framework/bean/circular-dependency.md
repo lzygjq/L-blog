@@ -1,6 +1,7 @@
 ---
 order: 2
 date: 2026-09-11
+sidebar: 循环依赖
 title: 循环依赖与三级缓存
 desc: 三级缓存的逐层推演，以及"为什么必须是三级"的核心答案
 ---
@@ -23,7 +24,7 @@ public class BService {
 }
 ```
 
-按 [Bean 生命周期](/java/spring/spring-framework/ioc-container) 的顺序：创建 A 需要先注入 B，创建 B 又需要先注入 A——**形成死循环**。
+按 [Bean 生命周期](/java/spring/spring-framework/ioc/) 的顺序：创建 A 需要先注入 B，创建 B 又需要先注入 A——**形成死循环**。
 
 直觉上这必然失败，但 Spring 能正常启动。它依靠的机制就是**三级缓存 + 提前暴露引用**。这是 Spring 面试中出现频率最高的一个技术点，也是最能区分"背答案"和"真理解"的问题。
 

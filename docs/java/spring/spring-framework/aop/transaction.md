@@ -1,6 +1,7 @@
 ---
-order: 4
+order: 2
 date: 2026-09-11
+sidebar: 事务与传播行为
 title: 声明式事务与传播行为
 desc: 七种传播行为、REQUIRES_NEW vs NESTED、失效清单十项、事务与连接池
 ---
@@ -28,7 +29,7 @@ public void transfer(Long from, Long to, BigDecimal amount) {
 }
 ```
 
-问题在于：**事务的开启/提交/回滚是横切逻辑，却被迫写进每个业务方法**。这正是 [AOP](/java/spring/spring-framework/aop) 的用武之地——`@Transactional` 把这段模板代码抽成切面，业务方法只保留纯业务逻辑。
+问题在于：**事务的开启/提交/回滚是横切逻辑，却被迫写进每个业务方法**。这正是 [AOP](/java/spring/spring-framework/aop/) 的用武之地——`@Transactional` 把这段模板代码抽成切面，业务方法只保留纯业务逻辑。
 
 ## 二、实现原理
 
