@@ -4,7 +4,8 @@
        ① 高频常用：点卡片右上角星标标记/取消，拖拽卡片排序
        ② 分类内卡片：直接拖拽卡片调整该分类内的站点顺序
        ③ 分类整体：拖分类标题左侧把手，调整各分类之间的先后顺序（右侧分类栏同步）
-       ④ 分类折叠：点标题行（或右侧箭头）收起/展开，长分类折叠后更好拖；存 nav-cat-collapsed -->
+       ④ 分类折叠：点标题行（或右侧箭头）收起/展开，长分类折叠后更好拖；存 nav-cat-collapsed
+       ⑤ 一键全收/全展：工具条右侧按钮，分类多时先收成一行再重排 -->
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { withBase } from 'vitepress'
@@ -163,6 +164,29 @@ function toggleCollapse(id) {
   persistCollapsed()
 }
 
+// 全部收起/展开：重排分类时最顺手的姿势是先把所有区块收成一行，再逐个拖。
+// 判定覆盖「高频常用 + 所有分类」——与逐区块折叠同一套 id（DOM id），避免两套真相。
+// 必须过滤掉 virtual 分类：navCategories[0] 就是 { id:'hot', virtual:true }，
+// 而模板里「高频常用」是单独硬编码 id="nav-hot" 渲染的、不在分类循环里 ——
+// 不过滤就会把 nav-hot 算两遍（顺序去重后看着没事，但存储里会多一条脏 id）。
+const allSectionIds = computed(() => [
+  'nav-hot',
+  ...orderedAllCats.value.filter((c) => !c.virtual).map((c) => 'nav-' + c.id)
+])
+
+// 注意用 collapsedIds 而非 isCollapsed：筛选态 isCollapsed 恒为 false，
+// 若按它算，筛选时按钮会一直显示"全部展开"，语义就错了。
+const allCollapsed = computed(
+  () =>
+    allSectionIds.value.length > 0 &&
+    allSectionIds.value.every((id) => collapsedIds.value.includes(id))
+)
+
+function toggleAllCollapse() {
+  collapsedIds.value = allCollapsed.value ? [] : [...allSectionIds.value]
+  persistCollapsed()
+}
+
 // ── 拖拽排序 ─────────────────────────────────
 // 三套互相独立的拖拽，靠各自的 state 区分，互不抢事件：
 //   ① dragIndex   高频常用卡片（顺序即收藏顺序，存 nav-favorites）
@@ -296,18 +320,36 @@ const countText = computed(() =>
 
 <template>
   <div class="nav-board" :class="{ 'is-filtering': !!keyword }">
-    <!-- 顶部工具条：第一行＝标题 + 计数（左）/ 筛选框（右），第二行＝拖拽小字说明 -->
+    <!-- 顶部工具条：第一行＝标题 + 计数（左）/ 全部收起 + 筛选框（右），第二行＝拖拽小字说明 -->
     <div class="nav-toolbar">
       <div class="nav-headline">
         <h2 class="nav-title">开发者导航</h2>
         <span class="nav-count">{{ countText }}</span>
       </div>
-      <input
-        v-model="keyword"
-        class="nav-search"
-        type="text"
-        placeholder="输入关键字筛选，如：redis / 正则 / 图标…"
-      />
+      <div class="nav-actions">
+        <button
+          v-if="!keyword"
+          class="nav-collapse-all"
+          :title="
+            allCollapsed
+              ? '展开全部分类'
+              : '收起全部分类——重排分类时先收成一行更好拖'
+          "
+          @click="toggleAllCollapse"
+        >
+          <svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+            <path d="M8 1.6 12.2 5.6H3.8z" fill="currentColor" />
+            <path d="M8 14.4 3.8 10.4h8.4z" fill="currentColor" />
+          </svg>
+          {{ allCollapsed ? '全部展开' : '全部收起' }}
+        </button>
+        <input
+          v-model="keyword"
+          class="nav-search"
+          type="text"
+          placeholder="输入关键字筛选，如：redis / 正则 / 图标…"
+        />
+      </div>
       <span class="nav-hint">拖拽卡片可调整分类内顺序，拖分类标题左侧把手可调整分类顺序</span>
     </div>
 
@@ -558,6 +600,37 @@ const countText = computed(() =>
 .nav-search:focus {
   border-color: var(--vp-c-brand-1);
 }
+/* 右侧操作区：全部收起/展开 + 搜索框，作为一个整体贴容器右缘 */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+/* 全部收起/展开：与搜索框同高的实体按钮。
+   分类多的时候逐个点箭头太慢，重排前先一键收干净最顺手 */
+.nav-collapse-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 7px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background: var(--vp-c-bg-soft);
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+.nav-collapse-all:hover {
+  border-color: var(--vp-c-brand-1);
+  color: var(--vp-c-brand-1);
+}
+.nav-collapse-all svg {
+  flex: none;
+}
 
 /* ── 分类锚点：桌面端用右侧 NavRail，窄屏（aside 隐藏）才显示顶部锚点 ── */
 .nav-anchor {
@@ -717,8 +790,12 @@ const countText = computed(() =>
   .nav-toolbar {
     grid-template-columns: minmax(0, 1fr);
   }
+  /* 窄屏纵向堆叠：搜索框在上占满整行，按钮在下 */
+  .nav-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
   .nav-search {
-    justify-self: start;
     width: 100%;
   }
 }
