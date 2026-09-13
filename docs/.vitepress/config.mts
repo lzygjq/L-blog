@@ -86,7 +86,8 @@ const sidebarSpec = [
       {
         text: '消息队列',
         children: [
-          { text: 'RabbitMQ', dir: 'middleware/rabbitmq' },
+          { text: 'RabbitMQ', dir: 'middleware/rabbitmq', group: true },
+          { text: 'Kafka', dir: 'middleware/kafka', group: true },
           { text: 'RocketMQ', dir: 'middleware/rocketmq' },
           { text: '物联网 MQTT', dir: 'middleware/mqtt' },
           { text: 'ELK（规划中）' }
