@@ -29,7 +29,7 @@ const sidebarSpec = [
           // 目录内只有 index.md → 「目录型条目」自动退化为一个可点击的条目，不再多包一层
           { text: 'Java 基础', dir: 'java/basics' },
           { text: 'Java 集合', dir: 'java/collections', group: true },
-          { text: 'Java 并发', dir: 'java/concurrent' },
+          { text: 'Java 并发', dir: 'java/concurrent', group: true },
           { text: 'Java 虚拟机', dir: 'java/jvm', group: true }
         ]
       },

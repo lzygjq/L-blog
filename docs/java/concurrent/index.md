@@ -1,7 +1,89 @@
 ---
-date: 2026-09-11
-draft: true
+date: 2026-09-13
+title: Java 并发 · 导览
 ---
 
-# 并发与 JUC
-> 写作中。计划覆盖：Java 内存模型、synchronized/volatile、AQS 源码、线程池参数与调优、并发容器、CompletableFuture。
+# Java 并发 · 导览
+
+并发是 Java 面试里**最难蒙的一块**：它不像集合那样「看一眼源码就能复述」，而是要求你把 **JVM 内存模型 → 硬件层面的指令重排 → JUC 的锁与工具** 这条链路串起来。很多人能背出「`volatile` 保证可见性、不保证原子性」，却答不上「那给 `i++` 加 `synchronized` 就能保证了吗」「为什么 `wait` 必须写在 `synchronized` 里」——这类追问才是分水岭。
+
+本板块按 **「线程本身 → 并发安全 → JUC 工具」** 三层组织：先搞清楚线程是什么、状态怎么流转，再讲清楚「为什么会有并发问题」以及 `synchronized` / `volatile` / `CAS` 各自解决了其中哪一部分，最后落到每天都在用的线程池与并发容器。
+
+## 一、整体体系
+
+先把这一块压成一张表，建立全局印象：
+
+| 层次 | 要解决的问题 | 核心内容 | 本板块篇目 |
+|---|---|---|---|
+| **线程本身** | 我的代码在哪个线程跑、跑到哪一步了 | 进程 / 线程、创建方式、六种状态、`wait` / `notify`、中断 | [线程基础](/java/concurrent/thread-basics) |
+| **并发安全** | 多线程同时读写同一份数据，为什么会错 | 三大特性、JMM、`volatile`、`synchronized` 与锁升级 | [线程安全与内存可见性](/java/concurrent/thread-safety) |
+| **无锁方案** | 加锁太重，能不能不加锁也保证原子性 | CAS、ABA、原子类、`LongAdder` | [CAS 与原子类](/java/concurrent/cas-atomics) |
+| **锁与同步器** | 需要更灵活的锁、需要排队与条件等待 | AQS、`ReentrantLock`、`Condition`、`Semaphore`、死锁 | [AQS 与锁](/java/concurrent/aqs-locks) |
+| **线程池** | 线程不能随手 new，要复用、要可控 | 七大参数、执行流程、拒绝策略、参数怎么定 | [线程池](/java/concurrent/thread-pool) |
+| **并发容器** | `HashMap` 多线程下会坏，需要一个安全的替代 | `ConcurrentHashMap`、`CopyOnWriteArrayList`、阻塞队列 | [并发容器](/java/concurrent/concurrent-collections) |
+| **线程封闭** | 变量不想被共享，想「一人一份」 | `ThreadLocal`、内存泄漏、跨线程传递 | [ThreadLocal](/java/concurrent/threadlocal) |
+
+## 二、三条主线
+
+三条线是**递进**关系：先有「共享」，才有「安全」，最后才需要「工具」：
+
+```text
+主线一：线程本身
+  进程 vs 线程 ── 创建方式（Thread / Runnable / Callable / 线程池）
+                    └─ 六种状态 ── wait / notify / sleep / join ── 中断与优雅停止
+
+主线二：并发安全（问题从哪来、怎么治）
+  三大特性 ── 原子性 ──── synchronized / Lock / 原子类
+              ├─ 可见性 ── volatile / synchronized
+              └─ 有序性 ── volatile / happens-before
+             └─ 底座：JMM（主内存 + 工作内存）与指令重排
+
+主线三：JUC 工具（JDK 提供了什么）
+  AQS（state + 队列，是一切的地基）
+    ├─ ReentrantLock / ReadWriteLock
+    ├─ Semaphore / CountDownLatch / CyclicBarrier
+    ├─ 线程池 ThreadPoolExecutor
+    └─ 并发容器 ConcurrentHashMap / CopyOnWriteArrayList / 阻塞队列
+```
+
+## 三、本板块导航
+
+| 篇目 | 覆盖内容 | 关键问题 |
+|---|---|---|
+| [线程基础](/java/concurrent/thread-basics) | 进程 / 线程、并发 / 并行、四种创建方式、`run` vs `start`、六种状态、`wait` / `notify`、`sleep` vs `wait`、顺序执行、优雅停止 | 线程有哪些状态？`sleep` 和 `wait` 区别？怎么停一个线程？ |
+| [线程安全与内存可见性](/java/concurrent/thread-safety) | 三大特性、JMM、`happens-before`、`volatile` 两层语义、`synchronized` 原理、锁升级与锁优化 | 并发问题的根源是什么？`volatile` 怎么保证可见性？锁升级过程？ |
+| [CAS 与原子类](/java/concurrent/cas-atomics) | CAS 三要素与自旋、ABA 问题、`Unsafe`、原子类家族、`LongAdder`、乐观锁 vs 悲观锁 | CAS 是什么？ABA 怎么解决？`AtomicLong` 和 `LongAdder` 选哪个？ |
+| [AQS 与锁](/java/concurrent/aqs-locks) | AQS 的 state 与队列、公平 / 非公平、`ReentrantLock` 加解锁、`Condition`、`synchronized` vs `Lock`、死锁四条件与诊断 | AQS 原理？`ReentrantLock` 怎么实现可重入？死锁怎么排查？ |
+| [线程池](/java/concurrent/thread-pool) | 七大参数、执行流程、四种拒绝策略、阻塞队列族、`Executors` 的坑、核心线程数怎么定、状态与关闭、监控 | 线程池参数与执行原理？为什么不用 `Executors`？核心线程数怎么定？ |
+| [并发容器](/java/concurrent/concurrent-collections) | `HashMap` 的并发问题、`ConcurrentHashMap` 1.7 vs 1.8、put 与扩容、`CopyOnWriteArrayList`、阻塞队列 | `ConcurrentHashMap` 怎么保证线程安全？1.7 和 1.8 有什么区别？ |
+| [ThreadLocal](/java/concurrent/threadlocal) | 线程封闭、`ThreadLocalMap` 结构、为什么内存泄漏、正确用法、父子线程传递、典型应用 | `ThreadLocal` 原理？为什么会泄漏？线程池里要注意什么？ |
+
+## 四、高频考点速查
+
+按「问 → 答 → 详见」压缩成一张表，面试前扫一遍即可。
+
+| 高频问题 | 一句话答案 | 详见 |
+|---|---|---|
+| 进程和线程的区别？ | 进程是资源分配的最小单位、有独立内存；线程是 CPU 调度的最小单位、共享进程资源、切换更轻 | [线程基础](/java/concurrent/thread-basics#process-vs-thread) |
+| 并发和并行的区别？ | 并发是「轮流做」（时间片轮转），并行是「同时做」（多核真并行） | [线程基础](/java/concurrent/thread-basics#concurrency-vs-parallel) |
+| 线程有哪几种创建方式？ | 本质只有一种——构造 `Thread` 并调 `start()`；`Runnable` / `Callable` 只是「任务」的不同写法，第四种是把任务交给线程池 | [线程基础](/java/concurrent/thread-basics#create-thread) |
+| `run()` 和 `start()` 的区别？ | `start()` 才会新建线程并由 JVM 回调 `run()`，且只能调一次；直接调 `run()` 只是当前线程里的普通方法调用 | [线程基础](/java/concurrent/thread-basics#run-vs-start) |
+| 线程有哪六种状态？ | `NEW` / `RUNNABLE` / `BLOCKED` / `WAITING` / `TIMED_WAITING` / `TERMINATED`；注意 `RUNNABLE` 包含了操作系统的「就绪 + 运行 + IO 等待」 | [线程基础](/java/concurrent/thread-basics#thread-state) |
+| `sleep` 和 `wait` 的区别？ | 归属不同（`Thread` 静态方法 vs `Object` 成员方法）；**`wait` 会释放锁，`sleep` 不会**；`wait` 要靠 `notify` 或超时唤醒 | [线程基础](/java/concurrent/thread-basics#sleep-vs-wait) |
+| 如何优雅地停止一个线程？ | 用 `interrupt()` 配合 `isInterrupted()` 检查，或 `volatile` 标志位；`stop()` 已废弃（会破坏数据一致性） | [线程基础](/java/concurrent/thread-basics#stop-thread) |
+| 并发问题的根源是什么？ | 三大特性被破坏：原子性、可见性、有序性（本质是 CPU 缓存、指令重排、线程切换） | [线程安全](/java/concurrent/thread-safety#three-features) |
+| `volatile` 的作用？ | 保证可见性 + 禁止指令重排（内存屏障），**不保证原子性**，所以 `i++` 依然会错 | [线程安全](/java/concurrent/thread-safety#volatile) |
+| `synchronized` 的底层原理？ | 基于对象头 Mark Word + Monitor（`Owner` / `EntryList` / `WaitSet`），并支持锁升级 | [线程安全](/java/concurrent/thread-safety#synchronized-principle) |
+| 锁升级的过程？ | 无锁 → 偏向锁 → 轻量级锁（CAS 自旋）→ 重量级锁；**不是一有竞争就重量级**，自旋成功不会升级 | [线程安全](/java/concurrent/thread-safety#lock-upgrade) |
+| CAS 是什么？有什么问题？ | 比较并交换（`V` / `A` / `B`），无锁保证原子性；问题是 ABA、自旋耗 CPU、只能保证一个变量 | [CAS 与原子类](/java/concurrent/cas-atomics#cas) |
+| ABA 问题怎么解决？ | 用 `AtomicStampedReference` 加版本号，或 `AtomicMarkableReference` 加布尔标记 | [CAS 与原子类](/java/concurrent/cas-atomics#aba) |
+| `AtomicLong` 和 `LongAdder` 的区别？ | 高并发下 `LongAdder` 用「分段累加」把热点分散到多个 Cell，写更快；读（`sum()`）需要汇总，略慢 | [CAS 与原子类](/java/concurrent/cas-atomics#longadder) |
+| AQS 是什么？ | 用 `volatile int state` + FIFO 双向队列实现的同步器框架，`ReentrantLock` / `Semaphore` / `CountDownLatch` 都基于它 | [AQS 与锁](/java/concurrent/aqs-locks#aqs) |
+| `ReentrantLock` 怎么实现可重入？ | `state` 计数：同一线程再次获取时 `state + 1`，释放时 `state - 1`，减到 0 才真正释放 | [AQS 与锁](/java/concurrent/aqs-locks#reentrantlock) |
+| `synchronized` 和 `Lock` 的区别？ | 关键字 vs 接口；自动释放 vs 手动 `unlock`；`Lock` 支持可中断、可超时、公平锁、多个 `Condition` | [AQS 与锁](/java/concurrent/aqs-locks#sync-vs-lock) |
+| 死锁的四个必要条件？ | 互斥、请求与保持、不可剥夺、循环等待；破坏任意一个即可避免（最常用：统一加锁顺序） | [AQS 与锁](/java/concurrent/aqs-locks#deadlock) |
+| 线程池的核心参数与执行原理？ | 7 个参数（核心 / 最大 / 空闲时间 / 单位 / 队列 / 工厂 / 拒绝策略）；执行顺序是「核心 → 队列 → 救急 → 拒绝」 | [线程池](/java/concurrent/thread-pool#pool-flow) |
+| 为什么不建议用 `Executors` 创建线程池？ | 队列无界（`LinkedBlockingQueue`）或线程数无界（`Integer.MAX_VALUE`），任务堆积就 OOM；应用 `ThreadPoolExecutor` 手动指定有界参数 | [线程池](/java/concurrent/thread-pool#why-not-executors) |
+| 核心线程数怎么定？ | CPU 密集型约 `N+1`，IO 密集型约 `2N`（或 `2N+1`）；公式只是起点，最终要靠压测 | [线程池](/java/concurrent/thread-pool#pool-size) |
+| `ConcurrentHashMap` 怎么保证线程安全？ | 1.7 用 `Segment` 分段锁；1.8 改为「CAS 写空桶 + `synchronized` 锁首节点」，锁粒度更细 | [并发容器](/java/concurrent/concurrent-collections#chm-18) |
+| `ThreadLocal` 为什么会内存泄漏？ | `Entry` 的 key 是弱引用（`ThreadLocal` 被回收后 key 变 null），value 是强引用且随线程存活；线程池复用线程时不 `remove` 就会堆积 | [ThreadLocal](/java/concurrent/threadlocal#memory-leak) |
