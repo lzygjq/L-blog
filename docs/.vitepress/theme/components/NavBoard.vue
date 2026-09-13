@@ -578,7 +578,12 @@ const countText = computed(() =>
 }
 .nav-title {
   margin: 0 !important;
+  /* VitePress 默认 .vp-doc h2 带 border-top + padding-top:24px，会在标题上方画一条
+     通栏细线（用户截图那根）。此处标题是自定义版式，不需要分隔线，两条都要清掉 ——
+     只写 border-bottom 会漏掉上面那条。 */
+  border-top: none !important;
   border-bottom: none !important;
+  padding-top: 0 !important;
   font-size: 24px;
 }
 .nav-count {
