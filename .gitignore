@@ -4,3 +4,4 @@ docs/.vitepress/.temp/
 docs/.vitepress/dist/
 docs/.vitepress/config.mts.timestamp-*
 .DS_Store
+docs/**/index.data.js.timestamp-*.mjs
