@@ -53,6 +53,53 @@ Handler    Handler      ④ 参数绑定 / 结果集映射
   TypeHandler           ⑤ 类型转换（Java 类型 ↔ JDBC 类型）
 ```
 
+### 用文字走一遍
+
+上面这张图是"结构图"，下面按执行顺序把链路讲清楚——**关键在于搞明白每一步是谁在干活、以及为什么需要这一层**。
+
+**第 1 步：代理把"方法调用"翻译成"SQL 指令"。**
+业务代码调用 `userMapper.selectById(1L)`，但注入的 `userMapper` 并不是实现类，而是 `MapperProxyFactory` 生成的 JDK 动态代理。调用先被 `MapperProxy.invoke()` 拦截，它做一件核心的事：**把"接口名 + 方法名"拼成一个字符串作为 `MappedStatement` 的 id**（如 `com.example.mapper.UserMapper.selectById`），再从 `Configuration` 这个"注册表"里取出对应的 `MappedStatement`。
+
+`MappedStatement` 是这一步的关键产物——它把一条 SQL 的**全部元信息**打包在一起：SQL 文本、参数映射、结果映射（`resultMap`）、缓存配置、超时设置等。**所以代理层完成的是"语义转换"：把面向对象的方法调用，转成了面向 SQL 的执行请求。**
+
+**第 2 步：代理把请求委托给 `SqlSession`。**
+代理自己不执行 SQL，它把 `MappedStatement` 和参数交给 `SqlSession`。这里有个容易被忽略的点：**`SqlSession` 是线程不安全的**（内部持有 `Executor` 和事务状态），不能直接做成单例 Bean。所以在 Spring 环境下，实际交付的是一个 `SqlSessionTemplate`——它内部持有 `SqlSession` 的动态代理，每次调用时通过 `TransactionSynchronizationManager` 取"当前事务绑定的 `SqlSession`"，没有事务才新建。**这一步是 MyBatis 与 Spring 事务能够协同的接缝**（详见第七节）。
+
+**第 3 步：`Executor` 做调度——查缓存 + 生成最终 SQL。**
+`SqlSession` 把执行权交给 `Executor`，它是真正的"执行调度者"，按顺序做三件事：
+
+1. **查缓存**：先查二级缓存（`namespace` 级，跨会话），再查一级缓存（`SqlSession` 级）。命中就直接返回，**整条 JDBC 链路都不会走到**；
+2. **生成 `BoundSql`**：解析动态标签（`<if>` / `<foreach>` / `<where>` 等），把条件拼装成最终可执行的 SQL 文本，同时建立"参数对象 ↔ SQL 中每个 `?`"的对应关系；
+3. **选定执行器**：`SimpleExecutor`（默认，每次新建 Statement）、`ReuseExecutor`（复用 Statement）、`BatchExecutor`（批量提交）——这是**策略模式**，由配置或调用时指定。
+
+**第 4 步：`StatementHandler` 落到 JDBC。**
+`Executor` 通过 `StatementHandler` 与 JDBC 打交道。它拿着 `BoundSql` 创建 `PreparedStatement`（顺带设置 `fetchSize`、`queryTimeout` 等），然后**把参数绑定这件事委托给 `ParameterHandler`**——`StatementHandler` 自己不管参数细节，这就是"职责单一"的体现。
+
+**第 5 步：`ParameterHandler` 完成参数绑定。**
+它遍历 `BoundSql` 中记录的参数映射，为 SQL 里的每一个 `?` 调用对应的 `TypeHandler`，把 Java 值写进 `PreparedStatement`——例如 `ps.setLong(1, 1L)`。**这一步就是 `#{id}` 最终变成 `?` 并被赋值的时刻**，也是"预编译天然防注入"的落点：参数始终以"值"的形式绑定，不会被拼进 SQL 文本。
+
+**第 6 步：执行 SQL，并把结果集映射回对象。**
+`PreparedStatement.execute()` 把 SQL 交给数据库，返回的 `ResultSet` 由 `ResultSetHandler` 处理：按 `resultMap` / `resultType` 声明的规则，把结果集的每一行映射成一个 Java 对象（复杂关联还会递归调用嵌套映射）。字段级别的 JDBC 类型 → Java 类型转换，同样由 `TypeHandler` 完成。
+
+**第 7 步：回写缓存并返回。**
+`Executor` 把查询结果放进一级缓存（若开启了二级缓存则同时写入），然后沿调用链原路返回。在 Spring 环境下，若无事务，`SqlSessionTemplate` 会在这一步**自动 commit 并归还会话**；有事务时则交由 `PlatformTransactionManager` 统一控制提交时机。
+
+### 一句话抓住主线
+
+把七步压缩成一句话：
+
+```
+MapperProxy 把「方法」翻译成「MappedStatement」
+     ↓
+Executor   负责「查缓存 + 生成最终 SQL」（调度层）
+     ↓
+StatementHandler + ParameterHandler  负责「落到 JDBC」（执行层）
+     ↓
+ResultSetHandler                     负责「把结果搬回来」（映射层）
+```
+
+**这条链的设计意图是"三层责任分离"**：代理层只做语义转换（不知道 SQL 怎么写），调度层只做缓存与 SQL 生成（不碰 JDBC API），执行层只做 JDBC 操作与类型转换（不关心业务语义）。**理解了这三层边界，`Executor` 为什么不直接执行 SQL、`ParameterHandler` 为什么独立存在、四大对象为什么都是插件拦截点——这些问题就都能自己推出来了。**
+
 | 组件 | 职责 |
 |---|---|
 | **`SqlSessionFactory`** | 全局单例，持有 `Configuration`（所有 MappedStatement 的注册表） |
