@@ -16,3 +16,6 @@ draft: true
 ## 智慧物业 SaaS
 - [微服务 → K8s 云原生演进](/projects/property-saas/microservice-to-k8s/)
 - [大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/)
+
+## 方法与计划
+- [产出工具导览](/projects/toolkit/)（ADR / 压测报告 / 架构图 三件套）

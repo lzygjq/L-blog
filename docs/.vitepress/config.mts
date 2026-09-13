@@ -121,6 +121,16 @@ const sidebarSpec = [
     items: [
       { text: '板块导览', link: '/projects/' },
       {
+        // 方法层：可验证产出三件套（先读方法，再看项目案例）
+        text: '产出工具',
+        children: [
+          { text: '导览', link: '/projects/toolkit/' },
+          { text: 'ADR 架构决策记录', dir: 'projects/toolkit/adr', indexLabel: '导览' },
+          { text: '压测报告', link: '/projects/toolkit/perf-report/' },
+          { text: '架构图', link: '/projects/toolkit/arch-diagram/' }
+        ]
+      },
+      {
         text: '绩效系统',
         children: [
           { text: '导览', link: '/projects/perf-system/' },

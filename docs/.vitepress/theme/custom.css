@@ -185,37 +185,116 @@ html.sidebar-collapsed .VPNavBarTitle {
   }
 }
 
-/* ===== 侧边栏滚动条美化：默认完全隐藏，hover 侧边栏时浮现细条 ===== */
+/* ===== 竖向滚动条：左右两侧共用同一套（宽度 / 配色 / 上下内缩）=====
+   左侧 = `aside.VPSidebar`；右侧 = **浏览器窗口滚动条**（`html`）。
+   注意：右侧那个不是「本页目录」的 —— VitePress 默认主题对 `.aside-container` 写了
+   `scrollbar-width: none` + `::-webkit-scrollbar { display: none }`（scoped，特异性 0,2,0），
+   本页目录的滚动条是被官方刻意隐藏的，靠 `.aside-curtain` 底部渐变暗示还有内容。
+   所以页面里能看到的只有两根：左侧目录的自定义条 + 窗口的系统默认条（更深）。
 
-.VPSidebar {
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.2s ease;
+   2026-09-13 用户诉求演进（同一处代码改了四轮，按顺序读）：
+     ① 都调短一点 —— 原生滚动条的长度由「内容/视口比例」决定，CSS 改不了；
+        只能在拇指上下各加 14px 透明边框 + `background-clip: padding-box`，
+        让"看得见的"那截比实际短 28px。这是唯一的办法。
+     ② 透明化一点 —— alpha 降到 0.2。
+     ③ 两侧颜色统一 —— 窗口滚动条原来是系统默认色（比左侧深），现在共用同一组变量。
+     ④ **与背景同色 ⇒ 视觉上"没有滚动条"**（当前版）
+
+   ④ 之所以成立的两个前提（缺一不可，动布局前先复核）：
+     `--sb-thumb: var(--vp-c-bg)` —— 两侧容器底色都已经是 --vp-c-bg：
+       · 左侧：`html .VPSidebar { background-color: var(--vp-c-bg) !important }`（本文件下方）
+       · 右侧：窗口条落在 `scrollbar-gutter: stable` 预留的那 4px 槽里，槽底也是 --vp-c-bg
+                （页面最右缘本来就是底色，正文列右侧还留了 8px 的 --lp-gap 白）
+     因为是 var() 惰性求值，**不需要**再给深色写一套 --sb-thumb，它自动跟着主题走。
+
+   隐形的代价与补偿（别把这段删了）：
+     拇指只是看不见，**依然存在、依然可拖、依然能点轨道跳转**，滚轮/触控板完全不受影响。
+     为了让"真想拖它"的时候还能找到，保留两档「靠近才显形」：
+       · 指针正好压在拇指上（thumb:hover）→ 显形
+       · 正在拖动（thumb:active）→ 加深
+     ⚠️ **不要**写 `.VPSidebar:hover::-webkit-scrollbar-thumb` —— 侧边栏是常驻区域，
+        鼠标只要停在菜单上就命中，那条规则会让滚动条几乎一直显形，④ 等于没做。
+     ⚠️ **更不能**写 `html:hover::-webkit-scrollbar-thumb` —— html:hover 恒为真。
+
+   ⚠️ 不要再给这些容器写 `scrollbar-width: thin` / `scrollbar-color`
+   —— Chrome 121+ 里这两个标准属性优先级高于 `::-webkit-scrollbar-*`，
+      会把下面整套自定义样式顶掉（旧代码的 4px 细条其实从未生效，画出来的是原生细条）。
+      Firefox 走 @supports 兜底。 */
+
+:root {
+  --sb-size: 4px;                                  /* 轨道宽 */
+  --sb-inset: 14px;                                /* 拇指上下内缩量（看着更短） */
+  --sb-thumb: var(--vp-c-bg);                      /* ④ 隐形：拇指 = 容器底色 */
+  --sb-thumb-hover: rgba(100, 116, 139, 0.35);     /* 指针压上去才显形 */
+  --sb-thumb-active: rgba(100, 116, 139, 0.5);     /* 拖动中 */
 }
 
-.VPSidebar:hover {
-  scrollbar-color: rgba(100, 116, 139, 0.3) transparent;
+html.dark {
+  /* 只覆盖"显形"的两档；--sb-thumb 跟着 --vp-c-bg 自动变，无需重复声明 */
+  --sb-thumb-hover: rgba(148, 163, 184, 0.35);
+  --sb-thumb-active: rgba(148, 163, 184, 0.5);
 }
 
-.VPSidebar::-webkit-scrollbar {
-  width: 4px;
+.VPSidebar,
+.aside-container,
+.VPDocAside {
+  /* 显式 auto：清掉可能残留的 thin，让下面的 ::-webkit- 规则真正生效 */
+  scrollbar-width: auto;
+  scrollbar-color: auto;
 }
 
-.VPSidebar::-webkit-scrollbar-track {
+.VPSidebar::-webkit-scrollbar,
+.aside-container::-webkit-scrollbar,
+.VPDocAside::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  width: var(--sb-size);
+}
+
+.VPSidebar::-webkit-scrollbar-track,
+.aside-container::-webkit-scrollbar-track,
+.VPDocAside::-webkit-scrollbar-track,
+html::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.VPSidebar::-webkit-scrollbar-thumb {
-  background: transparent;
+.VPSidebar::-webkit-scrollbar-thumb,
+.aside-container::-webkit-scrollbar-thumb,
+.VPDocAside::-webkit-scrollbar-thumb,
+html::-webkit-scrollbar-thumb {
+  border-top: var(--sb-inset) solid transparent;
+  border-bottom: var(--sb-inset) solid transparent;
+  background-color: var(--sb-thumb);
+  background-clip: padding-box;
   border-radius: 999px;
 }
 
-.VPSidebar:hover::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+/* ④ 隐形之后的补偿：**只有指针正好压在拇指上**才显形。
+   容器级 :hover（.VPSidebar:hover / html:hover）一律不写，理由见文件顶部 ④ 段 */
+.VPSidebar::-webkit-scrollbar-thumb:hover,
+.aside-container::-webkit-scrollbar-thumb:hover,
+.VPDocAside::-webkit-scrollbar-thumb:hover,
+html::-webkit-scrollbar-thumb:hover {
+  background-color: var(--sb-thumb-hover);
 }
 
-.VPSidebar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.5);
+/* 拖动中（按住不放）再加深一档，给持续反馈。
+   放在 :hover 之后，两者同时命中时以这条为准 */
+.VPSidebar::-webkit-scrollbar-thumb:active,
+.aside-container::-webkit-scrollbar-thumb:active,
+.VPDocAside::-webkit-scrollbar-thumb:active,
+html::-webkit-scrollbar-thumb:active {
+  background-color: var(--sb-thumb-active);
+}
+
+/* Firefox：不支持 ::-webkit-scrollbar-*，只能用标准属性（做不了内缩） */
+@supports not selector(::-webkit-scrollbar) {
+  .VPSidebar,
+  .aside-container,
+  .VPDocAside,
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: var(--sb-thumb) transparent;
+  }
 }
 
 /* 阅读列宽度：已改为左对齐吃满可用宽度（见文末 pdai 布局段的 max-width: min(100%, 1160px)），
@@ -737,4 +816,69 @@ html .VPDocAsideOutline .outline-link.active {
   color: var(--vp-c-brand-1) !important;
   font-weight: 600 !important;
   background-color: var(--vp-c-brand-soft) !important;
+}
+
+/* ============================================================
+   侧边栏条目：长标题单行缩略，不换行撑高菜单
+   ------------------------------------------------------------
+   超出部分用省略号；全文由 components/SidebarTip.vue 的悬停浮层补足
+   （浮层样式见下方 .sidebar-tip）。两条规则必须成对出现 ——
+   只加省略号不加浮层，标题就彻底看不全了。
+   ============================================================ */
+
+/* 让 flex 链条允许收缩，否则子项按 max-content 撑开，省略号不生效 */
+html .VPSidebar .VPSidebarItem .item,
+html .VPSidebar .VPSidebarItem .item > .link {
+  min-width: 0;
+}
+
+html .VPSidebar .VPSidebarItem .text {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 悬停浮层（由 SidebarTip.vue Teleport 到 body，fixed 定位）：
+   默认贴在侧边栏**右侧**、竖向对齐被截断的那一条 —— 一条菜单都不遮挡；
+   左侧 8px 的箭头指向它指向的条目。窄视口放不下时回退到侧边栏内部（箭头隐藏）。 */
+.sidebar-tip {
+  position: fixed;
+  z-index: 100;
+  padding: 7px 11px;
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 8px;
+  background-color: var(--vp-c-bg-elv);
+  box-shadow: var(--vp-shadow-3);
+  color: var(--vp-c-text-1);
+  font-size: 13px;
+  line-height: 1.5;
+  /* 定位算好前先不可见，避免在左上角闪一下 */
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  /* 浮层只负责显示，不能抢走鼠标，否则会跟 hover 判断打架 */
+  pointer-events: none;
+  word-break: break-word;
+}
+
+.sidebar-tip.is-ready {
+  opacity: 1;
+}
+
+/* 指向被截断条目的箭头：用旋转 45° 的方块，只留左上两条边 */
+.sidebar-tip::before {
+  content: "";
+  position: absolute;
+  left: -5px;
+  top: var(--tip-arrow-top, 50%);
+  width: 8px;
+  height: 8px;
+  transform: translateY(-50%) rotate(45deg);
+  background-color: inherit;
+  border-left: 1px solid var(--vp-c-divider);
+  border-bottom: 1px solid var(--vp-c-divider);
+}
+
+/* 回退形态（浮层在侧边栏内部）没有"侧边"可言，箭头关掉 */
+.sidebar-tip--inside::before {
+  display: none;
 }

@@ -5,12 +5,12 @@
 ## 一、项目定位
 
 - 站点名：**「L知识库」**，以第三方视角对外展示（不暴露个人履历/公司名）。
-- 核心价值：沉淀可验证产出（ADR/压测报告/架构图）。
+- 核心价值：沉淀可验证产出（ADR/压测报告/架构图）—— 落位 `docs/projects/toolkit/`，方法层与项目案例分离，三篇均按**黄金圈（Why → What → How）**组织。
 - 技术栈：VitePress + Markdown + Git。
 
 ## 二、目录约定
 
-- 9 大板块：`java` / `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `project`（项目实战）/ `interview` / `about`（关于本站）。
+- 9 大板块：`java` / `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `projects`（项目实战，含 `toolkit/` 产出工具方法层）/ `interview` / `about`（关于本站）。
 - 每个板块目录放 `index.md` 作导览页；目录名英文、标题中文、命名统一 4 字（云原生例外）。
 - 正文在 `docs/` 下，站点配置在 `docs/.vitepress/`。
 

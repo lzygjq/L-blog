@@ -45,5 +45,9 @@ features:
     title: 项目实战
     details: 大型集团绩效系统四大技术难点、SaaS 平台云原生与数仓落地 —— 面试弹药库
     link: /projects/
+  - icon: 📐
+    title: 产出工具
+    details: ADR / 压测报告 / 架构图 —— 项目实战的三件套可验证产出，按黄金圈讲清 Why / What / How
+    link: /projects/toolkit/
 date: 2026-09-11
 ---

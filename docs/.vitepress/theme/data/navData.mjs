@@ -1,5 +1,6 @@
-// 开发者导航数据：内容参考 pdai.tech 开发百宝箱 + cxy521（程序员521）分类体系
+// 开发者导航数据：自建的分类与站点条目
 // 结构：categories[] { id, icon, title, desc?, virtual?, items[] { name, desc, url, hot?, icon? } }
+// desc 会渲染到分类头与卡片上（对外可见），改动后跑 scripts/nav_check.mjs 验一遍
 // icon 字段可选：站点 /favicon.ico 直连失败时手动指定真实图标地址
 // 维护约定：只改这个文件即可增删导航条目，页面自动渲染
 // 「高频常用」是 virtual 分类：不再静态渲染，仅作为默认收藏来源（hot: true 的条目）；
@@ -30,7 +31,7 @@ export const navCategories = [
     id: 'ai',
     icon: '🤖',
     title: 'AI 工具',
-    desc: '对话助手 / AI 编程 / 绘图与视频，参考 cxy521 AI 专区',
+    desc: '对话助手 / AI 编程 / 绘图与视频',
     items: [
       { name: 'DeepSeek', desc: '国产大模型对话助手，代码与技术问答', url: 'https://chat.deepseek.com', icon: 'https://fe-static.deepseek.com/chat/favicon.svg' },
       { name: 'ChatGPT', desc: 'OpenAI 出品，全球标杆大模型对话助手', url: 'https://chatgpt.com' },
@@ -183,7 +184,7 @@ export const navCategories = [
       { name: 'W3Cschool', desc: '在线教程与技术资料查询', url: 'https://www.w3cschool.cn' },
       { name: 'JavaGuide', desc: 'Java 面试与进阶知识体系开源仓库', url: 'https://javaguide.cn' },
       { name: '小林 coding', desc: '图解网络、图解系统，面试热门', url: 'https://xiaolincoding.com', icon: 'https://cdn.xiaolincoding.com/icon.webp' },
-      { name: 'pdai.tech', desc: 'Java 全栈知识体系（本页导航参考来源）', url: 'https://pdai.tech' },
+      { name: 'pdai.tech', desc: 'Java 全栈知识体系', url: 'https://pdai.tech' },
       { name: '航歌 hangge', desc: '多端开发教程与代码示例合集（iOS / Android / 后端）', url: 'https://www.hangge.com/' },
       { name: 'LeetCode 力扣', desc: '算法刷题与面试题库', url: 'https://leetcode.cn' },
       { name: 'B 站技术区', desc: '海量视频教程与公开课', url: 'https://www.bilibili.com' },
