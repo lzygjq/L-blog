@@ -10,8 +10,9 @@
 
 ## 二、目录约定
 
-- 9 大板块：`java` / `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `projects`（项目实战，含 `toolkit/` 产出工具方法层）/ `interview` / `about`（关于本站）。
+- 10 大板块：`java` / `frontend`（大前端：小程序与 uni-app）/ `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `projects`（项目实战，含 `toolkit/` 产出工具方法层）/ `interview` / `about`（关于本站）。
 - 每个板块目录放 `index.md` 作导览页；目录名英文、标题中文、命名统一 4 字（云原生例外）。
+- 侧边栏（`docs/.vitepress/sidebar.mjs`）：**有子项的分组默认展开、右侧带可收起的 caret**；分组标题本身即该分组的导览入口（链到目录 `index.md`），**不再单独列「导览」子条目**。新增子目录用 `{ text, dir, group: true }`，层级不超过 2 层。
 - 正文在 `docs/` 下，站点配置在 `docs/.vitepress/`。
 
 ## 三、内容原则（改稿红线）
