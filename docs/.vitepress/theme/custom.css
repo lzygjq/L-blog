@@ -30,18 +30,15 @@ html.dark {
   --vp-c-brand-soft: rgba(62, 175, 124, 0.18);
 }
 
-/* ===== 左侧目录（参考 pdai.tech）：恒定全展开 / 逐级缩进 / 选中态色块 =====
-   目标（用户定稿）：① 不要折叠箭头、不要能收起的层级，一次性全展开；
+/* ===== 左侧目录（参考 pdai.tech）：可折叠但默认全展开 / 逐级缩进 / 选中态色块 =====
+   目标（用户 2026-09-13 改版）：① 每个分组默认展开，但右侧要有 caret 可收放；
    ② 逐级缩进 + 一级条目离左缘留出内边距（原来太贴边）；
    ③ 选中/悬停都是圆角色块，不要竖条、不要边框线 */
 
-/* ① 恒定展开：sidebar.mjs 已不输出 collapsed 字段，VitePress 的
-   collapsible = (item.collapsed != null) 恒为 false —— 不渲染 chevron 箭头、
-   点击分组标题也不再有收起动作。这里再兜一层：万一将来手写 collapsed，
-   用 CSS 强制展开（v-show 的内联 display:none 只有 !important 压得住） */
-html .VPSidebar .VPSidebarItem.collapsed > .items {
-  display: block !important;
-}
+/* ① 折叠由 sidebar.mjs 输出的 `collapsed: false` 驱动：
+   VitePress 的 collapsible = (item.collapsed != null) → 渲染右侧 caret、且默认展开。
+   ⚠️ 此处**不能**再写 `display: block !important` 强制展开（旧版"恒定展开"的兜底），
+   否则 v-show 的内联 display:none 会被压住，点 caret 收不起来。 */
 
 /* ② 缩进阶梯：默认主题只在 level-1..5 的 .items 上给 padding-left:16px，
    level-0 的 .items 完全没有缩进 —— 所以「分组标题」和它的「子条目」

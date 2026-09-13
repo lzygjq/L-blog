@@ -92,14 +92,14 @@ function listMd(dir) {
   }
 }
 
-/** 目录 → 条目列表：index 在前，其余文件按 order/date/文件名排序 */
-function dirItems(dir, indexLabel) {
-  const items = []
-  const indexAbs = join(DOCS, dir, 'index.md')
-  if (existsSync(indexAbs)) {
-    items.push({ text: indexLabel || displayName(dir + '/index', dir), link: '/' + dir + '/' })
-  }
-  const entries = listMd(dir)
+/** 目录下的 index.md 链接（不存在返回 null）——「分组标题本身可点击」靠它 */
+function indexLink(dir) {
+  return existsSync(join(DOCS, dir, 'index.md')) ? '/' + dir + '/' : null
+}
+
+/** 目录 → 子条目列表：非 index 的 md，按 order → date → 文件名排序 */
+function listEntries(dir) {
+  return listMd(dir)
     .filter((f) => f !== 'index.md')
     .map((f) => {
       const relNoExt = dir + '/' + f.replace(/\.md$/, '')
@@ -112,37 +112,47 @@ function dirItems(dir, indexLabel) {
       String(a.fm.date || '').localeCompare(String(b.fm.date || '')) ||
       a.relNoExt.localeCompare(b.relNoExt)
     )
-  for (const e of entries) items.push({ text: e.name, link: '/' + e.relNoExt })
-  return items
+    .map((e) => ({ text: e.name, link: '/' + e.relNoExt }))
 }
 
 /**
  * 条目节点类型（children 数组里混用）：
- *   { text, link }                          静态条目
- *   { text, dir }                           目录型条目：index 为条目，目录内其他 md 自动追加为兄弟条目
- *   { text, dir, indexLabel }               子组：条目列表由目录扫描生成
- *   { text, children }                      手写子组（children 里可再混用以上类型）
+ *   { text, link }                       静态条目（如「板块导览」）
+ *   { text, dir }                        目录型条目：标题链到目录 index（若有），目录内其他 md 平铺为同级条目
+ *   { text, dir, group: true }           可折叠分组：标题链到 index，其余 md 作子项
+ *   { text, children }                   手写分组（可再带 link，让标题也可点）
+ *   { text }                             纯文本占位（如「PostgreSQL（规划中）」）
  *
- * 重要约定：**不输出 collapsed 字段**（参考 pdai.tech 的左侧目录）。
- * VitePress 的 useSidebarControl 里 collapsible = (item.collapsed != null)：
- * 只要不给 collapsed，侧边栏就不会渲染折叠箭头、点击也不会收起，分组恒定全展开。
- * 曾经的 collapsed:true 会导致：① 每层带一个 chevron 箭头；② 非当前章节默认收起，
- * 需要用户逐层点开才能看到全貌。现在改为「一次性全部展开」。
+ * 折叠约定（2026-09-13 用户改版）：
+ *   1. **有子项的分组一律输出 `collapsed: false`**。VitePress 的
+ *      `collapsible = (item.collapsed != null)` 决定是否渲染右侧 caret 箭头，
+ *      而 `collapsed: false` 同时保证「默认展开」。
+ *   2. **不再生成「导览」子条目**——分组标题本身就是导览入口，链到目录的 index.md。
+ *      VPSidebarItem 的两种交互是分开的：有 link 时「点标题=跳转 / 点 caret=折叠」，
+ *      无 link 时「点标题=折叠」（见其 onItemInteraction / onCaretClick）。
  */
 function buildNode(node) {
-  if (node.children) {
-    return { text: node.text, items: node.children.map(buildNode).flat() }
+  // 有子项的分组：手写 children，或 dir + group（扫描目录、排除 index 自身）
+  const kids = node.children
+    ? node.children.map(buildNode).flat()
+    : node.dir && node.group
+      ? listEntries(node.dir)
+      : null
+
+  if (kids) {
+    const out = { text: node.text, collapsed: false, items: kids }
+    const link = node.link || (node.dir ? indexLink(node.dir) : null)
+    if (link) out.link = link
+    return out
   }
-  if (node.dir && node.indexLabel !== undefined) {
-    // 子组：目录扫描展开
-    return { text: node.text, items: dirItems(node.dir, node.indexLabel) }
-  }
+
   if (node.dir) {
-    // 目录型条目 + 目录内额外文件追加为兄弟条目
-    const extra = dirItems(node.dir).slice(1) // 跳过 index 自身
-    return [{ text: node.text, link: '/' + node.dir + '/' }, ...extra.map((it) => ({ text: it.text, link: it.link }))]
+    // 目录型条目：标题条目 + 目录内其余 md 平铺为兄弟（目录里只剩 index.md 时自然退化为单条）
+    const link = indexLink(node.dir)
+    return [link ? { text: node.text, link } : { text: node.text }, ...listEntries(node.dir)]
   }
-  return { text: node.text, link: node.link }
+
+  return node.link ? { text: node.text, link: node.link } : { text: node.text }
 }
 
 /** 顶层入口：spec = [{ text, children }, ...] */

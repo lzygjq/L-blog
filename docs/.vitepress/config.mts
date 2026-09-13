@@ -7,10 +7,12 @@ import { buildSidebar } from './sidebar.mjs'
 // sidebar 按路径前缀（prefix）映射，只展示对应板块的子分类，避免与顶部菜单重复；
 // 未命中任何前缀的页面（首页 / 导航 / 归档 / 关于）回落到 '/' → 无侧边栏。
 // 侧边栏由 sidebar.mjs 扫目录自动生成（新增 md 落对目录 + 重启 dev 即自动出现）：
-//   - { text, link }            静态条目
-//   - { text, dir }             目录型条目：index 为条目，目录内其他 md 自动追加为兄弟条目
-//   - { text, dir, indexLabel } 子组：整个目录扫描展开，index 显示为 indexLabel
-//   - { text, children }        手写子组
+//   - { text, link }             静态条目
+//   - { text, dir }              目录型条目：标题链到目录 index，目录内其他 md 自动追加为兄弟条目
+//   - { text, dir, group: true } 可折叠分组：标题链到 index，其余 md 作子项
+//   - { text, children }         手写分组（可再加 link 让标题也可点，如「Spring 生态」）
+// 分组约定：凡有子项的分组都渲染折叠箭头（默认展开、点 caret 收放）；
+//   标题本身即该分组的导览入口，所以**不再单独列「导览」子条目**。
 // 自动命名优先级：frontmatter.sidebar > sidebar.mjs OVERRIDES > frontmatter.title > H1 去英文括号 > 文件名
 // 排序：frontmatter.order > date > 文件名
 
@@ -21,32 +23,34 @@ const sidebarSpec = [
     items: [
       { text: '板块导览', link: '/java/' },
       {
+        // 纯逻辑分组（没有 /java/core/ 这个导览页）：标题不可点，点标题即折叠
         text: 'Java 核心',
         children: [
-          // 单条：目录内只有 index.md 时，「目录型条目」自动退化为一个可点击条目，不再多包一层
+          // 目录内只有 index.md → 「目录型条目」自动退化为一个可点击的条目，不再多包一层
           { text: 'Java 基础', dir: 'java/basics' },
-          { text: 'Java 集合', dir: 'java/collections', indexLabel: '导览' },
+          { text: 'Java 集合', dir: 'java/collections', group: true },
           { text: 'Java 并发', dir: 'java/concurrent' },
           { text: 'Java 虚拟机', dir: 'java/jvm' }
         ]
       },
       {
+        // 分组标题 = 导览入口（链到 /java/spring/），故不再单独列「导览」子条目
         text: 'Spring 生态',
+        link: '/java/spring/',
         children: [
-          { text: '导览', link: '/java/spring/' },
-          { text: 'Spring Framework', dir: 'java/spring/spring-framework', indexLabel: '导览' },
+          { text: 'Spring Framework', dir: 'java/spring/spring-framework', group: true },
           { text: 'Spring Boot', dir: 'java/spring/spring-boot' },
           { text: 'Spring Cloud', dir: 'java/spring/spring-cloud' }
         ]
       },
       {
         text: '设计模式',
+        link: '/java/design-patterns/',
         children: [
-          { text: '导览', link: '/java/design-patterns/' },
           { text: '设计原则与 UML', dir: 'java/design-patterns/principles' },
-          { text: '创建型（5 种）', dir: 'java/design-patterns/creational', indexLabel: '导览' },
-          { text: '结构型（7 种）', dir: 'java/design-patterns/structural', indexLabel: '导览' },
-          { text: '行为型（11 种）', dir: 'java/design-patterns/behavioral', indexLabel: '导览' }
+          { text: '创建型（5 种）', dir: 'java/design-patterns/creational', group: true },
+          { text: '结构型（7 种）', dir: 'java/design-patterns/structural', group: true },
+          { text: '行为型（11 种）', dir: 'java/design-patterns/behavioral', group: true }
         ]
       }
     ]
@@ -61,7 +65,7 @@ const sidebarSpec = [
         text: '数据存储',
         children: [
           { text: 'MySQL', dir: 'database/mysql' },
-          { text: 'Redis 缓存', dir: 'database/redis', indexLabel: '导览' },
+          { text: 'Redis 缓存', dir: 'database/redis', group: true },
           { text: '分库分表', dir: 'database/sharding' },
           { text: 'PostgreSQL（规划中）' }
         ]
@@ -139,17 +143,17 @@ const sidebarSpec = [
       {
         // 方法层：可验证产出三件套（先读方法，再看项目案例）
         text: '产出工具',
+        link: '/projects/toolkit/',
         children: [
-          { text: '导览', link: '/projects/toolkit/' },
-          { text: 'ADR 架构决策记录', dir: 'projects/toolkit/adr', indexLabel: '导览' },
+          { text: 'ADR 架构决策记录', dir: 'projects/toolkit/adr', group: true },
           { text: '压测报告', link: '/projects/toolkit/perf-report/' },
           { text: '架构图', link: '/projects/toolkit/arch-diagram/' }
         ]
       },
       {
         text: '绩效系统',
+        link: '/projects/perf-system/',
         children: [
-          { text: '导览', link: '/projects/perf-system/' },
           { text: '十万人组织架构同步', dir: 'projects/perf-system/org-sync-100k' },
           { text: '高峰期并发填报', dir: 'projects/perf-system/peak-filling' },
           { text: '多级审批实时推送', dir: 'projects/perf-system/approval-push' },
@@ -158,8 +162,8 @@ const sidebarSpec = [
       },
       {
         text: '智慧物业 SaaS',
+        link: '/projects/property-saas/',
         children: [
-          { text: '导览', link: '/projects/property-saas/' },
           { text: '微服务 → K8s 云原生演进', dir: 'projects/property-saas/microservice-to-k8s' },
           { text: '大数据架构方案 → 数仓', dir: 'projects/property-saas/data-warehouse' }
         ]
