@@ -137,7 +137,8 @@ const sidebarSpec = [
           { text: '微服务 → K8s 云原生演进', dir: 'projects/property-saas/microservice-to-k8s' },
           { text: '大数据架构方案 → 数仓', dir: 'projects/property-saas/data-warehouse' }
         ]
-      }
+      },
+      { text: '架构师路线图', dir: 'projects/architect-roadmap' }
     ]
   },
   {
