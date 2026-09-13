@@ -262,12 +262,11 @@ const countText = computed(() =>
 
 <template>
   <div class="nav-board" :class="{ 'is-filtering': !!keyword }">
-    <!-- 顶部工具条：标题 + 计数 + 筛选框 -->
+    <!-- 顶部工具条：第一行＝标题 + 计数（左）/ 筛选框（右），第二行＝拖拽小字说明 -->
     <div class="nav-toolbar">
       <div class="nav-headline">
         <h2 class="nav-title">开发者导航</h2>
         <span class="nav-count">{{ countText }}</span>
-        <span class="nav-hint">拖拽卡片可调整分类内顺序，拖分类标题左侧把手可调整分类顺序</span>
       </div>
       <input
         v-model="keyword"
@@ -275,6 +274,7 @@ const countText = computed(() =>
         type="text"
         placeholder="输入关键字筛选，如：redis / 正则 / 图标…"
       />
+      <span class="nav-hint">拖拽卡片可调整分类内顺序，拖分类标题左侧把手可调整分类顺序</span>
     </div>
 
     <!-- 分类锚点（筛选时隐藏，避免锚点失效） -->
@@ -445,17 +445,19 @@ const countText = computed(() =>
 }
 
 /* ── 工具条 ─────────────────────────── */
+/* 两行网格：第 1 行＝标题计数（左）+ 搜索框（右），第 2 行＝小字说明横跨整行 */
 .nav-toolbar {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  column-gap: 16px;
+  row-gap: 8px;
 }
 .nav-headline {
   display: flex;
   align-items: baseline;
   gap: 12px;
+  min-width: 0;
 }
 .nav-title {
   margin: 0 !important;
@@ -584,12 +586,23 @@ const countText = computed(() =>
   opacity: 0.6;
 }
 .nav-hint {
+  grid-column: 1 / -1;
   font-size: 12px;
   color: var(--vp-c-text-3);
 }
 @media (max-width: 1180px) {
   .nav-hint {
     display: none;
+  }
+}
+/* 窄屏：搜索框换到标题下方占满整行 */
+@media (max-width: 640px) {
+  .nav-toolbar {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .nav-search {
+    justify-self: start;
+    width: 100%;
   }
 }
 
