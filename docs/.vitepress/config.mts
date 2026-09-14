@@ -53,7 +53,7 @@ const sidebarSpec = [
           // Spring MVC 与 Spring 平级：Web 层独立成菜单
           { text: 'Spring MVC', dir: 'java/spring/spring-mvc' },
           { text: 'Spring Boot', dir: 'java/spring/spring-boot', group: true },
-          { text: 'Spring Cloud', dir: 'java/spring/spring-cloud' }
+          { text: 'Spring Cloud', dir: 'java/spring/spring-cloud', group: true }
         ]
       },
       {

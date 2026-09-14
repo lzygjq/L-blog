@@ -17,7 +17,7 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 | **[Spring](/java/spring/spring-framework/)** | 核心容器 | 对象管理与横切逻辑：IoC、Bean、AOP、事务、ORM 集成 | **已成篇（7 篇）** |
 | **[Spring MVC](/java/spring/spring-mvc/)** | Web 层 | 请求怎么被路由到 Controller、参数怎么绑定、响应怎么序列化 | 已成篇（1 篇） |
 | **[Spring Boot](/java/spring/spring-boot/)** | 提效 | 消除配置：自动配置、Starter、启动流程 | 已成篇（2 篇） |
-| [Spring Cloud](/java/spring/spring-cloud/) | 分布式 | 服务治理：注册发现、网关、配置中心、链路追踪 | 写作中 |
+| [Spring Cloud](/java/spring/spring-cloud/) | 分布式 | 服务治理与分布式能力：注册发现、网关、熔断降级、链路追踪、CAP、分布式事务、幂等、任务调度 | **已成篇（10 篇）** |
 
 **为什么 Spring MVC 要单独成一个菜单**：它有自己的处理链路（`DispatcherServlet` → `HandlerMapping` → `HandlerAdapter`）和一套 Web 专属注解（`@RequestBody` / `@PathVariable` 等），与容器的机制层是"两层"关系。把两者混在一个菜单里，找东西时要先分清"这是容器的知识还是 Web 的知识"，反而更费力。
 
@@ -41,12 +41,14 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 | [Spring MVC](/java/spring/spring-mvc/) | **执行流程**：九大组件、一次请求的完整链路、`HandlerMapping` 与 `HandlerAdapter` 为何分离、参数绑定与 `HttpMessageConverter`、拦截器 vs 过滤器、Web 层注解速查 |
 | [Spring Boot](/java/spring/spring-boot/) | **自动配置原理**：条件装配、`.imports` 清单演进、自定义 Starter<br>**启动流程**：`SpringApplication` 构造、`run()` 十一个阶段、七种启动事件、耗时优化与失败排查 |
 
-## 四、待补内容
+## 四、Spring Cloud 的内容
 
-**Spring Cloud**（规划中）：
+[Spring Cloud](/java/spring/spring-cloud/) 与其他三块不同——它不止讲框架组件，还包含**分布式理论与跨服务的通用能力**，共 10 篇：
 
-- **服务注册与发现**：Nacos / Eureka 的注册与心跳机制、CAP 取舍
-- **网关**：Spring Cloud Gateway 的响应式模型、路由与过滤器
-- **配置中心**：配置动态刷新的实现（`@RefreshScope` 与代理重建）
-- **链路追踪**：TraceId 透传、与日志 MDC 的集成
-- **容错**：Sentinel / Resilience4j 的熔断与限流策略
+| 域 | 篇目 |
+|---|---|
+| **组件**（换个框架就换一套） | 注册中心（Eureka / Nacos）、负载均衡与远程调用（Ribbon / LoadBalancer / OpenFeign）、服务保护（雪崩 / 降级 / 熔断）、网关与限流、链路追踪（Skywalking） |
+| **理论**（换任何框架都成立） | CAP 与 BASE |
+| **分布式能力** | 分布式事务（Seata 四种模式）、接口幂等、分布式任务调度（xxl-job） |
+
+**一点提醒**：这一块里的 Ribbon、Hystrix、Zuul **都已在 Spring Cloud 2020.0.0 被移除**，正文按「演进史 + 现役选型」写——原理照讲（面试仍高频），但选型结论指向 Spring Cloud LoadBalancer / Sentinel / Gateway。详见[导览页第三节](/java/spring/spring-cloud/#component-status)。
