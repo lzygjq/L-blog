@@ -34,14 +34,19 @@
 - 远端：`git@github.com:lzygjq/L-blog.git`（GitHub 私有仓库，SSH 直连，不依赖浏览器/代理）。
 - SSH 密钥：本机为 `~/.ssh/id_ed25519_github`（ssh config 已配 Host github.com）。**新机器需自建密钥并添加到 GitHub 账号（554511322@qq.com / lzygjq）**。
 - git 写操作后可能残留 `.git/index.lock`，提交前先 `mv .git/index.lock /tmp/`。
-- AI 完成修改后自动 commit + push（成本低、双机/多机同步必需）。
+- **AI 完成修改后默认只在本机 `git commit`，不 push 远端**（2026-09-15 用户明确要求）。
+  - 本地留档是默认动作：历史可回溯、改动不会丢、跨会话可查。
+  - **推远端必须由用户显式指定**（如「推送」「push 一下」「同步到远端」）。没被指定就不要推。
+  - 这条**同时覆盖 `workbuddy-sync`**（记忆与 skills 仓库）—— 同样本机 commit 留档即可；
+    例外是用户说「同步 L知识库」这类口令，那本身就是显式指定。
+  - 需要推时一条命令即可：`git push origin main`（私有仓库不受影响，见第七节）。
 
 ## 六、跨设备无缝对接（三机协同）
 
 | 数据 | 同步方式 |
 |------|---------|
 | 博客代码/文章 | 本仓库（Git push/pull，唯一真源） |
-| 长期记忆 MEMORY.md | `workbuddy-sync` 私有仓库（`memory/` 目录，开工 pull、收工 push） |
+| 长期记忆 MEMORY.md | `workbuddy-sync` 私有仓库（`memory/` 目录，开工 pull；收工**默认只本机 commit**，用户说「同步」才 push） |
 | WorkBuddy skills | 同上（`skills/` 目录） |
 | API Key（WEREAD_API_KEY 等） | 各机手动配置一次，不入库 |
 | 历史会话 | 换机后用 WorkBuddy 内 `conversation_search`（30 天窗口、返回结构化摘要）；更早/全文以本文件 + MEMORY.md 为准 |
@@ -54,7 +59,7 @@
 4. 装 Node 22+（arm64），`npm install` 装依赖。
 5. 修改前先读本文件 + `git pull`。
 
-**日常切换电脑的流程**：旧机收工 = AI 自动 `git push` + workbuddy-sync push；新机开工 = `git pull` 两个仓库 → 读 CONTEXT.md → 继续干活。会话上下文不需要"搬"，用 conversation_search 检索摘要 + 本文件恢复约定即可。
+**日常切换电脑的流程**：旧机收工 = AI 本机 `commit` 留档（**默认不 push**；要跨机同步时由用户说「推送」/「同步 L知识库」，那两句是显式指令）；新机开工 = `git pull` 两个仓库 → 读 CONTEXT.md → 继续干活。会话上下文不需要"搬"，用 conversation_search 检索摘要 + 本文件恢复约定即可。
 
 ## 七、发布状态（2026-09-15 起：暂停对外）
 
@@ -62,7 +67,7 @@
 
 - **当前（2026-09-15 22:30 实测确认）：仓库 private、Pages 已下线、自动部署已停。** 站点没写完前不对外访问。
 - **三项实测证据**：线上地址 **404**、无认证调 `api.github.com/repos/lzygjq/L-blog` **404**（私有仓库匿名读不到）、`git ls-remote origin` **正常返回** → 站点确实没了，而代码读写权限完好。
-- **私有仓库不影响 AI 推送代码**：`push` 走 SSH 密钥（`~/.ssh/id_ed25519_github`），鉴权对象是仓库所有者的密钥，**与仓库可见性无关** —— 照旧「改完自动 commit + push」，不需要任何额外操作，也不需要给 AI 任何 token。
+- **私有仓库不影响 AI 推送代码**：`push` 走 SSH 密钥（`~/.ssh/id_ed25519_github`），鉴权对象是仓库所有者的密钥，**与仓库可见性无关** —— 需要推时可直接 `git push origin main`，不需要任何额外操作，也不需要给 AI 任何 token。**但默认仍然只 commit 不 push**（见第五节）。
 - 线上地址 `https://lzygjq.github.io/L-blog/` **已 404**（GitHub Free 账号下私有仓库不支持 Pages，转 private 时站点被自动下线），以前给出去的链接会失效。
 - `.github/workflows/deploy.yml` 的 `push` 触发器**已注释掉**，只剩 `workflow_dispatch` 手动入口 —— 所以**现在 push 不会再发布任何东西**，本地 `npm run dev` 照常能看。
 - **写完要恢复发布，三件事一起做（缺一不可）**：① 取消 `deploy.yml` 里 `push:` 两行的注释；② Settings → Pages → Source 选 GitHub Actions；③ Settings → General → Danger Zone → 可见性改回 **Public**。
