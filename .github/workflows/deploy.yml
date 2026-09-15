@@ -1,11 +1,26 @@
 # 部署 VitePress 静态站到 GitHub Pages
-# 触发：push 到 main 分支，或在 Actions 页手动触发（workflow_dispatch）
-# 首次启用还需在仓库 Settings → Pages → Build and deployment → Source 选 "GitHub Actions"
+#
+# ⏸ 当前状态：**已暂停发布**（2026-09-15）—— 站点尚未写完，暂不对外访问。
+#    配套动作：仓库已转为 private。GitHub Free 账号下私有仓库不支持 Pages，
+#    线上站点 lzygjq.github.io/L-blog/ 在转 private 时被自动下线。
+#    同时把下面的 push 触发器注释掉：防止日后改回 public 时，
+#    一次普通 push 就把没写完的站点又发出去。
+#
+# ▶ 站点写完、要恢复发布时，三件事一起做（缺一不可）：
+#    ① 取消下面 `push:` 两行的注释，恢复「push 到 main 自动部署」；
+#    ② Settings → Pages → Build and deployment → Source 选 GitHub Actions；
+#    ③ Settings → General → Danger Zone → 可见性改回 Public。
+#       注：Free 账号下私有仓库用不了 Pages；Pro 虽允许从私有仓库发布，
+#       但它只保证「仓库私有」，站点本身仍是公开的 —— 别指望它藏住页面。
+#
+# ⚠ 在 Pages 关闭的状态下手动触发本工作流会失败（deploy-pages 找不到发布目标），
+#    这是预期行为，不是配置坏了。
 name: Deploy VitePress site to Pages
 
 on:
-  push:
-    branches: [main]
+  # ↓↓ 暂停发布中：取消下面两行注释即可恢复「push 到 main 自动部署」 ↓↓
+  # push:
+  #   branches: [main]
   workflow_dispatch:
 
 # GITHUB_TOKEN 权限：允许部署到 GitHub Pages

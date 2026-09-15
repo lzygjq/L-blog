@@ -55,3 +55,14 @@
 5. 修改前先读本文件 + `git pull`。
 
 **日常切换电脑的流程**：旧机收工 = AI 自动 `git push` + workbuddy-sync push；新机开工 = `git pull` 两个仓库 → 读 CONTEXT.md → 继续干活。会话上下文不需要"搬"，用 conversation_search 检索摘要 + 本文件恢复约定即可。
+
+## 七、发布状态（2026-09-15 起：暂停对外）
+
+> **这一节决定了「push 之后会不会上线」，接手时务必先看。**
+
+- **当前：仓库 private、Pages 已下线、自动部署已停。** 站点没写完前不对外访问。
+- 线上地址 `https://lzygjq.github.io/L-blog/` **已不可访问**（GitHub Free 账号下私有仓库不支持 Pages，转 private 时站点被自动下线），以前给出去的链接会变成 404。
+- `.github/workflows/deploy.yml` 的 `push` 触发器**已注释掉**，只剩 `workflow_dispatch` 手动入口 —— 所以**现在 push 不会再发布任何东西**，本地 `npm run dev` 照常能看。
+- **写完要恢复发布，三件事一起做（缺一不可）**：① 取消 `deploy.yml` 里 `push:` 两行的注释；② Settings → Pages → Source 选 GitHub Actions；③ Settings → General → Danger Zone → 可见性改回 **Public**。
+- 注意两个概念不要混：**仓库私有 ≠ 站点私有**。GitHub Pages 的站点可见性跟仓库可见性无关，个人账号只有在 Enterprise Cloud 下才有「真·私有 Pages」；Pro 只是允许从私有仓库发布，站点本身依然公开。所以「不想别人看到」的正解是**先别发布**，而不是「发布 + 藏地址」。
+- 百度统计 ID 仍留在 `config.mts`（`BAIDU_TONGJI_ID`），站点下线期间不会产生任何数据，恢复发布后自动继续采集。
