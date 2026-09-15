@@ -167,6 +167,7 @@ const sidebarSpec = [
     items: [
       { text: '板块导览', link: '/projects/' },
       { text: '架构师路线图', dir: 'projects/architect-roadmap' },
+      { text: '架构演进地图', dir: 'projects/architecture-evolution' },
       {
         // 方法层：可验证产出三件套（先读方法，再看项目案例）
         text: '产出工具',
