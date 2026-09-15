@@ -67,7 +67,7 @@ desc: 数据存储板块导览——MySQL 与 Redis 两条主线、分库分表�
 
 相关交叉内容：[多级缓存：亿级流量架构](/database/redis/multilevel-cache)、[Canal 数据同步](/bigdata/canal/)。
 
-## 四、面试高频清单
+## 四、面试高频清单 {#interview}
 
 | # | 问题 | 篇目 |
 |---|---|---|

@@ -340,7 +340,7 @@ public class B {
 
 **一个常见的坑**：在 `Interceptor` 里 `@Autowired` 一个 Service 是可行的（它由 Spring 管理），但在 `Filter` 里直接 `@Autowired` **会注入失败**（Filter 由 Tomcat 创建，早于 Spring 容器完成初始化）。需要时通过 `FilterRegistrationBean` 注册，或实现 `ApplicationContextAware` 手动取。
 
-## 十、面试问答
+## 十、面试问答 {#interview}
 
 **Q1：Spring MVC 的执行流程？**
 

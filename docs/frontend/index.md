@@ -30,7 +30,7 @@ desc: 大前端板块导览——小程序与 uni-app 的学习主线、内容�
 - **支付**：小程序拉起支付 → 服务端统一下单 → 异步回调 —— 对应[消息队列](/middleware/)的最终一致
 - **分包与性能**：包体积限制 → 静态资源上 CDN —— 对接[云原生](/cloud-native/)的部署链路
 
-## 三、面试关注点
+## 三、面试关注点 {#interview}
 
 1. 小程序的双线程模型为什么这么设计（安全 + 性能，见[起步](/frontend/miniprogram-start/)）
 2. `setData` 的性能边界，为什么大数据渲染要少用（见[模板与样式](/frontend/miniprogram-template/)）

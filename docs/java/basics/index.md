@@ -63,7 +63,7 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 | [Java 8 特性](/java/basics/java8) | Lambda 的底层（`invokedynamic`）、四大函数式接口与变体、接口 `default` 与菱形冲突、Stream 的惰性与并行流四个坑、`Optional` 纪律、新日期时间 API | Lambda 和匿名内部类的区别？并行流什么时候别用？`orElse` 和 `orElseGet` 差在哪？ |
 | [Java 9~21 演进](/java/basics/java9-21) | 模块化与强封装、`var` / `record` / `sealed` / 模式匹配、类库与 GC 的关键变化、虚拟线程的原理与三条禁忌、升级 LTS 排查清单 | 升级 JDK 17 为什么框架会挂？`record` 能不能做实体？虚拟线程为什么不能池化？ |
 
-## 四、高频考点速查
+## 四、高频考点速查 {#faq}
 
 按「问 → 答 → 详见」压缩，面试前扫一遍。
 
