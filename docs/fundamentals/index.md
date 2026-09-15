@@ -21,7 +21,7 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 | 域 | 目录 | 回答的问题 | 状态 |
 |---|---|---|---|
 | [计算机网络](/fundamentals/network/) | `network/` | 数据怎么从一台机器到另一台机器，中途会出什么错 | **5 篇已成篇** |
-| 操作系统 | `os/` | 数据到了机器之后，进程怎么被调度、内存怎么被管理、IO 怎么被等待 | 规划中 |
+| [操作系统](/fundamentals/os/) | `os/` | 数据到了机器之后，进程怎么被调度、内存怎么被管理、IO 怎么被等待 | **5 篇已成篇** |
 | 算法与数据结构 | `algorithms/` | 数据到了应用层，用什么结构存、用什么策略算，代价是多少 | 规划中 |
 
 **三者的关系不是"三个独立学科"，是一条连续的流水线**——网络负责"送达"，操作系统负责"接住并交给进程"，算法负责"算得又快又省"。下一节用一条真实的请求把这条流水线走一遍。
@@ -60,8 +60,8 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 
 | 交叉板块 | 交叉点 | 说明 |
 |---|---|---|
-| [Java 核心](/java/) | IO 模型、线程调度、集合底层 | `java/basics/io-nio` 讲 **Java 视角**（BIO/NIO/AIO 的 API 与 Selector）；「五种 IO 模型的内核机制、epoll 的数据结构、零拷贝」在本板块的 `os/` |
-| [Java 并发](/java/concurrent/) | 线程与调度 | 内核线程怎么被调度（本板块）vs Java 线程池怎么配（Java 板块）；前者是后者参数的依据 |
+| [Java 核心](/java/) | IO 模型、线程调度、集合底层 | [IO 与 NIO](/java/basics/io-nio) 讲 **Java 视角**（BIO/NIO/AIO 的 API、Buffer、Selector 用法）；「五种 IO 模型的内核机制、epoll 的数据结构、零拷贝」在 [IO 模型与多路复用](/fundamentals/os/io-model) |
+| [Java 并发](/java/concurrent/) | 线程与调度 | 内核线程怎么被调度（[进程、线程与调度](/fundamentals/os/process-thread)）vs Java 线程池怎么配（[线程池](/java/concurrent/thread-pool)）；前者是后者参数的依据 |
 | [存储与消息](/database/) | 连接、超时、重传 | 数据库连接池、MQ 长连接的行为，全部受 TCP 层影响 |
 | [云原生](/cloud-native/) | Service / Ingress / CNI | K8s 板块讲「怎么在集群内实现服务发现与转发」；本板块讲「TCP/IP 本身怎么工作」 |
 | [数据仓库](/bigdata/) | 海量数据处理 | TopK、布隆过滤器、位图、外排序这些算法在 `algorithms/`；它们在数仓与大数据场景里的用法在数据仓库板块 |
@@ -85,14 +85,34 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 | 一次请求从输入网址到看到页面经历了什么？ | DNS → TCP → TLS → HTTP → 封装；服务端侧还要经过收包、唤醒、调度、拷贝 | [#journey](#journey) |
 | 网络不通怎么排查？ | 按层自下而上：地址 → 路由 → 端口 → 应用 → 证书 → 性能，每一步都有对应工具 | [#layers-path](/fundamentals/network/troubleshoot#layers-path) |
 
-> **操作系统与算法与数据结构两组速查，在各域正文成篇后补入本节。**
+> **算法与数据结构一组速查，在该域正文成篇后补入本节。**
+
+### 4.2 操作系统 {#faq-os}
+
+| 问题 | 一句话答案 | 详见 |
+|---|---|---|
+| 进程和线程的本质区别？ | **进程是资源分配单位（独立地址空间），线程是调度单位（共享地址空间）**；Linux 内核里都是 `task_struct`，区别只在 `clone()` 的 `CLONE_*` 标志 | [#process-vs-thread](/fundamentals/os/process-thread#process-vs-thread) |
+| 上下文切换贵在哪？ | 直接成本（存寄存器）是百纳秒级；**真正贵的是切换后缓存与 TLB 变冷**。用 `pidstat -w` 分自愿（在等 IO/锁）与非自愿（被抢占） | [#context-switch](/fundamentals/os/process-thread#context-switch) |
+| CFS 和 EEVDF 是什么关系？ | Linux **6.6 起 EEVDF 取代 CFS**（6.12 完成转换）：从"最小虚拟运行时间"改为"**最早合格的虚拟截止时间**"，并能用 `sched_setattr` 请求更短时间片。**CFS 时代的调参经验已作废** | [#cfs-eevdf](/fundamentals/os/process-thread#cfs-eevdf) |
+| `load` 高但 CPU 空闲，怎么回事？ | load 把 **D 状态（不可中断睡眠）**也计入——典型是在等磁盘 IO。`ps -eo state,pid,cmd \| awk '$1=="D"'` 找出来 | [#load-avg](/fundamentals/os/process-thread#load-avg) |
+| `free` 里 `buff/cache` 很高要不要清？ | 不要。它是**可回收的页缓存**；**只看 `available`**（新版 `free` 的 `used = total − available`） | [#free-columns](/fundamentals/os/memory#free-columns) |
+| `write` 成功了数据在哪？ | 在**页缓存**（内存），没落盘。持久化要 `fsync`/`fdatasync`。`dirty_ratio` 超限会让写入者被迫同步回写 | [#dirty-writeback](/fundamentals/os/memory#dirty-writeback) |
+| 为什么 Java 进程 RSS 比 `-Xmx` 大？ | 堆外还有**元空间、线程栈（`-Xss`×线程数）、直接内存、Code Cache、GC 结构**。`-Xmx` 一般取 limit 的 60%~75% | [#java-mapping](/fundamentals/os/memory#java-mapping) |
+| `epoll` 为什么快？ | `select`/`poll` 每次调用都要**把整个 fd 集合拷进内核 + 线性遍历**；`epoll` 用红黑树存 fd、回调维护就绪链表，**只返回就绪的** | [#select-poll-epoll](/fundamentals/os/io-model#select-poll-epoll) |
+| 水平触发和边缘触发怎么选？ | 默认用**水平触发**（没读完还会通知）；边缘触发只通知一次，**必须一次读到 `EAGAIN`**，否则丢事件 | [#et-lt](/fundamentals/os/io-model#et-lt) |
+| `epoll` 会被 `io_uring` 取代吗？ | 主流网络服务**目前仍以 `epoll` 为正确默认**；`io_uring` 优势在磁盘+网络统一异步与批量提交，但受内核版本、安全面（容器常默认屏蔽）约束 | [#epoll-vs-uring](/fundamentals/os/io-model#epoll-vs-uring) |
+| 删除文件后空间没释放？ | 进程还持有那个 fd，inode 引用计数不为 0。用 `lsof +L1` 查，让应用重新打开文件或清空该 fd | [#space](/fundamentals/os/filesystem#space) |
+| 报 `Too many open files` 怎么办？ | 先 `cat /proc/<pid>/limits` 看**进程真实限制**（不是 `ulimit -n`）；区分"泄漏"（单调上升）与"不足"（贴着限制）。注意 **systemd 服务要在 unit 里设 `LimitNOFILE`** | [#fd](/fundamentals/os/filesystem#fd) |
+| 线上慢，第一步看什么？ | 先分类：CPU / IO / 内存 / 句柄。用 **PSI**（`/proc/pressure/*`）判饱和度，比使用率准 | [#method](/fundamentals/os/linux-tools#method) |
 
 ## 五、阅读建议 {#reading}
 
 | 你的情况 | 建议路径 |
 |---|---|
 | 想先把"一次请求"讲圆 | [网络分层与封装](/fundamentals/network/tcp-ip) → [TCP 核心机制](/fundamentals/network/tcp) → [HTTP 演进](/fundamentals/network/http) |
-| 线上出问题、要立刻定位 | [网络排查实战](/fundamentals/network/troubleshoot) → [TCP 的挥手与 TIME_WAIT](/fundamentals/network/tcp#teardown) |
+| 想搞懂"机器这一侧" | [进程、线程与调度](/fundamentals/os/process-thread) → [虚拟内存与内存管理](/fundamentals/os/memory) → [IO 模型与多路复用](/fundamentals/os/io-model) |
+| 线上出问题、要立刻定位 | [网络排查实战](/fundamentals/network/troubleshoot)（数据到没到）→ [Linux 排查实战](/fundamentals/os/linux-tools)（到了之后卡在哪） |
+| 要调 JVM 参数 / 解释容器 OOM | [虚拟内存与内存管理](/fundamentals/os/memory) → [落到 Java](/fundamentals/os/memory#java-mapping) |
 | 做技术选型（HTTP/2 还是 3、要不要上 QUIC） | [HTTP 演进](/fundamentals/network/http#compare) → [DNS 与 CDN](/fundamentals/network/dns-cdn) |
 | 面试前突击 | [高频考点速查](#faq)（背"问→答→详见"，再回正文看推导） |
 

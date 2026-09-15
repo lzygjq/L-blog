@@ -59,7 +59,7 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 | [泛型](/java/basics/generics) | 类型擦除规则、一串「为什么不能」的共同根因、数组协变 vs 泛型不变、通配符与 PECS、桥接方法、框架如何拿到泛型实参 | 擦除擦掉了什么？`? extends` 和 `? super` 怎么选？运行期怎么拿到 `List<String>` 里的 `String`？ |
 | [反射](/java/basics/reflection) | 必须用反射的场景、四种拿 `Class` 的方式与初始化时机、主动/被动引用、成员 API 速查、`setAccessible` 与模块化、动态代理两种实现、性能与安全 | 为什么 JDBC 驱动不用再写 `Class.forName`？动态代理为什么必须有接口？「反射慢十倍」现在还成立吗？ |
 | [注解](/java/basics/annotation) | 注解的本质（编译后是接口）、五个元注解、三档保留策略与各自的读取者、注解处理器与多轮处理、运行期反射与组合注解 | 加了注解为什么没反应？`@Retention` 忘写会怎样？Java 的注解为什么不能继承？ |
-| [IO 与 NIO](/java/basics/io-nio) | 五种 IO 模型与同步/异步的分界、BIO 流体系与装饰器模式、Buffer / Channel / Selector、`select` / `poll` / `epoll`、Reactor 模式、零拷贝四种实现、序列化 | NIO 到底是不是异步？`select` 和 `epoll` 差在哪？Kafka 为什么快（零拷贝）？ |
+| [IO 与 NIO](/java/basics/io-nio) | BIO 流体系与装饰器模式、Buffer / Channel / Selector 的用法与坑、Reactor 模式、零拷贝的 Java API、序列化（**五种 IO 模型与 epoll 的内核机制见[计算机基础](/fundamentals/os/io-model)**） | NIO 到底是不是异步？`select` 和 `epoll` 差在哪？Kafka 为什么快（零拷贝）？ |
 | [Java 8 特性](/java/basics/java8) | Lambda 的底层（`invokedynamic`）、四大函数式接口与变体、接口 `default` 与菱形冲突、Stream 的惰性与并行流四个坑、`Optional` 纪律、新日期时间 API | Lambda 和匿名内部类的区别？并行流什么时候别用？`orElse` 和 `orElseGet` 差在哪？ |
 | [Java 9~21 演进](/java/basics/java9-21) | 模块化与强封装、`var` / `record` / `sealed` / 模式匹配、类库与 GC 的关键变化、虚拟线程的原理与三条禁忌、升级 LTS 排查清单 | 升级 JDK 17 为什么框架会挂？`record` 能不能做实体？虚拟线程为什么不能池化？ |
 
