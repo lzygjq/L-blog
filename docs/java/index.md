@@ -10,7 +10,7 @@ Java 是整个知识体系的主干，按「基础 → 并发 → JVM → Spring
 
 | # | 板块 | 内容 | 状态 |
 |---|---|---|---|
-| 1 | [Java 基础](/java/basics/) | 泛型、反射、注解、IO/NIO、新特性 | 写作中 |
+| 1 | [Java 基础](/java/basics/) | 面向对象与 Object 契约、String 与包装类、异常体系、泛型、反射、注解、IO/NIO、Java 8 与 9~21 新特性（**9 篇已成篇**） | **已完成 9 篇** |
 | 2 | [Java 集合](/java/collections/) | 数据结构与复杂度、`ArrayList` 源码与扩容、`HashMap` 原理与扩容（**4 篇已成篇**） | 部分完成 |
 | 3 | [并发与 JUC](/java/concurrent/) | 线程基础、线程安全与 JMM、CAS 与原子类、AQS 与锁、线程池、并发容器、ThreadLocal（**8 篇已成篇**） | 部分完成 |
 | 4 | [JVM](/java/jvm/) | 运行时数据区、类加载、GC 与收集器、调优排查（**6 篇已成篇**） | 部分完成 |
