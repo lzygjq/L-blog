@@ -30,13 +30,16 @@ html.dark {
   --vp-c-brand-soft: rgba(62, 175, 124, 0.18);
 }
 
-/* ===== 左侧目录（参考 pdai.tech）：可折叠但默认全展开 / 逐级缩进 / 选中态色块 =====
-   目标（用户 2026-09-13 改版）：① 每个分组默认展开，但右侧要有 caret 可收放；
+/* ===== 左侧目录（参考 pdai.tech）：可折叠 / 逐级缩进 / 选中态色块 =====
+   目标（2026-09-14 用户改版）：① **默认只展开到「模块下的二级」**——一级分组展开、
+   二级及更深折叠，每个可折叠分组右侧仍有 caret 可收放；
    ② 逐级缩进 + 一级条目离左缘留出内边距（原来太贴边）；
    ③ 选中/悬停都是圆角色块，不要竖条、不要边框线 */
 
-/* ① 折叠由 sidebar.mjs 输出的 `collapsed: false` 驱动：
-   VitePress 的 collapsible = (item.collapsed != null) → 渲染右侧 caret、且默认展开。
+/* ① 折叠由 sidebar.mjs 输出的 `collapsed:` 驱动（depth=1 → false 展开、depth>=2 → true 折叠）：
+   VitePress 的 collapsible = (item.collapsed != null) → 渲染右侧 caret，collapsed 值决定初始开合。
+   当前页所在的折叠分组会被 VitePress 自动展开（useSidebarControl 的 watchPostEffect），
+   所以进到三级页面时不会「找不到自己在哪」。
    ⚠️ 此处**不能**再写 `display: block !important` 强制展开（旧版"恒定展开"的兜底），
    否则 v-show 的内联 display:none 会被压住，点 caret 收不起来。 */
 
@@ -415,6 +418,34 @@ html.aside-collapsed .VPDoc .aside {
 
 .VPNavBarMenuLink.active::after {
   transform: scaleX(1);
+}
+
+/* 「其他」是下拉分组（VPNavBarMenuGroup / VPFlyout），不是 MenuLink，结构不同，
+   默认主题只给 .text 上色（.VPFlyout.active .text），没有加粗也没有指示条。
+   补上与其它导航项一致的观感：加粗 + 底部指示条常驻，让「大模块选中」在全导航栏统一。
+   选择器带 active 提高特异性，压过 VPFlyout 内联 scoped 的 `.VPFlyout:hover .text`。 */
+.VPNavBarMenuGroup::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--vp-c-brand-1);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.25s ease;
+}
+
+.VPNavBarMenuGroup:hover::after,
+.VPNavBarMenuGroup.active::after {
+  transform: scaleX(1);
+}
+
+.VPNavBarMenuGroup.active .button .text {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
 }
 
 /* ===== 首页布局（大气清爽版） =====

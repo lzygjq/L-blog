@@ -27,7 +27,7 @@ const sidebarSpec = [
         text: 'Java 核心',
         children: [
           // 目录内只有 index.md → 「目录型条目」自动退化为一个可点击的条目，不再多包一层
-          { text: 'Java 基础', dir: 'java/basics' },
+          { text: 'Java 基础', dir: 'java/basics', group: true },
           { text: 'Java 集合', dir: 'java/collections', group: true },
           { text: 'Java 并发', dir: 'java/concurrent', group: true },
           { text: 'Java 虚拟机', dir: 'java/jvm', group: true }
@@ -218,17 +218,29 @@ export default defineConfig({
     siteTitle: 'L知识库',
     nav: [
       // 首页不占用菜单位置：访问根路径 / 即是首页，站名（VPNavBarTitle）本身链回首页
-      { text: '导航', link: '/nav/' },
-      { text: 'Java', link: '/java/' },
-      { text: '大前端', link: '/frontend/', activeMatch: '/frontend/' },
+      // activeMatch 是**正则**（VitePress 源码：isActive(path, match, asRegex=true)），
+      // 不写就退化为「与 link 精确相等」——那样只有板块首页会高亮，
+      // 进到任何子页面顶部大模块就灭掉。所以每个板块都要用 ^/前缀/ 的形式。
+      // 导航页是单文件 docs/nav.md（不是 nav/index.md）→ 构建产物是 nav.html，
+      // 线上（GitHub Pages）实测：/L-blog/nav.html 200、/L-blog/nav 200、**/L-blog/nav/ 404**。
+      // 所以 link 必须写 `/nav`（不带尾斜杠），否则「在新标签页打开」会 404
+      // （站内点击走客户端路由看不出来，只有硬加载/新标签页才暴露）。
+      // activeMatch 用正则前缀：该页 relativePath 规范化后是 `/nav`（无尾斜杠），
+      // 精确匹配 /nav/ 永远不成立。
+      { text: '导航', link: '/nav', activeMatch: '^/nav' },
+      { text: 'Java', link: '/java/', activeMatch: '^/java/' },
+      { text: '大前端', link: '/frontend/', activeMatch: '^/frontend/' },
       // 数据存储 + 消息队列合并入口：两个前缀下都保持高亮
-      { text: '存储与消息', link: '/database/', activeMatch: '/(database|middleware)/' },
-      { text: '数据仓库', link: '/bigdata/' },
-      { text: '云原生', link: '/cloud-native/' },
-      { text: 'AI 应用', link: '/ai/' },
-      { text: '项目实战', link: '/projects/' },
+      { text: '存储与消息', link: '/database/', activeMatch: '^/(database|middleware)/' },
+      { text: '数据仓库', link: '/bigdata/', activeMatch: '^/bigdata/' },
+      { text: '云原生', link: '/cloud-native/', activeMatch: '^/cloud-native/' },
+      { text: 'AI 应用', link: '/ai/', activeMatch: '^/ai/' },
+      { text: '项目实战', link: '/projects/', activeMatch: '^/projects/' },
       {
+        // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条
+        // （VPNavBarMenuGroup：active = isActive(自身 activeMatch) || 任一子项命中）
         text: '其他',
+        activeMatch: '^/(interview|archives|about)/',
         items: [
           { text: '面试专题', link: '/interview/' },
           { text: '归档', link: '/archives/' },

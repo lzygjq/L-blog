@@ -118,24 +118,30 @@ function listEntries(dir) {
  *   { text, children }                   手写分组（可再带 link，让标题也可点）
  *   { text }                             纯文本占位（如「PostgreSQL（规划中）」）
  *
- * 折叠约定（2026-09-13 用户改版）：
- *   1. **有子项的分组一律输出 `collapsed: false`**。VitePress 的
- *      `collapsible = (item.collapsed != null)` 决定是否渲染右侧 caret 箭头，
- *      而 `collapsed: false` 同时保证「默认展开」。
- *   2. **不再生成「导览」子条目**——分组标题本身就是导览入口，链到目录的 index.md。
+ * 折叠约定（2026-09-14 用户改版 —— 原来是一律全展开，太吵）：
+ *   1. **默认只展开到「模块下的二级」**：一级分组（Java 核心 / Spring 生态 / 数据存储…）
+ *      输出 `collapsed: false`（展开，直接看到二级条目）；**二级及更深的分组**
+ *      （Java 集合 / 创建型 / Spring Cloud / MySQL…）输出 `collapsed: true`（折叠，只留 caret）。
+ *      VitePress 的 `collapsible = (item.collapsed != null)` 决定是否渲染 caret 与初始开合，
+ *      所以「有 caret 但不展开」= `collapsed: true`。
+ *   2. **当前页所在的分支会由 VitePress 自动展开**（`useSidebarControl` 里的
+ *      `watchPostEffect`：`isActiveLink || hasActiveLink → collapsed = false`），
+ *      所以进到三级页面时不会「找不到自己在哪」，这是原生行为，不必自己实现。
+ *   3. **不再生成「导览」子条目**——分组标题本身就是导览入口，链到目录的 index.md。
  *      VPSidebarItem 的两种交互是分开的：有 link 时「点标题=跳转 / 点 caret=折叠」，
  *      无 link 时「点标题=折叠」（见其 onItemInteraction / onCaretClick）。
  */
-function buildNode(node) {
+function buildNode(node, depth = 1) {
   // 有子项的分组：手写 children，或 dir + group（扫描目录、排除 index 自身）
   const kids = node.children
-    ? node.children.map(buildNode).flat()
+    ? node.children.map((c) => buildNode(c, depth + 1)).flat()
     : node.dir && node.group
       ? listEntries(node.dir)
       : null
 
   if (kids) {
-    const out = { text: node.text, collapsed: false, items: kids }
+    // depth=1 是一级分组（模块下的第一层）→ 展开；depth>=2 → 折叠
+    const out = { text: node.text, collapsed: depth > 1, items: kids }
     const link = node.link || (node.dir ? indexLink(node.dir) : null)
     if (link) out.link = link
     return out
@@ -152,5 +158,6 @@ function buildNode(node) {
 
 /** 顶层入口：spec = [{ text, children }, ...] */
 export function buildSidebar(spec) {
-  return spec.map((g) => buildNode(g)).flat()
+  // depth 从 1 起算：spec 里的每一项都是「模块下的第一层」（一级分组）
+  return spec.map((g) => buildNode(g, 1)).flat()
 }
