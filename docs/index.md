@@ -4,7 +4,7 @@ layout: home
 hero:
   name: L知识库
   text: 夯实基础 · 构建体系 · 沉淀实战
-  tagline: 系统化梳理 Java 后端与大前端知识主线 —— 从语言与框架原理，到数据存储、消息队列、云原生与数据仓库，再到跨端开发与项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
+  tagline: 系统化梳理计算机基础与 Java 后端主线 —— 从网络、操作系统、算法这些语言无关的底座，到语言与框架原理，再到数据存储、消息队列、云原生与数据仓库，以及跨端开发与项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
   actions:
     - theme: brand
       text: 知识库总览
@@ -17,6 +17,10 @@ hero:
       link: /interview/
 
 features:
+  - icon: 🧮
+    title: 计算机基础
+    details: 计算机网络、操作系统、算法与数据结构 —— 语言无关的三大底座：分层与 TCP、进程与内存、复杂度与数据结构
+    link: /fundamentals/
   - icon: ☕
     title: Java 核心
     details: 语言基础、并发与 JUC、JVM 原理、Spring 全家桶、设计模式 —— 讲原理也讲演进

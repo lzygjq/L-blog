@@ -10,7 +10,8 @@
 
 ## 二、目录约定
 
-- 10 大板块：`java` / `frontend`（大前端：小程序与 uni-app）/ `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `projects`（项目实战，含 `toolkit/` 产出工具方法层）/ `interview` / `about`（关于本站）。
+- 11 大板块：`fundamentals`（计算机基础：计算机网络 / 操作系统 / 算法与数据结构）/ `java` / `frontend`（大前端：小程序与 uni-app）/ `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `projects`（项目实战，含 `toolkit/` 产出工具方法层）/ `interview` / `about`（关于本站）。
+- **顶部导航已达 10 项上限**（导航 / 计算机基础 / Java / 大前端 / 存储与消息 / 数据仓库 / 云原生 / AI 应用 / 项目实战 / 其他）—— 后续新领域**不再加顶层项**，挂进现有板块或塞进「其他」下拉。
 - 每个板块目录放 `index.md` 作导览页；目录名英文、标题中文、命名统一 4 字（云原生例外）。
 - 侧边栏（`docs/.vitepress/sidebar.mjs`）：**有子项的分组默认展开、右侧带可收起的 caret**；分组标题本身即该分组的导览入口（链到目录 `index.md`），**不再单独列「导览」子条目**。新增子目录用 `{ text, dir, group: true }`，层级不超过 2 层。
 - 正文在 `docs/` 下，站点配置在 `docs/.vitepress/`。
@@ -23,7 +24,7 @@
 
 ## 四、构建与验证（本机限制，各机通用）
 
-- **构建请用户在本机终端执行** `npm run build`（沙箱内 safe-delete 拦截会导致构建跑不完）。
+- **构建可在沙箱内直接跑**（2026-09-15 实测：172 文件、16.7s、exit 0）。构建期死链检查是最有价值的一道验证，收尾时优先跑它；若某次被 safe-delete 拦截（提示批量删除），再改由用户在本机终端执行 `npm run build`。
 - VitePress dev server 对任意路径都返回 200（SPA shell），**curl 不能用于验证内容**；须用 puppeteer-core 驱动系统 Chrome 抽查 DOM。
 - dev 服务用户自己终端跑（`npm run dev`），AI 不探活/重启，写完代码直接交付。
 - 验证强度=轻量：关键功能断言即可，不截图不读图，视觉用户自己看。

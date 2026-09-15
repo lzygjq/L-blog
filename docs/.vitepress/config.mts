@@ -19,6 +19,18 @@ import { buildSidebar } from './sidebar.mjs'
 // 每项：{ prefix: URL 前缀, items: 该板块的侧边栏条目 }
 const sidebarSpec = [
   {
+    // 计算机基础：跨栈底座（网络 / 操作系统 / 算法与数据结构）
+    // network 下有 5 篇正文 + 导览 → group 展开；os / algorithms 暂只有 index.md →
+    // 不加 group，自动退化为一个可点击条目（避免出现空折叠分组）
+    prefix: '/fundamentals/',
+    items: [
+      { text: '板块导览', link: '/fundamentals/' },
+      { text: '计算机网络', dir: 'fundamentals/network', group: true },
+      { text: '操作系统', dir: 'fundamentals/os' },
+      { text: '算法与数据结构', dir: 'fundamentals/algorithms' }
+    ]
+  },
+  {
     prefix: '/java/',
     items: [
       { text: '板块导览', link: '/java/' },
@@ -228,6 +240,8 @@ export default defineConfig({
       // activeMatch 用正则前缀：该页 relativePath 规范化后是 `/nav`（无尾斜杠），
       // 精确匹配 /nav/ 永远不成立。
       { text: '导航', link: '/nav', activeMatch: '^/nav' },
+      // 计算机基础放在最前：它是跨栈底座，其余板块的技术选型都要回到这里找依据
+      { text: '计算机基础', link: '/fundamentals/', activeMatch: '^/fundamentals/' },
       { text: 'Java', link: '/java/', activeMatch: '^/java/' },
       { text: '大前端', link: '/frontend/', activeMatch: '^/frontend/' },
       // 数据存储 + 消息队列合并入口：两个前缀下都保持高亮
