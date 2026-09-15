@@ -42,7 +42,8 @@ const sidebarSpec = [
           { text: 'Java 基础', dir: 'java/basics', group: true },
           { text: 'Java 集合', dir: 'java/collections', group: true },
           { text: 'Java 并发', dir: 'java/concurrent', group: true },
-          { text: 'Java 虚拟机', dir: 'java/jvm', group: true }
+          { text: 'Java 虚拟机', dir: 'java/jvm', group: true },
+          { text: '测试与质量', dir: 'java/testing', group: true }
         ]
       },
       {
