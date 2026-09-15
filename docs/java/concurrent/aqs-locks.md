@@ -248,7 +248,166 @@ try {
 | 谁在等 | 通常是「主线程」等「工作线程们」 | 工作线程们**互相等** |
 | 典型场景 | 接口并行调 N 个下游，等全部返回再汇总 | 多阶段任务，每阶段要所有线程都完成才开始下一阶段 |
 
-## 八、死锁 {#deadlock}
+## 八、读写锁：读多写少场景的专用锁 {#readwrite-lock}
+
+### 8.1 为什么需要它
+
+`ReentrantLock` / `synchronized` 是**互斥锁**：不管你要读还是要写，都得排队。但真实的业务里，读写比例常常是 10:1 甚至 100:1——比如本地缓存、配置中心、路由表。**让两个纯读操作互相排队，是纯粹的浪费。**
+
+读写锁把「读」和「写」分开对待：
+
+| 组合 | 是否允许 |
+|---|---|
+| 读 + 读 | ✅ 并行 |
+| 读 + 写 | ❌ 互斥 |
+| 写 + 写 | ❌ 互斥 |
+
+一句话：**读锁是共享的，写锁是独占的。**
+
+### 8.2 用一个 `int` 同时表达两把锁
+
+`ReentrantReadWriteLock` 的基础设施还是 AQS（`state` + 队列），但这里有个巧妙的设计：**AQS 只有一个 `int state`，而读写锁要同时记录「读锁被几个线程持有」和「写锁被重入了几次」**。
+
+解法是**把 32 位 `state` 按高低位切成两半**：
+
+```text
+           32 位 state
+┌───────────────────────┬───────────────────────┐
+│      高 16 位          │       低 16 位         │
+│   读锁持有数（含重入）    │   写锁重入次数          │
+│       readCount        │      writeCount        │
+└───────────────────────┴───────────────────────┘
+
+读锁：state += (1 << 16)      一次加 65536
+写锁：state += 1
+判断写锁是否被持有：state & 0x0000FFFF != 0  → 也就是 state != 0
+判断读锁是否被持有：state >>> 16 != 0
+```
+
+这样做的好处：**一次 CAS 就能同时处理两种锁的竞争**，不用维护两个独立的计数器（否则就要在多个变量之间做原子协调）。代价是数量上限：读锁最多同时被 **65535** 个线程持有，写锁最多重入 **65535** 次——超出会抛 `Error`，实际业务里碰不到，但面试答出这个数字很加分。
+
+对应到 AQS 的模板方法：
+
+| 锁 | 方法 | 模式 |
+|---|---|---|
+| 写锁 `WriteLock` | `tryAcquire` / `tryRelease` | 独占 |
+| 读锁 `ReadLock` | `tryAcquireShared` / `tryReleaseShared` | 共享 |
+
+### 8.3 读锁的「共享」是自定义的
+
+这里有个容易答错的点：**读锁虽然走共享模式，但它的获取条件比 `Semaphore` 严格得多**。`tryAcquireShared` 里除了判断写锁是否被占，还要判断**队列里有没有写线程在等**：
+
+```text
+读锁获取成功需要同时满足：
+  ① state 的低 16 位为 0（当前没有写锁）或当前线程已持有写锁
+  ② 没有其他线程在等写锁  ← 这条才是关键
+```
+
+第 ② 条是为了**缓解写饥饿**：如果读线程源源不断地插队，写线程可能永远拿不到锁。所以非公平模式下加了一个启发式——**队列头部如果排着写线程，新来的读线程要乖乖排队**（AQS 里的 `readerShouldBlock` / `apparentlyFirstQueuedIsExclusive`）。
+
+即便如此，**非公平读写锁在高频读的场景下仍可能出现写饥饿**。真正需要写线程及时拿到锁时，要么用公平模式（牺牲吞吐），要么用下面的 `StampedLock`。
+
+### 8.4 锁降级：写锁可以退化成读锁，反过来不行
+
+这是读写锁最有价值的特性之一：
+
+```text
+写锁 → 获取读锁 → 释放写锁     ✅ 支持，叫「锁降级」
+读锁 → 获取写锁                 ❌ 不支持，会死锁
+```
+
+「读锁升级成写锁」为什么不行：多个线程可能同时持有读锁，每个都想升级的话，**谁都不肯先释放**——经典的循环等待，直接死锁。所以 `ReentrantReadWriteLock` 干脆不提供这个能力。
+
+锁降级的用途是「**改完之后立刻以读的身份继续用，且中间不希望被别人插进来**」：
+
+```java
+rwLock.writeLock().lock();
+try {
+    cache = loadFromDb();                    // 更新
+    rwLock.readLock().lock();                // 降级：先拿读锁
+} finally {
+    rwLock.writeLock().unlock();             // 再放写锁
+}
+try {
+    useCache(cache);                         // 期间仍是读锁持有者，别人改不了
+} finally {
+    rwLock.readLock().unlock();
+}
+```
+
+注意顺序：**必须在释放写锁之前先拿到读锁**，否则中间会有一个「谁都不持锁」的空窗，数据可能被别的线程改掉。
+
+### 8.5 `StampedLock`：乐观读（JDK 8+）
+
+`ReentrantReadWriteLock` 的读锁仍是「悲观」的——即使只是读，也要写 `state`、动 CAS。`StampedLock` 提供了第三种思路：**乐观读**。
+
+```text
+三种模式：
+  ① 写锁 writeLock()          —— 独占，和普通写锁一样
+  ② 悲观读锁 readLock()        —— 共享，和普通读锁一样
+  ③ 乐观读 tryOptimisticRead() —— 不加锁！只领一个版本号 stamp
+```
+
+乐观读的用法是一个固定套路：**领版本号 → 读数据 → 校验版本号 → 通过就用，不通过再退化成悲观读重来**。
+
+```java
+public class Point {
+    private double x, y;
+    private final StampedLock sl = new StampedLock();
+
+    void move(double dx, double dy) {
+        long stamp = sl.writeLock();
+        try { x += dx; y += dy; }
+        finally { sl.unlockWrite(stamp); }
+    }
+
+    double distanceFromOrigin() {
+        long stamp = sl.tryOptimisticRead();      // ① 乐观读：不加锁
+        double cx = x, cy = y;                    // ② 一定要拷到局部变量
+        if (!sl.validate(stamp)) {                // ③ 校验：期间有人写过吗？
+            stamp = sl.readLock();                // ④ 有人写过 → 退化成悲观读
+            try { cx = x; cy = y; }
+            finally { sl.unlockRead(stamp); }
+        }
+        return Math.sqrt(cx * cx + cy * cy);      // 用局部变量算，不再碰字段
+    }
+}
+```
+
+**三个必须记住的细节**：
+
+1. **第 ② 步「拷到局部变量」不是可有可无的**。校验通过之后，字段仍可能被别的写线程改掉——如果用 `Math.sqrt(x*x + y*y)` 直接读字段，读 `x` 和读 `y` 之间就可能夹进一次写入，算出「新旧混合」的脏结果。拷进局部变量，用的是校验那一刻的快照。
+2. **`validate` 返回 `true` 才建立起 happens-before**。在那之前，乐观读期间读到的值**没有任何可见性保证**（它本质上就是普通的字段读）。所以「先读、后校验、再使用」这个顺序不能变。
+3. **乐观读本身开销几乎为零**——不写 `state`、不做 CAS、不产生缓存行竞争。所以「读多写极少」时它的吞吐远高于 `ReentrantReadWriteLock`。
+
+### 8.6 `StampedLock` 的四个坑
+
+它性能好，但**限制也比读写锁多得多**，这些限制经常就是面试的追问点：
+
+| 限制 | 后果 |
+|---|---|
+| **不可重入** | 同一线程重复获取写锁会**死锁**（没有「持有者」概念，也没有重入计数） |
+| **不支持 `Condition`** | 需要条件等待就只能用 `ReentrantLock` |
+| **不实现 `Lock` 接口** | `asReadLock()` / `asWriteLock()` 拿到的是阉割版：不支持中断、不支持条件 |
+| **所有模式共用同一个 stamp 空间** | 必须严格 `try/finally` 释放；拿错 stamp 或漏释放，行为难以预测 |
+| **没有「谁加的锁」的概念** | 一个线程加的锁，**另一个线程可以解**——灵活但危险 |
+
+还有一条使用纪律：**乐观读适合「读多写极少」**（比如每秒上万次读、每分钟一次写）。如果写很频繁，`validate` 会不断失败、每次都退化成悲观读，**性能反而不如直接用 `ReentrantReadWriteLock`**。
+
+### 8.7 四种锁怎么选
+
+| | `synchronized` | `ReentrantLock` | `ReentrantReadWriteLock` | `StampedLock` |
+|---|---|---|---|---|
+| 读读并行 | ❌ | ❌ | ✅ | ✅（乐观读完全无锁） |
+| 可重入 | ✅ | ✅ | ✅ | ❌ |
+| 条件变量 | ✅（`wait`/`notify`） | ✅（`Condition`） | ✅（写锁支持） | ❌ |
+| 可中断 / 超时 | ❌ | ✅ | ✅ | 部分（写锁可中断） |
+| 读的性能 | 低 | 低 | 中（仍要改 `state`） | **高**（乐观读零开销） |
+| 适用场景 | 一般互斥 | 需要超时 / 公平 / 多条件 | 读多写少，且读写都需互斥保护 | 读极多写极少，且能接受不可重入 |
+
+选择顺序建议：**先考虑能不能用不可变对象或 `volatile` 免掉锁 → 需要互斥就用 `synchronized` → 要超时 / 中断 / 公平 / 多条件换 `ReentrantLock` → 确实是读多写少再上读写锁 → 读远多于写、且能接受它的一堆限制，才用 `StampedLock`**。
+
+## 九、死锁 {#deadlock}
 
 **死锁**：两个或多个线程互相持有对方需要的锁，都在等对方先释放，于是永远等下去。
 
@@ -293,5 +452,7 @@ synchronized (lockA) {          synchronized (lockB) {
 - **`ReentrantLock` 如何可重入**：`state` 计数。同一线程再次获取时 `state + 1`，释放时 `state - 1`，减到 0 才真正释放并唤醒后继节点。
 - **公平 / 非公平**：公平锁在 `tryAcquire` 里加 `hasQueuedPredecessors()`，必须先排队；非公平锁直接 CAS 抢。**非公平吞吐量更高**，因为减少了线程唤醒与切换。
 - **`synchronized` vs `Lock`**：JVM 关键字 vs JDK 接口；自动释放 vs 手动 `unlock`；`Lock` 多出可中断、可超时、可公平、多 `Condition`、可立即返回的 `tryLock`。
+- **读写锁**：`ReentrantReadWriteLock` 把 AQS 的 `int state` 拆成**高 16 位读锁计数、低 16 位写锁重入次数**，一次 CAS 同时管两把锁（上限都是 65535）；读锁走共享模式，但 `tryAcquireShared` 会判断「队列里有没有写线程在等」以缓解写饥饿。**支持锁降级（写 → 读），不支持锁升级（读 → 写）**——后者多线程互不相让，必然死锁。
+- **`StampedLock`**：JDK 8 引入，比读写锁多一种「**乐观读**」——`tryOptimisticRead()` 只领一个版本号、完全不加锁，读完用 `validate(stamp)` 校验期间有没有写过，校验通过才建立 happens-before。读多写极少时吞吐远高于读写锁；代价是**不可重入**、不支持 `Condition`、不实现 `Lock` 接口、没有「谁加的锁」的概念。必须把读到的字段**先拷进局部变量**再使用，否则 `validate` 之后字段仍可能被改，算出新旧混合的脏值。
 - **死锁四条件**：互斥、请求与保持、不可剥夺、循环等待；破坏任意一条即可避免，最常用的是统一加锁顺序。
 - **死锁诊断**：`jps` 找进程 → `jstack <pid>` 看「Found one Java-level deadlock」；图形化用 `jconsole` / `VisualVM`，在线用 `Arthas thread -b`。

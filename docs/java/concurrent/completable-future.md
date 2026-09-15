@@ -1,5 +1,5 @@
 ---
-order: 8
+order: 9
 date: 2026-09-15
 sidebar: CompletableFuture 异步编排
 title: CompletableFuture 异步编排

@@ -2,7 +2,7 @@
 order: 5
 date: 2026-09-13
 title: 调优与线上排查
-desc: 五类调优参数速查、命令行与可视化工具链、内存泄漏四步法、CPU 飙高四步法、常见 OOM 类型与转储配置
+desc: 五类调优参数速查、命令行与可视化工具链、GC 日志配置与判读、内存泄漏四步法、CPU 飙高四步法、常见 OOM 类型
 ---
 
 # 调优与线上排查
@@ -62,6 +62,65 @@ java -XX:MaxRAMPercentage=70 -XX:+UseG1GC -XX:MaxGCPauseMillis=200 \
 - **Arthas**（生产排查首选）：`dashboard` 看全局、`thread -n 3` 看最忙线程、`heapdump` 导堆、`trace/watch` 看方法耗时与入参出参，**attach 到线上进程无需重启**；
 - **JFR/JMC**：低开销飞行记录仪，适合长时间采集线上问题。
 
+### GC 日志：怎么配、怎么看
+
+**没有 GC 日志的调优都是猜。** JDK 9 起 GC 日志并入了**统一日志框架**（JEP 158），语法从原来一堆 `-XX:+PrintGCxxx` 变成统一的 `-Xlog`：
+
+```text
+-Xlog:<选择器>:<输出>:<装饰器>:<轮转>
+
+-Xlog:gc                              # 只看每次 GC 的停顿
+-Xlog:gc*                             # GC 全部细节（阶段耗时、堆变化）
+-Xlog:gc*,gc+heap=debug               # 再叠加堆细节
+-Xlog:gc*:file=/data/logs/gc.log:time,uptime:filecount=5,filesize=32M
+      ↑选择器    ↑输出到文件      ↑装饰器（时间戳/运行时长）  ↑轮转：5 个文件、每个 32MB
+```
+
+> **JDK 8 的写法要单独记**（很多老系统还在用）：`-XX:+PrintGCDetails -XX:+PrintGCDateStamps -Xloggc:/data/logs/gc.log`。面试里如果能顺口说出「JDK8 用 `PrintGCDetails`，JDK9 起统一成 `-Xlog:gc*`」，这是个很实在的版本意识加分点。
+
+**怎么看——一份 G1 的 Young GC 日志逐行拆解**：
+
+```text
+[0.512s][info][gc,start    ] GC(0) Pause Young (Normal) (G1 Evacuation Pause)
+ └ 启动后 0.512 秒 └ 级别 └ tag        └ 第 0 次 GC └ 停顿类型
+[0.516s][info][gc,heap     ] GC(0) Eden regions: 24->0(24)
+[0.516s][info][gc,heap     ] GC(0) Survivor regions: 0->3(3)
+[0.516s][info][gc,heap     ] GC(0) Old regions: 0->0
+[0.516s][info][gc,heap     ] GC(0) Humongous regions: 1->1
+[0.516s][info][gc,metaspace] GC(0) Metaspace: 4096K(4864K)->4096K(4864K)
+[0.516s][info][gc          ] GC(0) Pause Young (Normal) (G1 Evacuation Pause) 25M->3M(512M) 4.237ms
+                                                              └回收前 └回收后 └总堆 └停顿耗时
+```
+
+**最该盯的是最后一行**，四个数字的含义：
+
+| 位置 | 含义 | 怎么判读 |
+|---|---|---|
+| `25M` | 回收**前**堆占用 | 与上一次比，涨得太快说明分配速率高 |
+| `3M` | 回收**后**堆占用 | **这一列最关键**：持续抬高、逐渐逼近总堆 → 内存泄漏或堆太小 |
+| `512M` | 堆总量 | 与 `-Xmx` 是否一致（不一致说明容器感知或参数没生效） |
+| `4.237ms` | 本次停顿 | 与 `MaxGCPauseMillis` 目标对比 |
+
+**六种典型的日志特征与处置**：
+
+| 日志特征 | 说明 | 处置方向 |
+|---|---|---|
+| `Pause Young (Normal)` 频繁、每次回收后占用都很低 | 正常的新生代回收 | 无需动作 |
+| 回收后占用**持续抬高**、逐步逼近总堆 | 大概率内存泄漏，或堆偏小 | 导 dump 走内存泄漏四步法；确属正常的则加堆 |
+| 出现 `Pause Full (G1 Compaction Pause)` | **G1 的兜底 Full GC，性能极差** | 提前触发并发标记（调低 `InitiatingHeapOccupancyPercent`）或加堆 |
+| `to-space exhausted` | 幸存区 / 晋升空间不够，对象无处可放 | 加堆、调大 `G1ReservePercent`、提前并发标记 |
+| `Humongous regions` 一直增长 | 大对象（超过 Region 一半）过多，占用连续 Region | 调大 `G1HeapRegionSize`；或从代码层面避免超大对象 |
+| `Metaspace` 持续增长不回落 | 类加载泄漏（动态代理、脚本引擎、热部署） | 查是否有动态生成类的代码；设置 `MaxMetaspaceSize` 兜底 |
+
+**确认参数真的生效**（改了参数但行为没变时的第一步）：
+
+```bash
+java -XX:+PrintCommandLineFlags -version     # 打印 JVM 实际采用的关键参数
+jinfo -flags <pid>                            # 看运行中进程的全部参数
+jcmd <pid> VM.flags                           # 同上（推荐，JDK9+）
+jcmd <pid> GC.heap_info                       # 看当前各分区实际占用
+```
+
 ## 四、内存泄漏排查四步法
 
 **前提认知**：内存泄漏 = 对象不再使用但仍被 GC Roots 引用，堆占用持续上涨且 Full GC 后不回落。
@@ -117,4 +176,11 @@ Arthas 的 `thread -n 3` 一条命令即可完成前四步的信息采集。
 
 ## 七、面试口径
 
-> 「调优参数分几类：堆用 -Xms/-Xmx 建议设相等，栈用 -Xss 权衡线程数，还有新生代比例、晋升阈值、收集器选择和 GC 日志，生产必加 HeapDumpOnOutOfMemoryError 留现场。工具方面命令行用 jps、jstat、jstack、jmap、jcmd，可视化主用 VisualVM 和 MAT 分析 dump，线上排查首选 Arthas。内存泄漏四步：导 dump → 加载分析 → 找异常对象顺引用链定位持有者 → 回代码修复，常见根因是静态集合只增不减和 ThreadLocal 未清理。CPU 飙高四步：top 找进程 → ps 找线程 → 转十六进制 → jstack 定位代码行，注意区分死循环、锁竞争和 GC 线程占满三种情况。」
+> 「调优参数分几类：堆用 -Xms/-Xmx 建议设相等，栈用 -Xss 权衡线程数，还有新生代比例、晋升阈值、收集器选择和 GC 日志，生产必加 HeapDumpOnOutOfMemoryError 留现场。工具方面命令行用 jps、jstat、jstack、jmap、jcmd，可视化主用 VisualVM 和 MAT 分析 dump，线上排查首选 Arthas。内存泄漏四步：导 dump → 加载分析 → 找异常对象顺引用链定位持有者 → 回代码修复，常见根因是静态集合只增不减和 ThreadLocal 未清理。CPU 飙高四步：top 找进程 → ps 找线程 → 转十六进制 → jstack 定位代码行，注意区分死循环、锁竞争和 GC 线程占满三种情况。GC 日志用 JDK9+ 的 `-Xlog:gc*` 输出（JDK8 还是 PrintGCDetails + Xloggc），关键看每行末尾的『回收前 -> 回收后(总堆) 停顿耗时』：回收后占用持续抬高就是泄漏或堆太小，出现 `Pause Full` 或 `to-space exhausted` 就是该调堆或改参数的信号。」
+
+几条容易被追问的实操细节：
+
+- **GC 日志语法**：JDK9+ 统一成 `-Xlog:<选择器>:<输出>:<装饰器>:<轮转>`，例如 `-Xlog:gc*:file=gc.log:time,uptime:filecount=5,filesize=32M`；`gc*` 是详细、`gc` 是只看停顿。**JDK8 的 `-XX:+PrintGCDetails -Xloggc:` 写法已过时但老系统仍在用，两个都要能说出来。**
+- **四个数字**：`25M->3M(512M) 4.237ms` = 回收前占用 → 回收后占用（总堆） + 本次停顿。**「回收后占用」这一列是判断泄漏的核心指标**，不是「回收前」。
+- **报警信号**：出现 `Pause Full`（G1 的兜底 Full GC）、`to-space exhausted`（晋升空间不足）、`Humongous regions` 持续增长（大对象过多）、`Metaspace` 只涨不落（类加载泄漏）——这四种都能直接指向处置动作。
+- **参数没生效怎么查**：`jcmd <pid> VM.flags` 看运行时实际参数；`java -XX:+PrintCommandLineFlags -version` 看 JVM 采用了哪些关键参数。

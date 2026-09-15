@@ -86,6 +86,7 @@ JMM（Java Memory Model）是一份**规范**，它定义了多线程读写共�
 | **线程启动** | 线程 A 调 `B.start()`，则 `start()` 之前的操作对 B 可见 |
 | **线程终止** | B 中所有操作 happens-before A 从 `B.join()` 成功返回 |
 | **中断** | `interrupt()` happens-before 被中断线程检测到中断事件 |
+| **`final` 字段** | 构造函数里对 `final` 字段的写入 happens-before 别的线程读到该对象引用之后读这个字段（**前提：构造过程中 `this` 没有逸出**，详见第八节） |
 | **传递性** | A happens-before B、B happens-before C，则 A happens-before C |
 
 一句话：**`happens-before` 是「不需要额外同步就保证可见」的白名单**。不在白名单里的读写，就都可能有可见性问题。
@@ -240,7 +241,141 @@ JDK 1.6 为了优化 `synchronized` 的性能，引入了锁升级机制。**注
 - **锁粗化（Lock Coarsening）**：如果一段代码里对同一个对象**反复加锁解锁**（例如循环体内 `synchronized`），JIT 会把锁的范围扩大到这个循环外面，减少同步次数。
 - **自适应自旋（Adaptive Spinning）**：自旋次数不是固定的，JVM 会根据「同一个锁上最近自旋成功的概率」动态调整——之前经常成功就多转一会儿，经常失败就少转甚至直接升级。
 
-## 八、三件武器怎么选
+## 八、`final` 的内存语义与安全发布 {#final-and-publication}
+
+JMM 里有三个关键字：`volatile`、`synchronized`，以及`final`。前两个前面都讲了，`final` 却常被当成纯粹的语法糖（"表示不能再赋值"）——其实它**在 JMM 里是一份独立的可见性承诺**，也是 Java 里唯一一种「不用任何同步手段就能安全发布对象」的写法。
+
+### 8.1 一个「看起来没问题」的例子
+
+```java
+public class Holder {
+    private final int value;                    // final 字段
+    public Holder(int v) { value = v; }
+}
+
+// 线程 A
+shared = new Holder(42);        // 构造 + 赋给 shared
+
+// 线程 B
+if (shared != null) {
+    int v = shared.value;       // 没有 final 时，这里可能读到 0
+}
+```
+
+根因还是 `new` 不是一步（第四节讲 DCL 时那段）：
+
+```text
+① 分配内存（此时 value = 0）
+② 执行构造方法（value = 42）
+③ 把引用赋给 shared
+
+指令重排后变成：① → ③ → ②
+线程 B 在 ③ 之后、② 之前读到 shared → 看到对象了，但 value 还是 0
+```
+
+**如果 `value` 是 `final`，JMM 就禁止这种重排。** 这是 `final` 与普通字段最本质的差别——普通字段的初始化**没有任何可见性承诺**，只能靠同步手段兜底。
+
+### 8.2 JMM 给 `final` 的两条重排序规则
+
+| 规则 | 内容 | 挡住了什么 |
+|---|---|---|
+| **写 `final` 字段** | 构造函数内对 `final` 字段的写入，**不能重排到**「把该对象的引用赋值给一个引用变量」之后 | 别人不会读到「对象已可见、字段还没写」的半成品 |
+| **读 `final` 字段** | 「初次读取对象引用」**不能重排到**「初次读取该对象的 `final` 字段」之后 | 拿到引用后第一次读 `final` 字段，读到的就是构造函数写入的值 |
+
+两条规则合起来给出一个很有用的结论：
+
+> **只要对象在构造过程中 `this` 没有逸出，任何线程拿到这个对象的引用后，不需要任何同步就能看到 `final` 字段的初始化值。**
+
+这也正好解释了第四节 DCL 单例为什么必须给 `instance` 加 `volatile`：**`instance` 是 `static` 字段，不是 `final` 字段**，享受不到这条规则，只能靠 `volatile` 的内存屏障挡住「① → ③ → ②」那次重排。**同一个问题，两个字段修饰符给出两种解法——这是把 `volatile` 与 `final` 串起来讲的最佳切口。**
+
+### 8.3 规则的前提：构造过程中 `this` 不能逸出
+
+`final` 的承诺有个前置条件，也是面试追问的分水岭：**构造函数里不能把 `this` 暴露出去**。一旦逸出，别的线程可能在初始化还没完成时就拿到引用，此时连 `final` 字段都可能读到默认值。
+
+```java
+public class ThisEscape {
+
+    private final int value;
+
+    // ① 构造器里启动线程 —— 新线程可能拿着半成品 this 干活
+    public ThisEscape(int v) {
+        value = v;
+        new Thread(() -> System.out.println(this.value)).start();   // ← 逸出
+    }
+
+    // ② 构造器里把 this 注册到外部容器（事件监听器最常见）
+    public void registerTo(Registry registry) { }
+
+    public ThisEscape(Registry registry) {
+        this.value = 1;
+        registry.register(this);                                    // ← 逸出
+    }
+
+    // ③ 构造器里调用可被子类覆写的方法
+    public ThisEscape() {
+        init();                                                     // ← 隐式逸出
+    }
+    protected void init() { }        // 子类覆写后可能读到尚未赋值的字段
+}
+```
+
+第三种最隐蔽：构造器调用了一个「看起来无害」的 `init()`，但它是 `protected` 的，子类覆写后会在**父类字段还没赋值时**执行。
+
+修法是**把「构造」和「发布」拆成两步**——构造函数只负责把对象建好，启动线程 / 注册监听器交给独立的 `start()` 或工厂方法：
+
+```java
+public final class Safe {
+    private final int value;
+
+    public Safe(int v) { value = v; }          // 构造器只赋值，不发布
+    public void start() {                      // 发布动作单独一步
+        new Thread(() -> System.out.println(value)).start();
+    }
+}
+```
+
+### 8.4 安全发布的四种方式
+
+「发布（publish）」= 把一个对象的引用交给别的线程使用；「安全发布」= 保证别的线程看到的是**完整构造好**的对象。Java 里能安全发布的手段只有这四种：
+
+| 方式 | 写法 | 原理 |
+|---|---|---|
+| **静态初始化器** | `static final Foo INSTANCE = new Foo();` | 类初始化由 JVM 保证对所有线程可见（JLS 的类初始化 happens-before 规则） |
+| **`final` 字段** | 把对象存进某个类的 `final` 字段 | 8.2 的两条重排序规则 |
+| **`volatile` / 原子引用** | `private volatile Foo ref;` | 内存屏障，见第四节 |
+| **锁或并发容器** | 写进 `synchronized` 块 / `ConcurrentHashMap` / 阻塞队列 | 锁的 happens-before；并发容器内部自带同步 |
+
+反过来说，**下面这些全是「不安全发布」**：引用赋给非 `volatile` 的 `public` 字段、塞进非同步的静态集合、从构造函数里把 `this` 交出去。它们不是「偶尔出错」，而是**在 x86 之外的平台、或在 JIT 做了激进的寄存器分配之后必然出错**——这也是「本地跑一万遍都没复现」的代码上线后偶发诡异 bug 的常见来源。
+
+### 8.5 `final` ≠ 不可变
+
+最容易被追问倒的一处：
+
+```java
+public class Cache {
+    private final List<String> items = new ArrayList<>();   // final 只锁住「引用」
+
+    public void add(String s) { items.add(s); }             // ← 内容照样能改
+}
+```
+
+**`final` 保证的是「引用不可改」，不是「对象状态不可改」。** 真正的不可变类要同时满足四条：
+
+1. 所有字段都是 `final`；
+2. 字段类型要么是基本类型，要么指向不可变对象；
+3. `this` 在构造过程中不逸出；
+4. 对外提供集合时做**防御性拷贝**（`List.copyOf(...)`），而不是把内部引用直接返回。
+
+顺带区分两个常被混为一谈的 API：
+
+| 写法 | 是不是真不可变 |
+|---|---|
+| `Collections.unmodifiableList(list)` | ❌ 只是**视图包装**，原列表改了它跟着变，写入时才抛异常 |
+| `List.of(...)` / `List.copyOf(...)` | ✅ 真不可变，且 `List.of` 连 `null` 都不接受 |
+
+还有一个边界要清楚：`final` 是**编译期 + JMM 层面的承诺**，反射（`setAccessible(true)` + `Field.set`）仍能改掉它。所以「不可变」是给正常代码的约定，**不是安全边界**——别拿它当防护手段。
+
+## 九、三件武器怎么选
 
 | | `synchronized` | `volatile` | `Lock` / 原子类 |
 |---|---|---|---|
@@ -252,6 +387,8 @@ JDK 1.6 为了优化 `synchronized` 的性能，引入了锁升级机制。**注
 
 选择顺序建议：**能用 `volatile` 解决就不加锁 → 需要互斥就优先 `synchronized`（JVM 优化好、代码简单、不会忘记释放）→ 需要超时、可中断、公平或条件队列时才用 `ReentrantLock`**。`ReentrantLock` 的细节见 [AQS 与锁](/java/concurrent/aqs-locks)。
 
+注意 `final` 不在这张表里：它**既不提供互斥也不提供原子性**，提供的是「不用同步就能安全发布」。所以在真正需要「多个字段一起不可变」的场景（配置对象、DTO、状态快照），首选是把对象设计成**不可变 + `final` 字段**，而不是给每个读写都加锁——后者容易漏、也更容易在后续改动中被破坏。
+
 ## 面试口径
 
 - **并发问题的根源**：三大特性被破坏——原子性（线程切换）、可见性（CPU 缓存）、有序性（指令重排）。
@@ -261,3 +398,6 @@ JDK 1.6 为了优化 `synchronized` 的性能，引入了锁升级机制。**注
 - **`synchronized` 原理**：JVM 层面的互斥锁，锁的信息记录在对象头的 Mark Word 中，升级到重量级锁后关联 Monitor（`Owner` / `EntryList` / `WaitSet`），`EntryList` 对应线程的 `BLOCKED` 状态。
 - **锁升级**：无锁 → 偏向锁 → 轻量级锁 → 重量级锁；竞争时先 CAS 自旋，自旋失败才膨胀为重量级锁；**JDK 15 起偏向锁默认禁用**。
 - **其他优化**：锁消除（逃逸分析）、锁粗化（合并相邻同步块）、自适应自旋。
+- **`final` 的内存语义**：JMM 有两条重排序规则——构造函数内写 `final` 字段**不能重排到**「把对象引用赋给一个引用变量」之后；「初次读对象引用」**不能重排到**「初次读该对象的 `final` 字段」之后。结论：**只要构造过程中 `this` 没逸出，其他线程无需同步就能看到 `final` 字段的初始化值**。这也是 DCL 单例里 `instance` 必须 `volatile` 的原因——它是 `static` 字段，不是 `final` 字段，享受不到这条规则。
+- **安全发布**：只有四种方式——静态初始化器、`final` 字段、`volatile` / 原子引用、锁或并发容器。反面是不安全发布：赋给非 `volatile` 的 `public` 字段、塞进非同步静态集合、构造器里把 `this` 交出去（启动线程 / 注册监听器 / 调用可被覆写的方法）。
+- **`final` ≠ 不可变**：`final` 只保证**引用**不可改，不保证对象状态不可改。不可变类还要满足「字段类型本身不可变 + `this` 不逸出 + 对外做防御性拷贝」。另外 `Collections.unmodifiableList` 只是视图包装，`List.of` / `List.copyOf` 才是真不可变。

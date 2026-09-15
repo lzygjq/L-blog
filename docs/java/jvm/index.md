@@ -15,8 +15,8 @@ JVM 是 Java 面试的「硬通货」：既考原理（内存模型、GC 算法�
 | 1 | [运行时数据区](/java/jvm/memory) | 程序计数器/栈/堆/方法区/直接内存，堆栈对比与栈溢出 | ✅ 已成篇 |
 | 2 | [类加载机制](/java/jvm/classloading) | 四类加载器、双亲委派、装载七阶段、打破委派的场景 | ✅ 已成篇 |
 | 3 | [垃圾回收](/java/jvm/gc) | 存活判定、四种引用、三大算法、分代回收与 GC 分类 | ✅ 已成篇 |
-| 4 | [垃圾收集器](/java/jvm/collectors) | Serial → Parallel → CMS → G1 → ZGC 的演进与选型 | ✅ 已成篇 |
-| 5 | [调优与线上排查](/java/jvm/tuning) | 参数速查、工具链、内存泄漏四步法、CPU 飙高四步法 | ✅ 已成篇 |
+| 4 | [垃圾收集器](/java/jvm/collectors) | Serial → Parallel → CMS → G1 → ZGC / Shenandoah 的演进、版本时间线与选型 | ✅ 已成篇 |
+| 5 | [调优与线上排查](/java/jvm/tuning) | 参数速查、工具链、GC 日志配置与判读、内存泄漏四步法、CPU 飙高四步法 | ✅ 已成篇 |
 
 **推荐顺序**：1 → 3 建立内存与回收的直觉；2 单独成块（类加载是独立机制）；4 是 3 的工程落地；5 是面试实操题的答案库。
 
@@ -31,9 +31,12 @@ JVM 是 Java 面试的「硬通货」：既考原理（内存模型、GC 算法�
 5. 强软弱虚四种引用的区别与使用场景（[垃圾回收](/java/jvm/gc)）
 6. 三种垃圾回收算法的对比（[垃圾回收](/java/jvm/gc)）
 7. 分代回收流程与对象晋升（[垃圾回收](/java/jvm/gc)）
-8. G1 的原理与三个阶段（[收集器](/java/jvm/collectors)）
-9. 常用调优参数（[调优与排查](/java/jvm/tuning)）
-10. 内存泄漏/OOM 排查、CPU 飙高排查（[调优与排查](/java/jvm/tuning)）
+8. G1 的原理与三个阶段（[收集器](/java/jvm/collectors#g1)）
+9. ZGC 为什么能做到停顿与堆大小无关、分代 ZGC 补上了什么（[收集器](/java/jvm/collectors#zgc-shenandoah)）
+10. 哪些收集器还在、哪些已被移除（CMS 在 JDK14 移除、非分代 ZGC 在 JDK24 移除）（[收集器](/java/jvm/collectors)）
+11. 常用调优参数（[调优与排查](/java/jvm/tuning)）
+12. GC 日志怎么配、怎么看（`-Xlog:gc*` 与 `回收前->回收后(总堆)` 的判读）（[调优与排查](/java/jvm/tuning)）
+13. 内存泄漏/OOM 排查、CPU 飙高排查（[调优与排查](/java/jvm/tuning)）
 
 ## 三、怎么用这个板块
 
