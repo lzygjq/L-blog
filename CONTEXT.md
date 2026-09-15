@@ -60,8 +60,10 @@
 
 > **这一节决定了「push 之后会不会上线」，接手时务必先看。**
 
-- **当前：仓库 private、Pages 已下线、自动部署已停。** 站点没写完前不对外访问。
-- 线上地址 `https://lzygjq.github.io/L-blog/` **已不可访问**（GitHub Free 账号下私有仓库不支持 Pages，转 private 时站点被自动下线），以前给出去的链接会变成 404。
+- **当前（2026-09-15 22:30 实测确认）：仓库 private、Pages 已下线、自动部署已停。** 站点没写完前不对外访问。
+- **三项实测证据**：线上地址 **404**、无认证调 `api.github.com/repos/lzygjq/L-blog` **404**（私有仓库匿名读不到）、`git ls-remote origin` **正常返回** → 站点确实没了，而代码读写权限完好。
+- **私有仓库不影响 AI 推送代码**：`push` 走 SSH 密钥（`~/.ssh/id_ed25519_github`），鉴权对象是仓库所有者的密钥，**与仓库可见性无关** —— 照旧「改完自动 commit + push」，不需要任何额外操作，也不需要给 AI 任何 token。
+- 线上地址 `https://lzygjq.github.io/L-blog/` **已 404**（GitHub Free 账号下私有仓库不支持 Pages，转 private 时站点被自动下线），以前给出去的链接会失效。
 - `.github/workflows/deploy.yml` 的 `push` 触发器**已注释掉**，只剩 `workflow_dispatch` 手动入口 —— 所以**现在 push 不会再发布任何东西**，本地 `npm run dev` 照常能看。
 - **写完要恢复发布，三件事一起做（缺一不可）**：① 取消 `deploy.yml` 里 `push:` 两行的注释；② Settings → Pages → Source 选 GitHub Actions；③ Settings → General → Danger Zone → 可见性改回 **Public**。
 - 注意两个概念不要混：**仓库私有 ≠ 站点私有**。GitHub Pages 的站点可见性跟仓库可见性无关，个人账号只有在 Enterprise Cloud 下才有「真·私有 Pages」；Pro 只是允许从私有仓库发布，站点本身依然公开。所以「不想别人看到」的正解是**先别发布**，而不是「发布 + 藏地址」。
