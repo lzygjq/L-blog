@@ -22,7 +22,7 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 |---|---|---|---|
 | [计算机网络](/fundamentals/network/) | `network/` | 数据怎么从一台机器到另一台机器，中途会出什么错 | **5 篇已成篇** |
 | [操作系统](/fundamentals/os/) | `os/` | 数据到了机器之后，进程怎么被调度、内存怎么被管理、IO 怎么被等待 | **5 篇已成篇** |
-| 算法与数据结构 | `algorithms/` | 数据到了应用层，用什么结构存、用什么策略算，代价是多少 | 规划中 |
+| [算法与数据结构](/fundamentals/algorithms/) | `algorithms/` | 数据到了应用层，用什么结构存、用什么策略算，代价是多少 | **7 篇已成篇** |
 
 **三者的关系不是"三个独立学科"，是一条连续的流水线**——网络负责"送达"，操作系统负责"接住并交给进程"，算法负责"算得又快又省"。下一节用一条真实的请求把这条流水线走一遍。
 
@@ -60,11 +60,11 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 
 | 交叉板块 | 交叉点 | 说明 |
 |---|---|---|
-| [Java 核心](/java/) | IO 模型、线程调度、集合底层 | [IO 与 NIO](/java/basics/io-nio) 讲 **Java 视角**（BIO/NIO/AIO 的 API、Buffer、Selector 用法）；「五种 IO 模型的内核机制、epoll 的数据结构、零拷贝」在 [IO 模型与多路复用](/fundamentals/os/io-model) |
+| [Java 核心](/java/) | IO 模型、线程调度、集合底层 | [IO 与 NIO](/java/basics/io-nio) 讲 **Java 视角**（BIO/NIO/AIO 的 API、Buffer、Selector 用法）；「五种 IO 模型的内核机制、epoll 的数据结构、零拷贝」在 [IO 模型与多路复用](/fundamentals/os/io-model)。**集合同理**：[Java 集合的底层选型](/java/collections/data-structure) 讲选型取舍，大 O、均摊、缓存局部性、哈希冲突在本域的 [算法与数据结构](/fundamentals/algorithms/) |
 | [Java 并发](/java/concurrent/) | 线程与调度 | 内核线程怎么被调度（[进程、线程与调度](/fundamentals/os/process-thread)）vs Java 线程池怎么配（[线程池](/java/concurrent/thread-pool)）；前者是后者参数的依据 |
-| [存储与消息](/database/) | 连接、超时、重传 | 数据库连接池、MQ 长连接的行为，全部受 TCP 层影响 |
+| [存储与消息](/database/) | 连接、超时、重传、索引结构 | 连接池与 MQ 长连接的行为全部受 TCP 层影响（见 [TCP 核心机制](/fundamentals/network/tcp)）；**索引结构**上：内存索引用红黑树（[树与索引结构](/fundamentals/algorithms/tree)），磁盘索引要用 B+ 树（[MySQL 索引](/database/mysql/index)）——**同一个"有序查找"需求在两种硬件下的不同解**；`ORDER BY` 超出内存时走 [外排序](/fundamentals/algorithms/high-volume#external-sort) |
 | [云原生](/cloud-native/) | Service / Ingress / CNI | K8s 板块讲「怎么在集群内实现服务发现与转发」；本板块讲「TCP/IP 本身怎么工作」 |
-| [数据仓库](/bigdata/) | 海量数据处理 | TopK、布隆过滤器、位图、外排序这些算法在 `algorithms/`；它们在数仓与大数据场景里的用法在数据仓库板块 |
+| [数据仓库](/bigdata/) | 海量数据处理 | TopK、布隆过滤器、位图、外排序、哈希分桶的**算法原理**在本域的 [海量数据处理](/fundamentals/algorithms/high-volume)；它们在数仓与大数据场景里的**选型与落地**（Doris 的表模型、Iceberg 的元数据、冷热分层）在 [数据仓库板块](/bigdata/) |
 | [面试专题](/interview/) | 检索入口 | 面试专题是**检索层**（题单 + 索引），本板块是**内容层**。三域成篇后，面试专题只放指向正文锚点的链接，不复制正文 |
 
 ## 四、高频考点速查 {#faq}
@@ -85,8 +85,6 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 | 一次请求从输入网址到看到页面经历了什么？ | DNS → TCP → TLS → HTTP → 封装；服务端侧还要经过收包、唤醒、调度、拷贝 | [#journey](#journey) |
 | 网络不通怎么排查？ | 按层自下而上：地址 → 路由 → 端口 → 应用 → 证书 → 性能，每一步都有对应工具 | [#layers-path](/fundamentals/network/troubleshoot#layers-path) |
 
-> **算法与数据结构一组速查，在该域正文成篇后补入本节。**
-
 ### 4.2 操作系统 {#faq-os}
 
 | 问题 | 一句话答案 | 详见 |
@@ -105,6 +103,30 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 | 报 `Too many open files` 怎么办？ | 先 `cat /proc/<pid>/limits` 看**进程真实限制**（不是 `ulimit -n`）；区分"泄漏"（单调上升）与"不足"（贴着限制）。注意 **systemd 服务要在 unit 里设 `LimitNOFILE`** | [#fd](/fundamentals/os/filesystem#fd) |
 | 线上慢，第一步看什么？ | 先分类：CPU / IO / 内存 / 句柄。用 **PSI**（`/proc/pressure/*`）判饱和度，比使用率准 | [#method](/fundamentals/os/linux-tools#method) |
 
+### 4.3 算法与数据结构 {#faq-algorithms}
+
+| 问题 | 一句话答案 | 详见 |
+|---|---|---|
+| 均摊复杂度和平均复杂度是一回事吗？ | **不是**。均摊是对**最坏操作序列**做算术（无需概率假设）；平均是对**输入分布**求期望 | [#amortized](/fundamentals/algorithms/complexity#amortized) |
+| `ArrayList.add` 是 `O(1)` 吗？ | **均摊 `O(1)`、单次最坏 `O(n)`**；倍增策略让 n 次追加的总拷贝量收敛于 `O(n)` | [#amortized](/fundamentals/algorithms/complexity#amortized) |
+| 数组下标为什么从 0 开始？ | 寻址公式 `base + i × size` **无需额外减法指令** | [#zero-based](/fundamentals/algorithms/linear#zero-based) |
+| 「数组比链表快」的真正原因？ | 不只是 `O(1)` 寻址，更是**缓存局部性**——一次缓存行加载带进相邻元素 | [#cache-locality](/fundamentals/algorithms/linear#cache-locality) |
+| 频繁增删就该用链表吗？ | **不一定**。循环"遍历 + 尾部追加"时数组实测更快；链表只在**已持有结点引用 + 任意位置增删**时占优 | [#linked-vs-array](/fundamentals/algorithms/linear#linked-vs-array) |
+| `HashMap` 容量为什么是 2 的幂？ | 把取模换成位与 `(n-1) & hash`——**位与一个周期，除法几十个周期** | [#power-of-two](/fundamentals/algorithms/linear#power-of-two) |
+| 树化阈值 8 是性能优化吗？ | **主要是防御性设计**——防构造哈希冲突退化成 `O(n)`（哈希碰撞 DoS） | [#load-factor](/fundamentals/algorithms/linear#load-factor) |
+| 红黑树五条性质推出什么？ | **最长路径 ≤ 2 × 最短路径**：红不能相邻 → 最长红黑交替；黑高相同 → 最短全黑 | [#rb-properties](/fundamentals/algorithms/tree#rb-properties) |
+| 建堆是 `O(n)` 还是 `O(n log n)`？ | **自底向上建堆是 `O(n)`**：层数越深节点越多但下沉越浅，级数收敛于 `2n` | [#build-heap](/fundamentals/algorithms/tree#build-heap) |
+| 并查集的复杂度是多少？ | 路径压缩 + 按秩合并后 **`O(α(n))` 均摊**，`α(n) < 5`，可直接当 `O(1)` | [#union-find](/fundamentals/algorithms/tree#union-find) |
+| 为什么 Dijkstra 不能有负权？ | 正确性依赖"**已确定节点不会再有更短路径**"这个贪心假设，负权会推翻它 | [#dijkstra](/fundamentals/algorithms/graph#dijkstra) |
+| 有向图怎么判环？ | **三色标记**：访问到"灰色"（当前路径上的祖先）即有环；单纯 `visited` 不够 | [#cycle-detection](/fundamentals/algorithms/graph#cycle-detection) |
+| 比较排序的下界是多少？ | **`O(n log n)`**：`n!` 种排列需 `2^k ≥ n!`；**下界只约束"靠比较"的算法** | [#lower-bound](/fundamentals/algorithms/sorting#lower-bound) |
+| Java 对基本类型和对象为什么用不同排序？ | **对象有身份、必须稳定**（TimSort）；基本类型值相等即不可区分，可用更快的双轴快排 | [#two-entries](/fundamentals/algorithms/sorting#two-entries) |
+| 0-1 背包为什么容量要逆序？ | 逆序时 `dp[j-w]` 还是"上一轮"旧值 → **每件物品只用一次**；正序会变成完全背包 | [#knapsack-reverse](/fundamentals/algorithms/dp#knapsack-reverse) |
+| "找零钱"为什么不能用贪心？ | 面额 `[1,3,4]` 凑 6：贪心 3 张、最优 2 张（`3+3`）——**局部最优损害了后续选择** | [#greedy-counterexamples](/fundamentals/algorithms/dp#greedy-counterexamples) |
+| 位图和布隆过滤器怎么选？ | **值域可控且要精确 → 位图**（1 bit/值）；**值域不可控、允许假阳性 → 布隆过滤器**（约 10 bit/元素） | [#bitmap](/fundamentals/algorithms/high-volume#bitmap) |
+| 布隆过滤器会漏判吗？ | **不会**（无假阴性），**只有假阳性**；语义是"可能包含 / 一定不包含" | [#bloom](/fundamentals/algorithms/high-volume#bloom) |
+| TopK 为什么用小顶堆？ | **堆顶是 K 个候选里最小的**，新元素比堆顶大才替换；用大顶堆会把最大值挤出去 | [#topk](/fundamentals/algorithms/high-volume#topk) |
+
 ## 五、阅读建议 {#reading}
 
 | 你的情况 | 建议路径 |
@@ -113,6 +135,9 @@ desc: 计算机网络、操作系统、算法与数据结构——三门语言�
 | 想搞懂"机器这一侧" | [进程、线程与调度](/fundamentals/os/process-thread) → [虚拟内存与内存管理](/fundamentals/os/memory) → [IO 模型与多路复用](/fundamentals/os/io-model) |
 | 线上出问题、要立刻定位 | [网络排查实战](/fundamentals/network/troubleshoot)（数据到没到）→ [Linux 排查实战](/fundamentals/os/linux-tools)（到了之后卡在哪） |
 | 要调 JVM 参数 / 解释容器 OOM | [虚拟内存与内存管理](/fundamentals/os/memory) → [落到 Java](/fundamentals/os/memory#java-mapping) |
+| 从零建立算法认知 | [复杂度分析](/fundamentals/algorithms/complexity) → [线性结构](/fundamentals/algorithms/linear) → [树与索引结构](/fundamentals/algorithms/tree) |
+| 想理解 Java 集合为什么这样设计 | [Java 集合的底层选型](/java/collections/data-structure)（选型视角）→ [线性结构](/fundamentals/algorithms/linear) 与 [树与索引结构](/fundamentals/algorithms/tree)（原理视角） |
+| 要处理内存放不下的数据 | [海量数据处理](/fundamentals/algorithms/high-volume) → [数据仓库板块](/bigdata/) |
 | 做技术选型（HTTP/2 还是 3、要不要上 QUIC） | [HTTP 演进](/fundamentals/network/http#compare) → [DNS 与 CDN](/fundamentals/network/dns-cdn) |
 | 面试前突击 | [高频考点速查](#faq)（背"问→答→详见"，再回正文看推导） |
 

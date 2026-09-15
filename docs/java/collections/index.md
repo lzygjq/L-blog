@@ -39,7 +39,7 @@ Map 线：二叉树 ─ 二叉搜索树 ─ 红黑树（自平衡，O(log n)）
 
 | 篇目 | 覆盖内容 | 关键问题 |
 |---|---|---|
-| [数据结构与算法复杂度](/java/collections/data-structure) | 大 O 表示法、常见复杂度、数组、单双向链表 | 为什么数组下标从 0 开始？链表增删为什么是 O(1)？ |
+| [Java 集合的底层选型](/java/collections/data-structure) | 选型速查表、四类集合的复杂度对照、`ArrayList` 扩容与 1.5 倍、`LinkedList` 的真实定位、"看起来像 O(1)"的坑 | 该选 `ArrayList` 还是 `LinkedList`？为什么扩容是 1.5 倍？ |
 | [List 集合](/java/collections/list) | 数组原理、`ArrayList` 源码与扩容、数组 ↔ List 转换、`ArrayList` vs `LinkedList` | `ArrayList` 底层原理？`new ArrayList(10)` 扩容几次？转换后互相影响吗？ |
 | [HashMap](/java/collections/hashmap) | 二叉树 / 红黑树 / 散列表、实现原理、put 流程、扩容、寻址算法、1.7 死循环 | `HashMap` 实现原理？put 流程？为什么长度是 2 的次幂？ |
 
@@ -49,9 +49,9 @@ Map 线：二叉树 ─ 二叉搜索树 ─ 红黑树（自平衡，O(log n)）
 
 | 高频问题 | 一句话答案 | 详见 |
 |---|---|---|
-| 数组为什么下标从 0 开始？ | 寻址公式 `base + i * size` 直接用下标，从 1 开始要多一次减法指令 | [数据结构与算法复杂度](/java/collections/data-structure#数组为什么下标从-0-开始) |
-| 数组插入删除为什么慢？ | 要保证内存连续，平均要挪动一半元素，O(n) | [数据结构与算法复杂度](/java/collections/data-structure#数组的插入与删除) |
-| 单向链表和双向链表的区别？ | 双向多一个 `prev` 指针，多耗空间换取「给定节点 O(1) 增删」 | [数据结构与算法复杂度](/java/collections/data-structure#单双向链表对比) |
+| 数组为什么下标从 0 开始？ | 寻址公式 `base + i * size` 直接用下标，从 1 开始要多一次减法指令 | [底层选型](/java/collections/data-structure#数组为什么下标从-0-开始)　|　[原理推导](/fundamentals/algorithms/linear#zero-based) |
+| 数组插入删除为什么慢？ | 要保证内存连续，平均要挪动一半元素，O(n) | [底层选型](/java/collections/data-structure#数组的插入与删除)　|　[缓存与硬件代价](/fundamentals/algorithms/linear#cache-locality) |
+| 单向链表和双向链表的区别？ | 双向多一个 `prev` 指针，多耗空间换取「给定节点 O(1) 增删」 | [底层选型](/java/collections/data-structure#单双向链表对比)　|　[原理推导](/fundamentals/algorithms/linear#doubly-linked) |
 | `ArrayList` 底层实现原理？ | 动态数组；初始容量 0，首次 add 才初始化 10；扩容 1.5 倍且要数组拷贝 | [List 集合](/java/collections/list#arraylist-底层实现原理) |
 | `new ArrayList(10)` 扩容几次？ | 0 次——只声明并实例化，指定容量 10，未扩容 | [List 集合](/java/collections/list#构造与容量) |
 | 数组和 List 怎么互转？转换后互相影响吗？ | `Arrays.asList` 共享同一数组（会受影响）；`toArray` 是拷贝（不受影响） | [List 集合](/java/collections/list#数组与-list-互转) |

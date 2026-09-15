@@ -27,7 +27,7 @@ const sidebarSpec = [
       { text: '板块导览', link: '/fundamentals/' },
       { text: '计算机网络', dir: 'fundamentals/network', group: true },
       { text: '操作系统', dir: 'fundamentals/os', group: true },
-      { text: '算法与数据结构', dir: 'fundamentals/algorithms' }
+      { text: '算法与数据结构', dir: 'fundamentals/algorithms', group: true }
     ]
   },
   {
