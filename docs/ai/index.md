@@ -1,6 +1,6 @@
 ---
 date: 2026-09-11
-desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线、五篇正文的定位与阅读路径、高频考点速查
+desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线、七篇正文的定位与阅读路径、高频考点速查
 ---
 
 # AI 应用 · 板块导览
@@ -46,6 +46,7 @@ AI 应用
     └── 数字人                        多模态终端集成
         ├── 数字人 · 导览             形态分类与选型维度
         ├── 实时互动数字人            选型与集成落地
+        ├── 接入宿主：Web 与原生 App   宿主形态与硬约束
         └── 集成清单                 第三方 AI 能力接入方法论
 
 横向依赖：
@@ -64,7 +65,7 @@ AI 应用
 | **提升日常开发效率** | [Vibe Coding](/ai/vibe-coding/) → [Agent 与 Harness](/ai/agent-harness/) |
 | **在 Java 项目里用大模型** | [Agent 与 Harness](/ai/agent-harness/) → [Spring AI](/ai/spring-ai/) → [Spring AI Alibaba](/ai/spring-ai-alibaba/) |
 | **要做多智能体 / 流程编排** | [Agent 与 Harness · 多 Agent](/ai/agent-harness/#multi-agent) → [Spring AI Alibaba · Graph](/ai/spring-ai-alibaba/#graph) |
-| **做面向终端的 AI 产品** | [数字人导览](/ai/digital-human/) → [实时互动数字人](/ai/digital-human/interactive-avatar) → [集成清单](/ai/digital-human/integration-checklist) |
+| **做面向终端的 AI 产品** | [数字人导览](/ai/digital-human/) → [实时互动数字人](/ai/digital-human/interactive-avatar) → [接入宿主：Web 与原生 App](/ai/digital-human/web-vs-native) → [集成清单](/ai/digital-human/integration-checklist) |
 | **要对接 MCP / 外部工具** | [Agent 与 Harness · MCP](/ai/agent-harness/#mcp) → [Spring AI · MCP](/ai/spring-ai/#mcp) → [Spring AI Alibaba · Nacos MCP Registry](/ai/spring-ai-alibaba/#enterprise) |
 | **面试前突击** | [高频考点速查](#faq) → 回正文看推导 |
 

@@ -11,11 +11,11 @@ Java 是整个知识体系的主干，按「基础 → 并发 → JVM → Spring
 | # | 板块 | 内容 | 状态 |
 |---|---|---|---|
 | 1 | [Java 基础](/java/basics/) | 面向对象与 Object 契约、String 与包装类、异常体系、泛型、反射、注解、IO/NIO、Java 8 与 9~21 新特性（**9 篇已成篇**） | **已完成 9 篇** |
-| 2 | [Java 集合](/java/collections/) | 数据结构与复杂度、`ArrayList` 源码与扩容、`HashMap` 原理与扩容（**4 篇已成篇**） | 部分完成 |
+| 2 | [Java 集合](/java/collections/) | 数据结构与复杂度、`ArrayList` 源码与扩容、`HashMap` 原理与扩容（**6 篇已成篇**） | 部分完成 |
 | 3 | [并发与 JUC](/java/concurrent/) | 线程基础、线程安全与 JMM、CAS 与原子类、AQS 与锁、线程池、并发容器、ThreadLocal（**8 篇已成篇**） | 部分完成 |
-| 4 | [JVM](/java/jvm/) | 运行时数据区、类加载、GC 与收集器、调优排查（**6 篇已成篇**） | 部分完成 |
-| 5 | [Spring 生态](/java/spring/) | Spring 核心（IoC / Bean / AOP / MyBatis，**7 篇已成篇**）+ Spring MVC + Spring Boot（**2 篇**）+ Cloud（**10 篇**，含 CAP / 分布式事务 / 幂等 / 任务调度） | 部分完成 |
-| 6 | [设计模式](/java/design-patterns/) | 设计原则 + 23 种模式 | **已完成 27 篇** |
+| 4 | [JVM](/java/jvm/) | 运行时数据区、类加载、GC 与收集器、调优排查（**5 篇已成篇**） | 部分完成 |
+| 5 | [Spring 生态](/java/spring/) | Spring 核心（IoC / Bean / AOP / MyBatis，**7 篇已成篇**）+ Spring MVC + Spring Boot（**6 篇**）+ Cloud（**9 篇**，含 CAP / 分布式事务 / 幂等 / 任务调度） | 部分完成 |
+| 6 | [设计模式](/java/design-patterns/) | 设计原则 + 23 种模式 | **已完成 23 篇**（设计原则 1 + 模式 22） |
 
 ## 阅读建议
 

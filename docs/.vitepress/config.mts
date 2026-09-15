@@ -20,8 +20,8 @@ import { buildSidebar } from './sidebar.mjs'
 const sidebarSpec = [
   {
     // 计算机基础：跨栈底座（网络 / 操作系统 / 算法与数据结构）
-    // network 下有 5 篇正文 + 导览 → group 展开；os / algorithms 暂只有 index.md →
-    // 不加 group，自动退化为一个可点击条目（避免出现空折叠分组）
+    // 三域都已有正文（network 5 / os 5 / algorithms 7）→ 全部 group 展开
+    // （若某域只剩 index.md，则应去掉 group，让它自动退化为可点击条目，避免空折叠分组）
     prefix: '/fundamentals/',
     items: [
       { text: '板块导览', link: '/fundamentals/' },

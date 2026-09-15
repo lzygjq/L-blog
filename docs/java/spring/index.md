@@ -17,7 +17,7 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 | **[Spring](/java/spring/spring-framework/)** | 核心容器 | 对象管理与横切逻辑：IoC、Bean、AOP、事务、ORM 集成 | **已成篇（7 篇）** |
 | **[Spring MVC](/java/spring/spring-mvc/)** | Web 层 | 请求怎么被路由到 Controller、参数怎么绑定、响应怎么序列化 | 已成篇（1 篇） |
 | **[Spring Boot](/java/spring/spring-boot/)** | 提效 | 消除配置：自动配置、Starter、启动流程、配置体系、Actuator、内嵌容器 | **已成篇（6 篇）** |
-| [Spring Cloud](/java/spring/spring-cloud/) | 分布式 | 服务治理与分布式能力：注册发现、网关、熔断降级、链路追踪、CAP、分布式事务、幂等、任务调度 | **已成篇（10 篇）** |
+| [Spring Cloud](/java/spring/spring-cloud/) | 分布式 | 服务治理与分布式能力：注册发现、网关、熔断降级、链路追踪、CAP、分布式事务、幂等、任务调度 | **已成篇（9 篇）** |
 
 **为什么 Spring MVC 要单独成一个菜单**：它有自己的处理链路（`DispatcherServlet` → `HandlerMapping` → `HandlerAdapter`）和一套 Web 专属注解（`@RequestBody` / `@PathVariable` 等），与容器的机制层是"两层"关系。把两者混在一个菜单里，找东西时要先分清"这是容器的知识还是 Web 的知识"，反而更费力。
 
@@ -43,7 +43,7 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 
 ## 四、Spring Cloud 的内容
 
-[Spring Cloud](/java/spring/spring-cloud/) 与其他三块不同——它不止讲框架组件，还包含**分布式理论与跨服务的通用能力**，共 10 篇：
+[Spring Cloud](/java/spring/spring-cloud/) 与其他三块不同——它不止讲框架组件，还包含**分布式理论与跨服务的通用能力**，共 9 篇：
 
 | 域 | 篇目 |
 |---|---|

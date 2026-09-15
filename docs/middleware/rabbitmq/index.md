@@ -1,7 +1,7 @@
 ---
 order: 0
 date: 2026-09-14
-desc: RabbitMQ 知识地图、AMQP 模型速览、6 篇学习主线与 7 题面试索引
+desc: RabbitMQ 知识地图、AMQP 模型速览、5 篇学习主线与 7 题面试索引
 ---
 
 # RabbitMQ · 导览
