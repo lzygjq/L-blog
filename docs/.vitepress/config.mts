@@ -219,7 +219,7 @@ const base = process.env.GITHUB_ACTIONS ? '/L-blog/' : '/'
 // 留空 = 完全不注入脚本，站点照常构建与运行，只是没有统计数据。
 // 该 ID 会明文出现在页面源码里，这是所有前端统计的共同特征，属正常；
 // 但百度账号密码绝不要写进仓库。
-const BAIDU_TONGJI_ID = ''
+const BAIDU_TONGJI_ID = 'a32b56a960928758f68787b9dc75ce33'
 
 // 统计脚本只在生产构建注入：npm run dev 不带，避免本地刷新污染线上数据。
 // 注意 npm run preview 服务的是生产产物、会带上脚本，自测时到百度统计后台把自己 IP 排除即可。
