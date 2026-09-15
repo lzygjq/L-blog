@@ -210,7 +210,7 @@ public class RedisAutoConfiguration { ... }
 
 > **实践提示**：给 Spring Boot 2.7+ / 3.x 写 Starter 时，**必须把清单放到 `.imports` 文件**。只用 `spring.factories` 在 3.x 下**完全不会生效**——这是升级迁移中最常见的"自动配置莫名失效"原因。
 
-## 六、自定义 Starter 的三段式结构
+## 六、自定义 Starter 的三段式结构 {#starter-structure}
 
 官方 Starter 的目录结构是有讲究的，**照抄这个结构**能避免大部分坑：
 
@@ -272,7 +272,7 @@ com.example.starter.GreetingAutoConfiguration
 3. **用 `@ConditionalOnClass` 守卫**——避免"引了 autoconfigure 却没引实现库"时报 `ClassNotFoundException`。
 4. **类名以 `AutoConfiguration` 结尾，包名避免与官方冲突**（不要放在 `org.springframework.boot` 下）。
 
-## 七、配置优先级
+## 七、配置优先级 {#config-precedence}
 
 自动配置依赖的配置值来自多个源，**同名配置的覆盖顺序从高到低**：
 

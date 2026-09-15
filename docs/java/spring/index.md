@@ -16,7 +16,7 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 |---|---|---|---|
 | **[Spring](/java/spring/spring-framework/)** | 核心容器 | 对象管理与横切逻辑：IoC、Bean、AOP、事务、ORM 集成 | **已成篇（7 篇）** |
 | **[Spring MVC](/java/spring/spring-mvc/)** | Web 层 | 请求怎么被路由到 Controller、参数怎么绑定、响应怎么序列化 | 已成篇（1 篇） |
-| **[Spring Boot](/java/spring/spring-boot/)** | 提效 | 消除配置：自动配置、Starter、启动流程 | 已成篇（2 篇） |
+| **[Spring Boot](/java/spring/spring-boot/)** | 提效 | 消除配置：自动配置、Starter、启动流程、配置体系、Actuator、内嵌容器 | **已成篇（6 篇）** |
 | [Spring Cloud](/java/spring/spring-cloud/) | 分布式 | 服务治理与分布式能力：注册发现、网关、熔断降级、链路追踪、CAP、分布式事务、幂等、任务调度 | **已成篇（10 篇）** |
 
 **为什么 Spring MVC 要单独成一个菜单**：它有自己的处理链路（`DispatcherServlet` → `HandlerMapping` → `HandlerAdapter`）和一套 Web 专属注解（`@RequestBody` / `@PathVariable` 等），与容器的机制层是"两层"关系。把两者混在一个菜单里，找东西时要先分清"这是容器的知识还是 Web 的知识"，反而更费力。
@@ -39,7 +39,7 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 | 菜单 | 已完成 |
 |---|---|
 | [Spring MVC](/java/spring/spring-mvc/) | **执行流程**：九大组件、一次请求的完整链路、`HandlerMapping` 与 `HandlerAdapter` 为何分离、参数绑定与 `HttpMessageConverter`、拦截器 vs 过滤器、Web 层注解速查 |
-| [Spring Boot](/java/spring/spring-boot/) | **自动配置原理**：条件装配、`.imports` 清单演进、自定义 Starter<br>**启动流程**：`SpringApplication` 构造、`run()` 十一个阶段、七种启动事件、耗时优化与失败排查 |
+| [Spring Boot](/java/spring/spring-boot/) | **自动配置原理**：条件装配、`.imports` 清单演进、自定义 Starter<br>**Starter 设计与自定义**：starter/autoconfigure 的职责切分、条件装配粒度、属性元数据、`ApplicationContextRunner` 测试<br>**启动流程**：`SpringApplication` 构造、`run()` 十一个阶段、七种启动事件、耗时优化与失败排查<br>**配置体系**：15 层属性源与成因、Profile 与多文档、`spring.config.import` 的反直觉语义、config tree 与 K8s、密钥与动态刷新<br>**Actuator 与生产可观测**：端点暴露策略、`liveness`/`readiness` 的语义分界、Micrometer 与基数陷阱、安全加固<br>**内嵌容器与请求进入**：容器启动时机、Tomcat 三个参数的关系、`ServletContextInitializer`、`/error` 转发、优雅停机、虚拟线程 |
 
 ## 四、Spring Cloud 的内容
 

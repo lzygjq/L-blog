@@ -7,9 +7,9 @@ title: Java 并发 · 导览
 
 并发是 Java 面试里**最难蒙的一块**：它不像集合那样「看一眼源码就能复述」，而是要求你把 **JVM 内存模型 → 硬件层面的指令重排 → JUC 的锁与工具** 这条链路串起来。很多人能背出「`volatile` 保证可见性、不保证原子性」，却答不上「那给 `i++` 加 `synchronized` 就能保证了吗」「为什么 `wait` 必须写在 `synchronized` 里」——这类追问才是分水岭。
 
-本板块按 **「线程本身 → 并发安全 → JUC 工具」** 三层组织：先搞清楚线程是什么、状态怎么流转，再讲清楚「为什么会有并发问题」以及 `synchronized` / `volatile` / `CAS` 各自解决了其中哪一部分，最后落到每天都在用的线程池与并发容器。
+本板块按 **「线程本身 → 并发安全 → JUC 工具」** 三层组织：先搞清楚线程是什么、状态怎么流转，再讲清楚「为什么会有并发问题」以及 `synchronized` / `volatile` / `CAS` 各自解决了其中哪一部分，最后落到每天都在用的线程池、并发容器与异步编排。
 
-## 一、整体体系
+## 一、整体体系 {#system}
 
 先把这一块压成一张表，建立全局印象：
 
@@ -22,8 +22,9 @@ title: Java 并发 · 导览
 | **线程池** | 线程不能随手 new，要复用、要可控 | 七大参数、执行流程、拒绝策略、参数怎么定 | [线程池](/java/concurrent/thread-pool) |
 | **并发容器** | `HashMap` 多线程下会坏，需要一个安全的替代 | `ConcurrentHashMap`、`CopyOnWriteArrayList`、阻塞队列 | [并发容器](/java/concurrent/concurrent-collections) |
 | **线程封闭** | 变量不想被共享，想「一人一份」 | `ThreadLocal`、内存泄漏、跨线程传递 | [ThreadLocal](/java/concurrent/threadlocal) |
+| **异步编排** | 多个任务要并行发起、还要组合结果与处理异常 | `Future` 的不足、`CompletableFuture` 方法族、执行线程、超时与降级 | [CompletableFuture 异步编排](/java/concurrent/completable-future) |
 
-## 二、三条主线
+## 二、三条主线 {#threads}
 
 三条线是**递进**关系：先有「共享」，才有「安全」，最后才需要「工具」：
 
@@ -43,10 +44,11 @@ title: Java 并发 · 导览
     ├─ ReentrantLock / ReadWriteLock
     ├─ Semaphore / CountDownLatch / CyclicBarrier
     ├─ 线程池 ThreadPoolExecutor
-    └─ 并发容器 ConcurrentHashMap / CopyOnWriteArrayList / 阻塞队列
+    ├─ 并发容器 ConcurrentHashMap / CopyOnWriteArrayList / 阻塞队列
+    └─ 异步编排 CompletableFuture（可组合的 Future，实现 CompletionStage）
 ```
 
-## 三、本板块导航
+## 三、本板块导航 {#navigation}
 
 | 篇目 | 覆盖内容 | 关键问题 |
 |---|---|---|
@@ -57,8 +59,9 @@ title: Java 并发 · 导览
 | [线程池](/java/concurrent/thread-pool) | 七大参数、执行流程、四种拒绝策略、阻塞队列族、`Executors` 的坑、核心线程数怎么定、状态与关闭、监控 | 线程池参数与执行原理？为什么不用 `Executors`？核心线程数怎么定？ |
 | [并发容器](/java/concurrent/concurrent-collections) | `HashMap` 的并发问题、`ConcurrentHashMap` 1.7 vs 1.8、put 与扩容、`CopyOnWriteArrayList`、阻塞队列 | `ConcurrentHashMap` 怎么保证线程安全？1.7 和 1.8 有什么区别？ |
 | [ThreadLocal](/java/concurrent/threadlocal) | 线程封闭、`ThreadLocalMap` 结构、为什么内存泄漏、正确用法、父子线程传递、典型应用 | `ThreadLocal` 原理？为什么会泄漏？线程池里要注意什么？ |
+| [CompletableFuture 异步编排](/java/concurrent/completable-future) | `Future` 的四个不足、创建入口与 `commonPool` 的坑、方法族与 `thenApply`/`thenCompose`/`thenCombine` 区别、**回调执行在哪个线程**、异常处理三兄弟、`join` vs `get`、超时、并行聚合实战、与虚拟线程和结构化并发的关系 | `CompletableFuture` 的回调在执行哪个线程？`allOf` 有什么坑？有了虚拟线程还需要它吗？ |
 
-## 四、高频考点速查
+## 四、高频考点速查 {#faq}
 
 按「问 → 答 → 详见」压缩成一张表，面试前扫一遍即可。
 
@@ -87,3 +90,13 @@ title: Java 并发 · 导览
 | 核心线程数怎么定？ | CPU 密集型约 `N+1`，IO 密集型约 `2N`（或 `2N+1`）；公式只是起点，最终要靠压测 | [线程池](/java/concurrent/thread-pool#pool-size) |
 | `ConcurrentHashMap` 怎么保证线程安全？ | 1.7 用 `Segment` 分段锁；1.8 改为「CAS 写空桶 + `synchronized` 锁首节点」，锁粒度更细 | [并发容器](/java/concurrent/concurrent-collections#chm-18) |
 | `ThreadLocal` 为什么会内存泄漏？ | `Entry` 的 key 是弱引用（`ThreadLocal` 被回收后 key 变 null），value 是强引用且随线程存活；线程池复用线程时不 `remove` 就会堆积 | [ThreadLocal](/java/concurrent/threadlocal#memory-leak) |
+| **`CompletableFuture` 比 `Future` 多了什么？** | 可主动完成、可链式回调、可组合（`thenCompose`/`thenCombine`/`allOf`）、可按阶段处理异常（实现了 `CompletionStage`） | [CompletableFuture](/java/concurrent/completable-future#why-completable-future) |
+| **`thenApply` / `thenCompose` / `thenCombine` 的区别？** | `thenApply` 同步转换（返回 `CF` 会嵌套）、`thenCompose` 串行依赖（自动扁平化）、`thenCombine` 两个独立任务并行后合并 | [CompletableFuture](/java/concurrent/completable-future#apply-vs-compose) |
+| **`CompletableFuture` 的回调在哪个线程执行？** | 不带 `Async` 时**跑在上一个阶段的完成线程上**（若上一阶段已完成，则跑在调用线程）；要固定线程池必须用 `xxxAsync(..., executor)` | [CompletableFuture](/java/concurrent/completable-future#which-thread) |
+| **为什么不能使用默认的 `commonPool`？** | 并行度是「CPU 核数 - 1」、全 JVM 共享（含 `parallelStream`）、无法隔离监控与关闭；涉及 IO 必须传自己的池 | [CompletableFuture](/java/concurrent/completable-future#default-pool) |
+| **`exceptionally` / `handle` / `whenComplete` 怎么选？** | 前者仅异常时执行（同类型兜底）；`handle` 两者都执行且**能改结果与类型**；`whenComplete` 两者都执行但**不能改结果** | [CompletableFuture](/java/concurrent/completable-future#three-handlers) |
+| **`join()` 和 `get()` 的区别？** | `get` 抛受检的 `ExecutionException`，`join` 抛非受检的 `CompletionException`；且 **`join` 不响应中断** | [CompletableFuture](/java/concurrent/completable-future#join-vs-get) |
+| **`allOf` 有什么坑？** | 返回 `CF<Void>`（结果要自己收）；**任一失败即短路，但其余任务不会被取消**——这正是与结构化并发最本质的差别 | [CompletableFuture](/java/concurrent/completable-future#aggregation) |
+| **`orTimeout` 会取消任务吗？** | 不会，只让结果变成超时失败，底层任务仍在跑；因此下游客户端自身也必须设超时 | [CompletableFuture](/java/concurrent/completable-future#timeout) |
+| **有了虚拟线程还需要 `CompletableFuture` 吗？** | 简单的"并行发起 + 都等结果"用虚拟线程更清晰；但超时/降级/多路合并/触发式回调这类**编排能力**仍是它的价值 | [CompletableFuture](/java/concurrent/completable-future#with-virtual-threads) |
+| **结构化并发（`StructuredTaskScope`）现在能用吗？** | 还不能——JDK 25 第五次预览（JEP 505）、JDK 26 第六次预览（JEP 525），预计 JDK 27 转正，目前需 `--enable-preview` | [CompletableFuture](/java/concurrent/completable-future#structured-concurrency) |

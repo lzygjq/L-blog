@@ -1,5 +1,5 @@
 ---
-order: 2
+order: 3
 date: 2026-09-13
 sidebar: 启动流程
 title: Spring Boot 启动流程
