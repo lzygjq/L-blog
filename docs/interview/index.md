@@ -8,7 +8,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 
 这个板块**不写新知识**。它的唯一职责是把散在各板块的题目串起来：**每条索引都指向正文锚点，答案在正文里**。
 
-各板块的导览页或正文末尾都已经有纵向题单（合计 **1075 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
+各板块的导览页或正文末尾都已经有纵向题单（合计 **1138 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
 
 ## 一、纵向题单解决不了的三件事 {#why}
 
@@ -16,7 +16,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 |---|---|---|
 | **同一个概念横跨多个板块** | 「一致性」在 MySQL 讲事务、在 Redis 讲缓存、在 MQ 讲顺序与幂等、在 Spring Cloud 讲分布式事务——四篇各自都对，但没有人告诉你**它们是同一个问题的四种解法** | [跨板块连线题](#threads) |
 | **面试是按轮次递进的** | 题单按知识域排（Java / 存储 / 中间件…），不按「一面问什么、二面问什么」排 | [按轮次的复习路径](#rounds) |
-| **1075 道全看一遍不现实** | 题单里记忆题与决策题混在一起，不知道哪道该背题面、哪道该背推导 | [四个层次](#layers)分优先级 + [自检清单](#checklist) |
+| **1138 道全看一遍不现实** | 题单里记忆题与决策题混在一起，不知道哪道该背题面、哪道该背推导 | [四个层次](#layers)分优先级 + [自检清单](#checklist) |
 
 **一句话定位**：各板块是**内容层**（把机制讲透），这一页是**检索层**（告诉你先看什么，以及同一件事在哪几处出现过）。
 
@@ -51,7 +51,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 |---|---|---|
 | **基础面 / 一面** | 语言与数据结构基本功、SQL 与索引、能说清常用组件的行为 | [计算机基础 43 题](/fundamentals/#faq) → [Java 基础 39 题](/java/basics/#faq) → [集合 25 题](/java/collections/#faq) → [并发 41 题](/java/concurrent/#faq) → [MySQL 12 题](/database/mysql/#interview) |
 | **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [横切能力 60 题](/java/spring/spring-framework/crosscutting/#interview) → [Spring Boot 18 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
-| **三面 / 架构面** | 分布式取舍、云原生落地、数据链路、**方案对比与代价** | [Spring Cloud 10 题](/java/spring/spring-cloud/#interview-index) → [云原生 16 题](/cloud-native/#interview-questions) → [数据仓库 27 题](/bigdata/#faq) → [Flink 流处理 34 题](/bigdata/flink/#faq) → [ClickHouse 40 题](/bigdata/clickhouse/#faq) → [MongoDB 48 题](/database/mongodb/#faq) → [Redis 13 题](/database/redis/#interview) |
+| **三面 / 架构面** | 分布式取舍、云原生落地、数据链路、**方案对比与代价** | [Spring Cloud 10 题](/java/spring/spring-cloud/#interview-index) → [云原生 16 题](/cloud-native/#interview-questions) → [数据仓库 27 题](/bigdata/#faq) → [Flink 流处理 34 题](/bigdata/flink/#faq) → [ClickHouse 40 题](/bigdata/clickhouse/#faq) → [MongoDB 48 题](/database/mongodb/#faq) → [Redis 16 题](/database/redis/#interview) |
 | **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [架构师路线图](/projects/architect-roadmap/)（自检缺口）→ [可验证产出工具箱](/projects/toolkit/)（ADR / 压测报告 / 架构图） |
 | **AI 方向岗** | 工程化的 AI 协作方式、Agent 与 MCP、框架选型 | [AI 应用 19 题](/ai/#faq) → [Agent 与 Harness](/ai/agent-harness/#interview) → [Spring AI](/ai/spring-ai/#interview) |
 | **大前端相关岗** | 小程序双线程模型、`setData` 边界、登录支付时序 | [大前端 6 题](/frontend/#interview) |
@@ -151,7 +151,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | Spring Cloud | 10 | [面试索引](/java/spring/spring-cloud/#interview-index) | 注册发现、网关限流、熔断、分布式事务、幂等 |
 | 设计模式 | 7 组辨析 | [面试高频](/java/design-patterns/#interview) | 只列最易混淆的边界（代理 vs 装饰、策略 vs 状态） |
 | MySQL | 12 | [面试高频清单](/database/mysql/#interview) | 索引、事务、日志、MVCC、主从 |
-| Redis | 13 | [面试高频](/database/redis/#interview) | 缓存三大问题、锁、持久化、集群 |
+| Redis | 16 | [面试高频](/database/redis/#interview) | 缓存三大问题与一致性三档、锁演进与看门狗失效边界、四种轻量队列、持久化与集群、容量口径 |
 | PostgreSQL | 86 | [面试索引](/database/postgresql/#interview) | 两个根设计（版本存哪 / 索引存什么）、xmin 与快照三要素、VACUUM 三职责、长事务顶住清理水位、事务 ID 回卷、表级锁八模式与行锁记在元组头、锁队列 FIFO、SSI、GIN/GiST/BRIN 与部分索引、物理与逻辑复制、`synchronous_commit` 五档、`hot_standby_feedback` 取舍、PgBouncer 三模式、`work_mem` 与复制槽积压 |
 | 消息队列 | 26 | [面试高频清单](/middleware/#interview) | RabbitMQ / Kafka / RocketMQ / MQTT 横向对照 |
 | RPC 与协议 | 52 | [面试索引](/middleware/rpc/#interview-index) | 八条失效的本地调用假设、序列化五项指标与演进红线、协议头七要素与粘包拆包、Dubbo SPI 与集群容错、超时预算与重试三前提、优雅下线的四个时间差 |
@@ -172,7 +172,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 分布式协调 | 51 | [面试索引](/distributed/coordination/#interview-index) | 协调服务的边界与六种原语、znode 与约 1MB 硬上限、会话与临时节点、Watcher 三个特性与羊群效应、zxid 的 epoch + 计数器、ZAB 与 Raft 的"两套机制 vs 一套"、TRUNC 的推理链、ZK 默认读非线性的后果、锁的能力边界与 fencing token、RedLock 的定位、etcd 的 2GiB 配额与 compaction/defrag 之别、KRaft 为什么去掉 ZK、Observer 与投票集合 |
 | 安全与合规 | 26 | [面试高频索引](/security/#interview) | 会话与令牌、越权防护、OAuth2 与 PKCE、XSS/CSRF/注入、签名与重放、密码存储与脱敏 |
 
-**上表合计 1135 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
+**上表合计 1138 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
 
 ## 六、自检清单 {#checklist}
 
