@@ -41,6 +41,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 | 分布式理论 | CAP 定理、BASE 理论、一致性协议（Paxos/Raft）、分布式 ID、**协调服务（ZooKeeper / ZAB / etcd）** | **取舍层**：[CAP 与 BASE](/java/spring/spring-cloud/cap-base)；**机制层**：[分布式理论](/distributed/)（3 篇：共识协议 / 数据分布 / 分布式 ID）；**服务化层**：[分布式协调](/distributed/coordination/)（5 篇：边界 / 数据模型 / ZAB / 锁与 fencing / 选型与治理）。**本行已补齐** |
 | Redis | 数据结构、持久化、主从哨兵集群、缓存三大问题、分布式锁 | [Redis 板块](/database/redis/)（已成篇 9 篇） |
 | 消息队列 | Kafka/RocketMQ 原理、消息可靠性、幂等、顺序消息、事务消息 | [消息队列板块](/middleware/) |
+| RPC 与协议 | Dubbo/gRPC 原理、序列化协议、协议与传输、超时与重试、优雅上下线 | **框架层**：[RPC 与协议](/middleware/rpc/)（5 篇：边界 / 序列化与 IDL / 协议与传输 / Dubbo 机制 / 可靠性治理）。**本行已补齐** |
 | 微服务治理 | 注册中心（Nacos）、配置中心、网关、熔断降级、链路追踪 | [Spring Cloud](/java/spring/spring-cloud/)（已成篇 9 篇） |
 | 分布式事务 | 2PC/XA、TCC、SAGA、Seata、本地消息表 | [分布式事务](/java/spring/spring-cloud/transaction)（已成篇） |
 | 接口幂等 | 重复提交、消息重投、去重方案选型 | [接口幂等](/java/spring/spring-cloud/idempotency)（已成篇） |

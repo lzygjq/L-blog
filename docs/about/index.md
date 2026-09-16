@@ -16,7 +16,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [Java 核心](/java/) | 语言基础、并发与 JUC、JVM、Spring 全家桶、设计模式 |
 | [大前端](/frontend/) | 微信小程序双线程模型、uni-app 跨端机制、组件化与分包、发布与多端打包 |
 | [数据存储](/database/) | MySQL 原理与调优、PostgreSQL 的 MVCC / VACUUM / 索引类型、Redis 原理与高可用、分库分表、**MongoDB 文档模型与原生分片** |
-| [消息队列](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT 与选型对比 |
+| [消息队列](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT 与选型对比；**RPC 与协议**（序列化与 IDL、协议与传输、Dubbo 机制、超时与重试） |
 | [搜索与检索](/search/) | Elasticsearch：倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、运维调优与 ELK 日志栈 |
 | [数据仓库](/bigdata/) | Canal 同步、**Flink 流处理**、Doris 数仓、**ClickHouse 与 OLAP 选型**、Iceberg 冷热分层、分层建模 |
 | [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD、监控与可观测 |

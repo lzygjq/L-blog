@@ -261,7 +261,7 @@ try (FileChannel in = FileChannel.open(Path.of("big.zip"), StandardOpenOption.RE
 | **语言层：编程模型复杂** | 回调风格导致「回调地狱」，调试与异常传播都麻烦；而 NIO 可以配合虚拟线程在**保持同步写法**的同时获得高吞吐（见 [虚拟线程](/java/basics/java9-21#virtual-thread)） |
 | **工程：收益被 IO 线程数掩盖** | Netty 用少量 IO 线程就能撑住极高并发，AIO 的「省线程」优势不再关键 |
 
-**Netty 的定位**：不是「异步 IO 框架」，而是**「基于 NIO 多路复用的、把 Reactor 模式与协议解析工程化的网络框架」**。它解决的是裸 NIO 的三个痛点——半包/粘包（`LengthFieldBasedFrameDecoder` 一类解码器）、事件注册时机（`OP_WRITE` 的正确用法）、以及线程模型（boss/worker 分离）。主流 RPC、网关、消息中间件的网络层都建在它上面。
+**Netty 的定位**：不是「异步 IO 框架」，而是**「基于 NIO 多路复用的、把 Reactor 模式与协议解析工程化的网络框架」**。它解决的是裸 NIO 的三个痛点——半包/粘包（`LengthFieldBasedFrameDecoder` 一类解码器）、事件注册时机（`OP_WRITE` 的正确用法）、以及线程模型（boss/worker 分离）。主流 RPC、网关、消息中间件的网络层都建在它上面——**这些框架在它之上又做了什么**，见 [RPC 与协议](/middleware/rpc/)（其中 [线程模型](/middleware/rpc/protocol-and-transport#thread-model) 讲的正是"IO 线程为什么不能写业务"）。
 
 ## 六、序列化：绕不开的配套话题 {#serialization}
 
@@ -293,6 +293,8 @@ public class User implements Serializable {
 | **兼容性脆弱** | 类结构一改就可能反序列化失败，跨版本升级风险高 |
 
 **因此生产上普遍改用**：跨语言场景用 JSON（Jackson / Gson）或 Protobuf / Thrift；RPC 内部通信用 Protobuf / Hessian / Kryo。**判据是三条**：要不要跨语言、对体积与吞吐的要求、以及**数据可不可信**（不可信数据一定不要用「能执行代码」的序列化方案）。
+
+五类方案的完整横评、IDL 的价值、以及**"改字段为什么不能改编号"的演进红线**，见 [序列化与 IDL](/middleware/rpc/serialization)。
 
 ## 七、常见坑速查 {#pitfalls}
 

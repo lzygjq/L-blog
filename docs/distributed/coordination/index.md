@@ -55,6 +55,7 @@ desc: 协调服务只存"谁说了算"、不存"发生了什么"——从这句�
 | [CAP 与 BASE](/java/spring/spring-cloud/cap-base) | **取舍层**：ZK / etcd 是典型的 **CP** 代表，这里的判据是"**读到旧的会出大问题**" |
 | [Redis 分布式锁](/database/redis/lock-and-mq) | 同一问题的**另一条路线**：那边讲 `SET NX` 与 Lua 的实现，这边讲三种实现的语义差异与 fencing |
 | [消息队列](/middleware/) | **最直接的解耦现场**：Kafka 4.0 起移除 ZooKeeper（[KRaft 的因果链](/distributed/coordination/coordination-selection#kraft)）；RocketMQ 5.x 引入 Controller 模式 |
+| [RPC 与协议](/middleware/rpc/) | **同一场服务化改造的另一半**：协调解决"**谁说了算**"，RPC 解决"**话怎么传**"；Dubbo 的注册中心可以就是 ZooKeeper / Nacos（[应用级服务发现](/middleware/rpc/dubbo-internals#app-level)） |
 | [云原生](/cloud-native/) | **K8s 的整个控制平面依赖 etcd**：etcd 不可用则集群无法做任何变更（[etcd 的配额与磁盘](/distributed/coordination/coordination-selection#etcd-ops)） |
 | [高可用](/high-availability/) | **同一命题的另一面**：那边讲冗余与故障转移，这边要解决的是「**失去租约的那段窗口里，旧持有者还在写**」 |
 | [数据仓库](/bigdata/) | ClickHouse Keeper 协议兼容 ZK、Doris 用 Paxos 不依赖 ZK —— **把外部协调依赖内化**的两个样本 |

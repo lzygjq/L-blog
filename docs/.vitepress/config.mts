@@ -108,6 +108,12 @@ const sidebarSpec = [
         ]
       },
       {
+        // RPC 与协议（2026-09-16 新增）：与「消息队列」平级 —— RPC 不是消息队列的子集
+        text: 'RPC 与协议',
+        dir: 'middleware/rpc',
+        group: true
+      },
+      {
         // 搜索与检索：以检索为目的的存储（Elasticsearch），既非数据库也非消息队列
         // dir + group：分组标题链到 /search/ 导览，目录内 5 篇自动成为子项（加篇零配置改动）
         text: '搜索与检索',

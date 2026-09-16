@@ -35,7 +35,7 @@ features:
     link: /database/
   - icon: ✉️
     title: 消息队列
-    details: RabbitMQ / RocketMQ 的可靠性、顺序性与幂等设计，物联网 MQTT 接入
+    details: RabbitMQ / RocketMQ 的可靠性、顺序性与幂等设计，物联网 MQTT 接入，RPC 与协议（序列化 / 协议与传输 / Dubbo 机制）
     link: /middleware/
   - icon: 🔍
     title: 搜索与检索

@@ -288,6 +288,8 @@ TCP 提供的是**字节流（byte stream）**：它保证"字节按顺序、不
 
 **对比 UDP**：UDP 是**数据报**协议，一个 `sendto` 对应一个 `recvfrom`，**内核保留边界**。所以 UDP 不会粘包——但换来的是"不保证到达、不保证顺序、包太大直接丢"。
 
+**应用层怎么把边界找回来**：三种分帧方式（定长 / 分隔符 / 长度字段）与 Netty 的 `LengthFieldBasedFrameDecoder` 五个参数，见 [RPC · 协议与传输](/middleware/rpc/protocol-and-transport#framing)。
+
 ### 7.2 三种解法
 
 | 方案 | 做法 | 优缺点 | 典型用例 |

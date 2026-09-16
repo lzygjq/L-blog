@@ -132,6 +132,8 @@ public class LbConfig {
 
 ### 6.1 它解决什么 {#feign-why}
 
+> **对照阅读**：OpenFeign 是"**HTTP + 声明式客户端**"这条路线的代表，另一条路线是"**二进制协议 + 接口级治理**"（见 [RPC 与协议](/middleware/rpc/)，其中 [Dubbo 的调用链](/middleware/rpc/dubbo-internals#refer) 与本章的 LB 机制对照着看最清楚）。两者的负载均衡与容错思想是相通的。
+
 用 `RestTemplate` 调一次下游要写这么多：
 
 ```java
