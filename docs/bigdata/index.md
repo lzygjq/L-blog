@@ -37,17 +37,20 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
                 ODS → DWD → DWS → ADS（+ DIM）
 ```
 
-**一条演进主线**：数据要先能被**拿到**（同步），再要能被**实时加工**（流处理），然后要能**算得快**（引擎），再要能**留得住且留得起**（归档），最后要能被**组织得不产生二义**（建模）。五篇的顺序就是这条线。
+**一条演进主线**：数据要先能被**拿到**（同步），再要能被**实时加工**（流处理），然后要能**算得快**（引擎），再要能**留得住且留得起**（归档），最后要能被**组织得不产生二义**（建模）。六篇的顺序就是这条线。
 
-## 一、五篇的分工 {#modules}
+> 链路里**引擎这一段有两条路线**：[Doris](/bigdata/doris/) 与 [ClickHouse](/bigdata/clickhouse/) 处在**同一层**，是**替代关系而非串联关系**（同一时刻通常只需其中之一，也可以按负载分工）。选择判据见 [OLAP 引擎选型](/bigdata/clickhouse/olap-selection#criteria)。
+
+## 一、六篇的分工 {#modules}
 
 | # | 篇目 | 解决的问题 | 最值得记的结论 |
 |---|---|---|---|
 | 1 | [Canal 数据同步](/bigdata/canal/) | 业务库的变更怎么准确、完整地送出来 | CDC 读的是数据库自己的变更日志；**语义是"至少一次"，幂等必须在写入侧做** |
 | 2 | [Flink 流处理](/bigdata/flink/) | 变更出来之后，在流上怎么做清洗、打宽、聚合 | 流处理难在**时间不确定、状态要保命、结果要只算一次**；端到端一致取决于 sink |
 | 3 | [Doris 数仓](/bigdata/doris/) | 分析负载用什么引擎承接、表怎么建 | 表模型是性能的分水岭；**存算分离下 Unique 模型的写入频率有硬约束** |
-| 4 | [Lakehouse：Iceberg / MinIO / 冷热分层](/bigdata/lakehouse/) | 冷数据放哪儿、成本怎么降下来 | Lakehouse 没发明新存储，它把"表"**从存储层搬到了元数据层** |
-| 5 | [数仓分层建模](/bigdata/warehouse-design/) | 数据怎么组织才不产生口径分叉 | 分层解决的是**协作与口径**问题，不是性能问题 |
+| 4 | [ClickHouse 与 OLAP 选型](/bigdata/clickhouse/) | 引擎的另一条路线：什么时候该选它、什么时候不该 | **先分负载再看引擎**；"改一行、马上要看、还不能重复"就该换引擎 |
+| 5 | [Lakehouse：Iceberg / MinIO / 冷热分层](/bigdata/lakehouse/) | 冷数据放哪儿、成本怎么降下来 | Lakehouse 没发明新存储，它把"表"**从存储层搬到了元数据层** |
+| 6 | [数仓分层建模](/bigdata/warehouse-design/) | 数据怎么组织才不产生口径分叉 | 分层解决的是**协作与口径**问题，不是性能问题 |
 
 ## 二、与其他板块的交叉点 {#cross}
 
@@ -98,7 +101,21 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 | 四条写入链路怎么分工？ | Stream Load 业务直推；Routine Load 消费流；Broker Load 批量回填；INSERT INTO SELECT 仓内加工 | [#ingest](/bigdata/doris/#ingest) |
 | 为什么别用 `DELETE` 清历史？ | Duplicate/Aggregate 上的 `DELETE` 靠谓词累积，会拖慢后续所有查询——用 `TRUNCATE PARTITION` | [#query-update](/bigdata/doris/#query-update) |
 
-### 3.4 归档侧 {#faq-lakehouse}
+### 3.4 引擎选型（ClickHouse）{#faq-clickhouse}
+
+| 问题 | 一句话答案 | 详见 |
+|---|---|---|
+| 为什么 ClickHouse 更新慢？ | 不原地改：改一行要动 N 个列文件，只能重写整个 part | [#why](/bigdata/clickhouse/storage-engine#why) |
+| 索引为什么只记 1/8192？ | 数据物理有序，标记之间的行必然落在对应键值区间内 | [#granularity](/bigdata/clickhouse/storage-engine#granularity) |
+| `ORDER BY` 和 `PRIMARY KEY` 什么区别？ | 排序键定物理顺序，主键只定索引（必须是排序键的前缀） | [#order-by-vs-primary-key](/bigdata/clickhouse/storage-engine#order-by-vs-primary-key) |
+| 为什么大表 JOIN 大表容易 OOM？ | 默认把**右表整体读进内存**建哈希表，且每个节点各建一份 | [#join-algorithm](/bigdata/clickhouse/query-and-index#join-algorithm) |
+| 物化视图为什么不是透明加速？ | 它是**插入触发器**：只处理新数据、查询不会自动改写 | [#mv](/bigdata/clickhouse/query-and-index#mv) |
+| 怎么知道索引真的生效了？ | `EXPLAIN indexes = 1` 看 `Granules` 是否真的变小 | [#explain](/bigdata/clickhouse/query-and-index#explain) |
+| 更新该走哪条路径？ | 一次性修正→mutation；要立刻不可见→轻量删除；CDC 变更→`ReplacingMergeTree` | [#summary](/bigdata/clickhouse/update-and-write#summary) |
+| `internal_replication` 该设什么？ | **`true`** —— 设成 `false` 会向每个副本都写一遍，产生重复数据 | [#internal-replication](/bigdata/clickhouse/cluster-and-replica#internal-replication) |
+| 什么情况不该选 ClickHouse？ | 只要出现"改一行、马上要看、还不能重复"，就该考虑别的引擎 | [#when-not](/bigdata/clickhouse/olap-selection#when-not) |
+
+### 3.5 归档侧 {#faq-lakehouse}
 
 | 问题 | 一句话答案 | 详见 |
 |---|---|---|
@@ -110,7 +127,7 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 | 冷热分层分几层？ | 热（本地 SSD）/ 温（SSD+HDD）/ 冷（对象存储 + 湖表），按**访问特征**切 | [#three-tiers](/bigdata/lakehouse/#three-tiers) |
 | TTL 迁移怎么保证不丢数据？ | **先写、再校验、最后删源**，按分区可重跑，留迁移台账 | [#ttl-migration](/bigdata/lakehouse/#ttl-migration) |
 
-### 3.5 建模侧 {#faq-modeling}
+### 3.6 建模侧 {#faq-modeling}
 
 | 问题 | 一句话答案 | 详见 |
 |---|---|---|

@@ -18,7 +18,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [数据存储](/database/) | MySQL 原理与调优、PostgreSQL 的 MVCC / VACUUM / 索引类型、Redis 原理与高可用、分库分表 |
 | [消息队列](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT 与选型对比 |
 | [搜索与检索](/search/) | Elasticsearch：倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、运维调优与 ELK 日志栈 |
-| [数据仓库](/bigdata/) | Canal 同步、**Flink 流处理**、Doris 数仓、Iceberg 冷热分层、分层建模 |
+| [数据仓库](/bigdata/) | Canal 同步、**Flink 流处理**、Doris 数仓、**ClickHouse 与 OLAP 选型**、Iceberg 冷热分层、分层建模 |
 | [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD、监控与可观测 |
 | [AI 应用](/ai/) | AI 辅助研发（Vibe Coding、Agent）、AI 能力集成（Spring AI、数字人） |
 | [项目实战](/projects/) | 架构师路线图、绩效系统难点专题、SaaS 平台云原生与数仓落地、可验证产出三件套 |

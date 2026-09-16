@@ -43,7 +43,7 @@ features:
     link: /search/
   - icon: 📊
     title: 数据仓库
-    details: Canal 实时同步、Flink 流处理与状态一致性、Doris 数仓、Iceberg 冷热分层与数仓分层建模
+    details: Canal 实时同步、Flink 流处理与状态一致性、Doris 与 ClickHouse 双引擎、Iceberg 冷热分层与数仓分层建模
     link: /bigdata/
   - icon: ☸️
     title: 云原生
