@@ -192,8 +192,11 @@ const sidebarSpec = [
         text: '智慧物业 SaaS',
         link: '/projects/property-saas/',
         children: [
+          { text: '核心业务链路', dir: 'projects/property-saas/core-business' },
           { text: '微服务 → K8s 云原生演进', dir: 'projects/property-saas/microservice-to-k8s' },
-          { text: '大数据架构方案 → 数仓', dir: 'projects/property-saas/data-warehouse' }
+          { text: '大数据架构方案 → 数仓', dir: 'projects/property-saas/data-warehouse' },
+          { text: '容量测算与压测方案', dir: 'projects/property-saas/capacity-and-perf' },
+          { text: '发布、安全与运维', dir: 'projects/property-saas/release-and-ops' }
         ]
       }
     ]

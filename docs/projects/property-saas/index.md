@@ -1,7 +1,7 @@
 ---
 date: 2026-09-15
 title: 智慧物业 SaaS 导览
-desc: 一个多租户物业管理 SaaS 的业务图景与技术难点：租户规模差异、强一致账单、硬件接入、峰值写入与分析负载外移，以及两条架构主线
+desc: 一个多租户物业管理 SaaS 的业务图景与技术难点：租户规模差异、强一致账单、硬件接入、峰值写入与分析负载外移，以及五篇专题构成的完整设计链路
 ---
 
 # 智慧物业 SaaS 导览
@@ -33,29 +33,32 @@ desc: 一个多租户物业管理 SaaS 的业务图景与技术难点：租户�
 | 报表要**多维下钻与长期留存** | 分析负载**外移**到独立引擎，业务库只留在线事务 |
 | 多租户共享一套代码与部署 | 所有横切点（上下文、缓存、消息、文件）都要**带租户维度** |
 
-## 二、两条架构主线 {#two-tracks}
+## 二、五篇专题：一条自下而上的设计链 {#tracks}
 
-### 主线一：微服务 → K8s 云原生演进
+五个专题不是并列的五个话题，而是**同一条链路的五个层次**——从"业务约束长什么样"到"怎么交付上线"。
 
-[微服务 → K8s 云原生演进](/projects/property-saas/microservice-to-k8s/)
+| # | 专题 | 这一篇回答什么问题 | 层次 |
+|---|---|---|---|
+| 1 | [核心业务链路：账单、门禁与交易](/projects/property-saas/core-business/) | 三条关键链路各自被什么业务约束逼出了什么设计？数据模型与分片怎么定？ | **业务与数据** |
+| 2 | [微服务 → K8s 云原生演进](/projects/property-saas/microservice-to-k8s/) | 拆完服务后的四类新问题怎么收敛？多租户怎么隔离？部署形态怎么迁移？ | **工程与部署** |
+| 3 | [大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/) | 分析负载怎么从业务库外移？同步链路与仓内分层怎么做？ | **数据链路** |
+| 4 | [容量测算与压测方案](/projects/property-saas/capacity-and-perf/) | 容量怎么推而不是猜？五层防护各防什么？怎么用压测把估算变成结论？ | **容量与性能** |
+| 5 | [发布、安全与运维](/projects/property-saas/release-and-ops/) | 怎么才敢频繁发版？数据库变更怎么不出事？信任边界与合规红线在哪？ | **交付与运行** |
 
-从"框架层怎么收敛"讲到"多租户怎么隔离"，再到"部署形态怎么迁移"：
+### 2.1 三块地基，被五篇共同依赖 {#foundation}
 
-- **工程结构**：框架能力为什么要聚合成一个 JAR，聚合的代价是什么、什么时候该拆回去；
-- **多租户三级混合隔离**：共享库 + 租户字段 / 独立 Schema / 独立库 + 独立部署，以及隔离级别与部署形态的对应关系；
-- **横切点的租户传播**：异步线程池、消息消费、定时任务、缓存 key、文件路径——这些地方漏一个就会串租户；
-- **迁移路线**：先无状态后有状态、先读路径后写路径，数据库不动。
+```text
+                  ① 数据模型          ② 公共框架层         ③ 租户维度
+              谁的库 / 谁的表 /       幂等·缓存·消息·       上下文怎么贯穿
+              分片键 / 归档策略        日志·异常·鉴权        每一次 IO
+                    │                      │                    │
+      ┌─────────────┴──────────────────────┴────────────────────┴─────────────┐
+      ▼                        ▼                        ▼                     ▼
+ 核心业务链路             微服务 → K8s              数据链路            容量 / 发布
+ （约束怎么落地）        （能力怎么收敛）          （负载怎么外移）      （怎么验证与交付）
+```
 
-### 主线二：大数据架构方案 → 数仓落地
-
-[大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/)
-
-从"为什么不能继续让报表查业务库"讲到选型与落地：
-
-- **选型结论与否决理由**：Doris + 消息队列 + 对象存储上的湖表，**不用 Hadoop 全家桶**；
-- **同步链路**：业务库 binlog → 数仓，幂等与乱序怎么处理；
-- **仓内分层**：贴源 → 明细 → 汇总 → 应用，以及一致性维度；
-- **冷热分层与 TTL 迁移**：热/温/冷三层，迁移任务为什么必须"先写、再验、最后删"。
+**读这五篇的顺序建议按上表 1→5**，因为它对应的是一次真实的搭建顺序：先把业务约束翻译成数据模型，再收敛工程能力，然后处理数据增长，接着验证容量，最后才能谈发布节奏。**跳过第 1 篇直接看第 4 篇，会看不懂容量为什么要按场景拆口径**——因为那些场景全部来自业务链路。
 
 ## 三、技术栈总览 {#stack}
 
@@ -83,23 +86,36 @@ desc: 一个多租户物业管理 SaaS 的业务图景与技术难点：租户�
 
 | 业务难点 | 架构设计 | 详见 |
 |---|---|---|
-| 批量出账的峰值写入 | 任务分片 + 幂等重跑 + 消息削峰 | [微服务 → K8s](/projects/property-saas/microservice-to-k8s/#migration) |
+| 批量出账的峰值写入 | 任务分片 + 幂等重跑 + 消息削峰 | [核心业务链路 · 出账](/projects/property-saas/core-business/#billing-flow) |
+| 账单金额精度与并发修改 | 定点类型 + 条件更新 + 状态机 | [核心业务链路 · 正确性](/projects/property-saas/core-business/#billing-correctness) |
 | 支付回调不能重复入账 | 业务唯一键 + 状态机 + 幂等表 | [接口幂等](/java/spring/spring-cloud/idempotency#solutions) |
-| 多级审批与通知 | 消息驱动 + 消费幂等 | [分布式事务](/java/spring/spring-cloud/transaction#mq-idempotent) |
+| 门禁弱网离线仍要能开门 | 设备侧白名单 + 分层缓存 + 补传 | [核心业务链路 · 离线降级](/projects/property-saas/core-business/#offline) |
+| 团购抢购库存不超卖 | 缓存预减库存 + 消息排队 + 幂等回补 | [核心业务链路 · 交易](/projects/property-saas/core-business/#commerce) |
 | 租户规模差异极大 | 三级混合隔离 | [K8s 多租户隔离](/cloud-native/kubernetes/#multi-tenant) |
 | 定时任务在多副本下重复执行 | 调度平台分片 + 执行权互斥 | [分布式任务调度](/java/spring/spring-cloud/scheduling#no-dup) |
+| 容量该配多少没有依据 | 六步推导链 + 三档租户画像 | [容量测算 · 推导链](/projects/property-saas/capacity-and-perf/#derivation) |
+| 高并发时雪崩而不是排队 | 五层防护链路 + 按语义降级 | [容量测算 · 防护链路](/projects/property-saas/capacity-and-perf/#protection) |
+| 估算值缺少实测背书 | 混合场景压测 + 中间件同屏监控 | [压测方案](/projects/property-saas/capacity-and-perf/#pressure-test) |
 | 报表查询压垮业务库 | 分析负载外移到 Doris | [Doris 数仓](/bigdata/doris/) |
 | 业务库变更如何进数仓 | binlog → CDC → MQ → 数仓 | [Canal 数据同步](/bigdata/canal/) |
 | 历史数据长期留存与成本 | 冷热分层 + 湖表归档 | [Lakehouse](/bigdata/lakehouse/#three-tiers) |
 | 指标口径不统一 | 分层建模 + 一致性维度 | [数仓分层建模](/bigdata/warehouse-design/) |
+| 数据库变更出事后回不去 | 扩展—迁移—收缩三步法 + 可回滚检查项 | [发布 · 数据库变更](/projects/property-saas/release-and-ops/#db-migration) |
+| 敏感数据与合规红线 | 严格边界 + 切面层脱敏 + 分级分类 | [发布 · 合规边界](/projects/property-saas/release-and-ops/#compliance) |
+| 故障时不知道该看哪 | 三层监控 + P0/P1 分级 + Runbook | [发布 · 监控告警](/projects/property-saas/release-and-ops/#monitoring) |
+| 多级审批与通知 | 消息驱动 + 消费幂等 | [分布式事务](/java/spring/spring-cloud/transaction#mq-idempotent) |
 
 ## 五、阅读建议 {#reading}
 
 | 你的关注点 | 建议路径 |
 |---|---|
-| 想看架构决策过程 | [产出工具 · ADR](/projects/toolkit/adr/) → 本板块两个专题 |
+| 想看架构决策过程 | [产出工具 · ADR](/projects/toolkit/adr/) → 本板块五篇专题 |
+| 想从业务起点看完整链路 | [核心业务链路](/projects/property-saas/core-business/) → [容量测算与压测](/projects/property-saas/capacity-and-perf/) → [发布、安全与运维](/projects/property-saas/release-and-ops/) |
 | 想看多租户与云原生落地 | [Kubernetes 编排](/cloud-native/kubernetes/) → [微服务 → K8s](/projects/property-saas/microservice-to-k8s/) |
 | 想看数据链路与数仓 | [Canal](/bigdata/canal/) → [Doris](/bigdata/doris/) → [Lakehouse](/bigdata/lakehouse/) → [数仓分层建模](/bigdata/warehouse-design/) → [数仓落地](/projects/property-saas/data-warehouse/) |
+| 想看容量怎么论证 | [压测报告（方法）](/projects/toolkit/perf-report/) → [容量测算与压测方案（案例）](/projects/property-saas/capacity-and-perf/) |
 | 想看怎么把方案变成可验证产出 | [产出工具导览](/projects/toolkit/)（ADR / 压测报告 / 架构图） |
 
 > **写作约定**：案例层只讲"我们怎么用的"，方法层只讲"怎么用"——两者的分工见 [产出工具导览](/projects/toolkit/)。
+>
+> **五篇共同遵守一条纪律**：区分「设计目标」与「实测数据」。所有数值都标注了它是估算还是实测，并在每篇末尾单列「设计目标与尚未验证的部分」——**未验证项写出来不是方案不完整，而是边界声明**。

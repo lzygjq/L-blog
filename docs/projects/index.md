@@ -18,7 +18,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
 | [**架构演进地图**](/projects/architecture-evolution/) | 「什么时候该升到下一档」——五层 × 四档的判据 | **方法层**：每档的触发信号 / 代价 / 验收标准 | ✅ 已成篇 |
 | [**可验证产出工具箱**](/projects/toolkit/) | 「凭什么信你说的」——ADR / 压测报告 / 架构图怎么产出 | **方法层**：三件套的 Why → What → How | ✅ 已成篇（6 篇） |
 | [**绩效系统**](/projects/perf-system/) | 「最难的地方你怎么解的」——四个难点专题 | **案例层**：背景 → 方案对比 → 落地 → 效果 → 复盘 | ⏳ 待补写（4 个专题） |
-| [**智慧物业 SaaS**](/projects/property-saas/) | 「**某一个系统**具体怎么演的」——微服务到 K8s、单库到数仓 | **案例层**：同上 | ✅ 已成篇（2 篇） |
+| [**智慧物业 SaaS**](/projects/property-saas/) | 「**某一个系统**具体怎么演的」——业务链路、微服务到 K8s、单库到数仓、容量与发布 | **案例层**：同上 | ✅ 已成篇（5 篇） |
 
 **为什么方法层排在案例层前面**：先学会「怎么产出证据」，再看案例怎么用这些证据。反过来看，案例里最关键的几句话（为什么否决另一个方案、拐点在哪）会被当成「作者的个人习惯」而忽略掉。
 
@@ -37,7 +37,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
         │  遗留问题：方法会了，但没有真实案例填进去
         ▼
 ③ 项目案例（案例层）
-   绩效系统（4 个难点专题） + 智慧物业 SaaS（2 篇演进）
+   绩效系统（4 个难点专题） + 智慧物业 SaaS（5 篇专题）
         │  产出：带约束、带备选、带代价、带未验证部分的完整叙事
         ▼
    回到 ①：案例里暴露的知识缺口，指回各知识板块的正文
@@ -67,7 +67,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
 | 系统 | 侧重 | 难点专题 | 状态 |
 |---|---|---|---|
 | **大型集团绩效系统** | **单点性能与一致性** | [十万人组织架构同步](/projects/perf-system/org-sync-100k/)（树形结构批量同步）<br>[高峰期并发填报](/projects/perf-system/peak-filling/)（流量尖峰与限流）<br>[多级审批消息实时推送](/projects/perf-system/approval-push/)（最终一致与不丢不重）<br>[报表预计算](/projects/perf-system/report-precompute/)（预聚合与查询性能） | ⏳ 4 个专题待补写 |
-| **智慧物业 SaaS** | **架构演进与多租户** | [微服务 → K8s 云原生演进](/projects/property-saas/microservice-to-k8s/)（框架聚合、三级混合租户隔离、租户上下文传播、发布回滚）<br>[大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/)（Canal 同步、Doris 分层、冷热分层与 TTL 迁移） | ✅ 已成篇 |
+| **智慧物业 SaaS** | **架构演进与多租户** | [核心业务链路](/projects/property-saas/core-business/)（出账峰值与强一致、门禁弱网离线、交易状态机）<br>[微服务 → K8s 云原生演进](/projects/property-saas/microservice-to-k8s/)（框架聚合、三级混合租户隔离、租户上下文传播）<br>[大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/)（Canal 同步、Doris 分层、冷热分层与 TTL 迁移）<br>[容量测算与压测方案](/projects/property-saas/capacity-and-perf/)（六步推导链、五层防护链路、压测方案）<br>[发布、安全与运维](/projects/property-saas/release-and-ops/)（四种发布策略、扩展—迁移—收缩、合规边界） | ✅ 已成篇（5 篇） |
 
 **案例写作的固定结构**（便于横向对比）：背景与约束 → 方案对比（含被否决的） → 落地实现 → 效果数据 → 复盘与面试问答。两个系统都严格按此结构，读第二篇时可以直接跳到关心的那一节。
 
@@ -99,7 +99,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
 | **准备项目经历表述** | [ADR](/projects/toolkit/adr/)（决策怎么记）→ [压测报告](/projects/toolkit/perf-report/)（效果怎么量化）→ [架构图](/projects/toolkit/arch-diagram/)（结构怎么画） |
 | **做长期能力规划** | [架构师路线图](/projects/architect-roadmap/) → 按图中「仍缺」逐项回到对应板块 |
 | **判断该不该升级架构** | [架构演进地图](/projects/architecture-evolution/)（先看判据，再点进对应层的分册） |
-| **看架构演进怎么讲** | [微服务 → K8s](/projects/property-saas/microservice-to-k8s/) → [数仓落地](/projects/property-saas/data-warehouse/) |
+| **看架构演进怎么讲** | [核心业务链路](/projects/property-saas/core-business/) → [微服务 → K8s](/projects/property-saas/microservice-to-k8s/) → [数仓落地](/projects/property-saas/data-warehouse/) → [容量与压测](/projects/property-saas/capacity-and-perf/) → [发布、安全与运维](/projects/property-saas/release-and-ops/) |
 | **看单点难点怎么讲** | [绩效系统导览](/projects/perf-system/)（4 个专题待补写，可先看结构与选题） |
 
 ## 七、与相邻板块的边界 {#boundary}
