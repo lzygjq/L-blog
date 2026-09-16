@@ -35,7 +35,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 
 | 模块 | 核心内容 | 本站对应 |
 |---|---|---|
-| 分布式理论 | CAP 定理、BASE 理论、一致性协议（Paxos/Raft）、分布式 ID | [CAP 与 BASE](/java/spring/spring-cloud/cap-base)（已成篇；Paxos/Raft、分布式 ID 仍缺） |
+| 分布式理论 | CAP 定理、BASE 理论、一致性协议（Paxos/Raft）、分布式 ID | **取舍层**：[CAP 与 BASE](/java/spring/spring-cloud/cap-base)；**机制层**：[分布式理论](/distributed/)（3 篇：共识协议 / 数据分布 / 分布式 ID）。**本行已补齐** |
 | Redis | 数据结构、持久化、主从哨兵集群、缓存三大问题、分布式锁 | [Redis 板块](/database/redis/)（已成篇 9 篇） |
 | 消息队列 | Kafka/RocketMQ 原理、消息可靠性、幂等、顺序消息、事务消息 | [消息队列板块](/middleware/) |
 | 微服务治理 | 注册中心（Nacos）、配置中心、网关、熔断降级、链路追踪 | [Spring Cloud](/java/spring/spring-cloud/)（已成篇 9 篇） |

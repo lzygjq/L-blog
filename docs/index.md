@@ -49,6 +49,10 @@ features:
     title: AI 应用
     details: AI 辅助研发（Vibe Coding、Agent 与工具链）+ AI 能力集成（Spring AI、数字人）
     link: /ai/
+  - icon: 🕸️
+    title: 分布式理论
+    details: 共识协议（Paxos / Raft 与选主）、一致性哈希与数据分布、分布式 ID —— 多节点如何表现得像一个
+    link: /distributed/
   - icon: 🔐
     title: 安全与合规
     details: 认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界 —— 把安全从"上线前扫一遍"变成设计期选择
