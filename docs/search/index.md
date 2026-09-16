@@ -101,7 +101,7 @@ ES 的复杂度**大部分不在分布式，而在 Lucene**。而 Lucene 索引�
 | [MySQL 索引设计](/database/mysql/index-design) | **对照层**：`LIKE '%abc%'` 索引失效 → 这正是倒排索引存在的理由。**"排序用 B+ 树、包含用倒排"** |
 | [分库分表](/database/sharding/) | **同类问题**：跨节点分页与深分页是两块引擎上的同一个难题 |
 | [Canal 数据同步](/bigdata/canal/) | **上游**：ES 极少做唯一数据源，数据几乎都要从 MySQL 同步过来 |
-| [监控与可观测](/cloud-native/observability/#logging) | **交界**：那边讲"日志怎么产生与采集"，这边讲"日志存到 ES 之后怎么检索" |
+| [监控与可观测](/cloud-native/observability/logging-pipeline) | **交界**：那边讲"日志怎么产生与采集"，这边讲"日志存到 ES 之后怎么检索" |
 | [链路追踪](/java/spring/spring-cloud/tracing) | **配套**：ES 是链路数据的常用存储后端；`traceId` 是日志与链路关联的钥匙 |
 | [事件驱动与 CQRS](/methodology/event-driven-cqrs) | **语义层**：ES 是典型的"读模型"落点，投影要可重放 |
 | [海量数据算法](/fundamentals/algorithms/high-volume) | **底座**：posting list 的压缩（差值编码 / Roaring Bitmap）与 `cardinality` 的 HyperLogLog++ 都是通用算法 |

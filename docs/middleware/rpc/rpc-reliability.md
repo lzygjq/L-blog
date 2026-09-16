@@ -221,6 +221,8 @@ A → B → C → D，每跳超时都设 1s
 | **跨异步传递** | 线程池、`CompletableFuture`、消息队列都要显式传递，否则链路断开 |
 | **无侵入方案** | SkyWalking / 探针类方案靠字节码增强自动完成透传，代价是版本兼容与性能开销（[无侵入探针](/java/spring/spring-cloud/tracing#skywalking-agent)） |
 
+> **本节只讲"RPC 层要做什么"**——链路的通用模型、跨进程传播的四个断点（网关 / MQ / 线程池 / 响应式）、采样策略与后端选型见[链路追踪与 OpenTelemetry](/cloud-native/observability/tracing-otel)，其中[传播断点](/cloud-native/observability/tracing-otel#propagation)一节与本表互为补充。
+
 **在 RPC 侧必须知道的两点**：
 
 - **attachments 是"隐式契约"**：用它传业务参数（如租户 ID、灰度标记）很方便，但它**不在接口签名里**，容易被新同事忽略而导致功能缺失（例如某个新增的调用路径没带租户 ID → 数据越权）。**建议：能从接口签名传的，就不要藏进 attachments**；

@@ -157,7 +157,7 @@ const sidebarSpec = [
       { text: '服务网格', dir: 'cloud-native/service-mesh' },
       { text: 'CRD 与 Operator', dir: 'cloud-native/operator' },
       { text: 'CI/CD', dir: 'cloud-native/cicd' },
-      { text: '监控与可观测', dir: 'cloud-native/observability' }
+      { text: '监控与可观测', dir: 'cloud-native/observability', group: true }
     ]
   },
   {

@@ -160,6 +160,8 @@ CPU 与内存的"超限后果"完全不同，这是必背点：
 
 最常见的误用：**把依赖健康写进 liveness**。数据库抖动时，所有实例的 liveness 同时失败 → 全部重启 → 重启后依赖仍未恢复 → **雪崩**。依赖检查应该放在 readiness（摘流量、等恢复即可）。
 
+> 这两个端点对应 Spring Boot 的 `/actuator/health/liveness` 与 `/actuator/health/readiness`，开启方式与"为什么 liveness 不要查数据库"见[指标与 Prometheus → Spring Boot 接入](/cloud-native/observability/metrics-prometheus#micrometer)。
+
 ## 五、弹性与发布 {#scaling-release}
 
 ### 5.1 HPA：副本数是怎么算出来的 {#hpa}

@@ -15,7 +15,7 @@ desc: 容器化 → 编排 → 交付 → 可观测的四段演进主线，加�
 | 1 | [**Docker 容器化**](/cloud-native/docker/) | 交付物**不一致** | namespace / cgroup、镜像分层与写时复制、多阶段构建、Compose | ✅ 已成篇 |
 | 2 | [**Kubernetes 编排**](/cloud-native/kubernetes/) | 机器会挂、流量会涨、发布要停服 | 声明式 API 与控制器循环、对象选型、调度与 QoS、探针、HPA、多租户 | ✅ 已成篇 |
 | 3 | [**CI/CD 流水线**](/cloud-native/cicd/) | 发布**不可重复、不可回滚** | 流水线五阶段、镜像不可变标签、蓝绿/金丝雀、扩展-收缩、GitOps | ✅ 已成篇 |
-| 4 | [**监控与可观测**](/cloud-native/observability/) | 出问题**看不见、定位慢** | 三支柱与 traceId 关联、Prometheus 与 PromQL、结构化日志、链路采样、SLO 告警 | ✅ 已成篇 |
+| 4 | [**监控与可观测**](/cloud-native/observability/) | 出问题**看不见、定位慢** | 5 篇：指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / 成本与许可——三支柱靠 `service` + `traceId` 关联 | ✅ 已成篇 |
 
 **四者的依赖关系**（顺序不能跳）：
 
@@ -54,7 +54,7 @@ desc: 容器化 → 编排 → 交付 → 可观测的四段演进主线，加�
 | **要落地一套环境** | Dockerfile 多阶段构建 → [Compose 本地依赖环境](/cloud-native/docker/#compose) → K8s 对象选型与探针 → [滚动更新与 PDB](/cloud-native/kubernetes/#rolling-update) |
 | **要讲项目经历** | [多租户隔离](/cloud-native/kubernetes/#multi-tenant) → [发布策略取舍](/cloud-native/cicd/#deploy-strategy) → [数据库变更与扩展-收缩](/cloud-native/cicd/#rollback) |
 | **评估"要不要上服务网格"** | [取舍判据](/cloud-native/service-mesh/#tradeoffs) → [与 Spring Cloud 的分工](/cloud-native/service-mesh/#vs-spring-cloud) → [mTLS 与零信任](/cloud-native/service-mesh/#mtls) |
-| **在排查线上问题** | [黄金信号与告警设计](/cloud-native/observability/#alerting) → [PromQL 速查](/cloud-native/observability/#promql) → [一次慢请求怎么定位](/cloud-native/observability/#interview) |
+| **在排查线上问题** | [黄金信号与告警设计](/cloud-native/observability/slo-and-alerting#signals) → [PromQL 速查](/cloud-native/observability/metrics-prometheus#promql) → [一次慢请求怎么定位](/cloud-native/observability/slo-and-alerting#incident) |
 
 ## 三、与其他板块的交叉点 {#cross-links}
 
@@ -86,8 +86,8 @@ desc: 容器化 → 编排 → 交付 → 可观测的四段演进主线，加�
 | 12 | 蓝绿和金丝雀的区别？各自什么时候用？ | [CI/CD · 发布策略](/cloud-native/cicd/#deploy-strategy) |
 | 13 | 回滚怎么做？数据库变更怎么回滚？ | [CI/CD · 回滚与数据库](/cloud-native/cicd/#rollback) |
 | 14 | 指标、日志、链路三者怎么关联？ | [可观测 · 三支柱](/cloud-native/observability/#three-pillars) |
-| 15 | Histogram 和 Summary 怎么选？ | [可观测 · 指标类型](/cloud-native/observability/#prometheus-model) |
-| 16 | 什么样的告警算好告警？SLO 与错误预算怎么用？ | [可观测 · 告警设计](/cloud-native/observability/#alerting) |
+| 15 | Histogram 和 Summary 怎么选？ | [可观测 · 指标类型](/cloud-native/observability/metrics-prometheus#types) |
+| 16 | 什么样的告警算好告警？SLO 与错误预算怎么用？ | [可观测 · 告警原则](/cloud-native/observability/slo-and-alerting#principles) |
 | 17 | 为什么需要 Helm？`upgrade` 报成功但服务没起来是怎么回事？ | [Helm · `--wait` 与常见误判](/cloud-native/helm/#wait-atomic) |
 | 18 | Helm 和 Kustomize 怎么选？Chart 的 `version` 和 `appVersion` 有何区别？ | [Helm · 取舍判据](/cloud-native/helm/#helm-vs-kustomize) |
 | 19 | 服务网格解决了什么问题？应用没改代码，流量为什么经过代理？ | [服务网格 · 流量劫持](/cloud-native/service-mesh/#traffic-hijack) |

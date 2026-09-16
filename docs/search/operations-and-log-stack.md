@@ -233,7 +233,7 @@ Kibana（检索、可视化、告警）
 | **存储** | 索引按天 / 按大小滚动 | 按天最直观，配合 ILM 自动管理 |
 | **可视化** | Kibana / Grafana | 日志用 Kibana，**指标用 Prometheus + Grafana**（两边定位不同） |
 
-**日志要能回答问题，前提是结构化。** 三条纪律（与[监控与可观测](/cloud-native/observability/#logging)的分工是"链路 vs 存储端"）：
+**日志要能回答问题，前提是结构化。** 三条纪律（与[监控与可观测](/cloud-native/observability/logging-pipeline#structured)的分工是"链路 vs 存储端"）：
 
 | 纪律 | 做法 |
 |---|---|
