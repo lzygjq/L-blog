@@ -31,7 +31,7 @@ features:
     link: /frontend/
   - icon: 🗄️
     title: 数据存储
-    details: MySQL 索引与事务、PostgreSQL 的 VACUUM 与索引类型、Redis 原理与高可用、分库分表与扩容方案
+    details: MySQL 索引与事务、PostgreSQL 的 VACUUM 与索引类型、MongoDB 文档模型与原生分片、Redis 原理与高可用、分库分表与扩容方案
     link: /database/
   - icon: ✉️
     title: 消息队列

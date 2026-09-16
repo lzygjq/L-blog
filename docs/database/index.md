@@ -1,18 +1,21 @@
 ---
 date: 2026-09-14
-desc: 数据存储板块导览——MySQL 与 Redis 两条主线、分库分表的位置与面试高频清单
+desc: 数据存储板块导览——关系型两条路线与文档型的分工、Redis 缓存层、分库分表的位置与面试高频清单
 ---
 
 # 数据存储 · 板块导览
 
-数据存储板块以「**关系型数据库 + 内存缓存**」为主干，用一个统一的判断口径组织：**先问"数据放在哪、为什么放这里"，再问"怎么保证它在并发和故障下不出错"。**关系型这一支有**两条路线**——[MySQL](/database/mysql/) 与 [PostgreSQL](/database/postgresql/)，它们在最底层的两个设计上选了相反方向，**它们的对照本身就是一份选型能力**。
+数据存储板块以「**关系型数据库 + 内存缓存**」为主干，并在主干之外补上另一种**数据形状**：[MongoDB](/database/mongodb/)（文档型）。全板块用一个统一的判断口径组织：**先问"数据放在哪、为什么放这里"，再问"怎么保证它在并发和故障下不出错"。**
 
-## 一、四块内容的分工
+关系型这一支有**两条路线**——[MySQL](/database/mysql/) 与 [PostgreSQL](/database/postgresql/)，它们在最底层的两个设计上选了相反方向，**它们的对照本身就是一份选型能力**。文档型不是第三条路线，而是**另一种形状**：它与关系型是**分工关系**，可以并存于同一个系统。
+
+## 一、五块内容的分工
 
 | 板块 | 定位 | 回答的核心问题 | 状态 |
 |---|---|---|---|
 | [**MySQL**](/database/mysql/) | 关系型数据库、**默认路线** | 数据怎么有序存放（索引）、并发怎么不出错（事务/MVCC）、量大了怎么办（复制/分片） | ✅ 8 篇已成篇 |
 | [**PostgreSQL**](/database/postgresql/) | 关系型数据库的**另一条路线** | 与 MySQL 的根设计差异在哪、膨胀与回卷怎么防、什么查询用什么索引、复制与连接池怎么配 | ✅ 5 篇已成篇 |
+| [**MongoDB**](/database/mongodb/) | 文档型，**另一种数据形状**（与关系型是分工而非替代） | 形状是树时怎么建模、索引按 ESR 怎么设计、多节点下读写语义怎么配、分片键怎么选、什么时候**不该**用它 | ✅ 5 篇已成篇 |
 | [**Redis**](/database/redis/) | 内存缓存、**性能与分布式工具** | 怎么把热数据挡在数据库前面、怎么实现分布式锁与轻量 MQ（含布隆过滤器、脑裂防护、淘汰策略、场景收口） | ✅ 9 篇已成篇 |
 | [**分库分表**](/database/sharding/) | 单机容量的**最后手段** | 什么时候该分、按什么拆、拆完的四大代价怎么补 | ✅ 已成篇 |
 
@@ -39,6 +42,8 @@ desc: 数据存储板块导览——MySQL 与 Redis 两条主线、分库分表�
 ```
 
 > PostgreSQL 与 MySQL 处在**同一层**（关系型主库），彼此是**替代关系**而非串联关系——同一时刻通常只需其中之一。选型判据见 [PostgreSQL · 与 MySQL 的差异](/database/postgresql/vs-mysql#selection)。
+>
+> [MongoDB](/database/mongodb/) **不在上面这条链路里**——它不是"替代某一块"，而是**另一种数据形状**。判断它该不该出现的入口是[六条否决理由](/database/mongodb/nosql-selection#when-not)，而不是"它比 MySQL 快不快"。
 
 ## 二、推荐阅读顺序
 
@@ -56,7 +61,9 @@ desc: 数据存储板块导览——MySQL 与 Redis 两条主线、分库分表�
         │
         ├──▶ ⑥ 分库分表                  （写扩展的最后手段）
         │
-        └──▶ ⑦ PostgreSQL                （另一条关系型路线：先读「与 MySQL 的差异」，再读 VACUUM）
+        ├──▶ ⑦ PostgreSQL                （另一条关系型路线：先读「与 MySQL 的差异」，再读 VACUUM）
+        │
+        └──▶ ⑧ MongoDB                   （第二种数据形状：先读「文档模型」，再读「NoSQL 选型」）
 ```
 
 > **顺序不能跳的理由**：**不知道 B+ 树的排序方式，"最左前缀法则"就只能背**；不知道"实例化与可见性判断"，MVCC 的四条规则就是天书；不先做读写分离，直接上分库分表是过度设计。
@@ -90,5 +97,8 @@ desc: 数据存储板块导览——MySQL 与 Redis 两条主线、分库分表�
 | 12 | PostgreSQL 和 MySQL 的本质差异是什么？ | [PostgreSQL · 与 MySQL 的差异](/database/postgresql/vs-mysql) |
 | 13 | PG 的表膨胀与事务 ID 回卷是怎么回事？ | [PostgreSQL · MVCC 与 VACUUM](/database/postgresql/mvcc-and-vacuum) |
 | 14 | 什么查询该用什么索引类型？ | [PostgreSQL · 索引体系](/database/postgresql/index-and-types) |
+| 15 | 复合索引的字段顺序怎么定？（ESR） | [MongoDB · 索引与查询](/database/mongodb/index-and-query#esr) |
+| 16 | 什么时候该用文档数据库、什么时候千万别用？ | [MongoDB · NoSQL 选型](/database/mongodb/nosql-selection#when-not) |
+| 17 | 为什么自增 ID 做分片键是灾难？ | [MongoDB · 分片集群](/database/mongodb/sharding#shard-key) |
 
-消息与队列相关主题见[消息队列板块](/middleware/)。全文检索与日志检索见[搜索与检索板块](/search/)（Elasticsearch 5 篇）——**它与本板块同属「存储·消息·检索」这一个侧边栏，是"以检索为目的的存储"**。
+消息与队列相关主题见[消息队列板块](/middleware/)。全文检索与日志检索见[搜索与检索板块](/search/)（Elasticsearch 5 篇）——**它与本板块同属「存储·消息·检索」这一个侧边栏，是"以检索为目的的存储"**。文档型的定位与选型判据见 [MongoDB 板块导览](/database/mongodb/#position)。

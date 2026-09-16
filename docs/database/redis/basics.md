@@ -7,7 +7,7 @@ desc: NoSQL 与 SQL 的分界、五大结构命令速查、Jedis→Lettuce→Spr
 
 # 基础篇：数据模型与命令体系
 
-## 一、NoSQL 与 SQL：解决的是不同问题
+## 一、NoSQL 与 SQL：解决的是不同问题 {#nosql-vs-sql}
 
 | 维度 | SQL（关系型） | NoSQL（以 Redis 为例） |
 |---|---|---|
