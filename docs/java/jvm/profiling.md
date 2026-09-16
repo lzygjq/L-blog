@@ -181,7 +181,7 @@ jcmd <pid> JFR.stop  name=slow
                                         └─ 改完 ──→ 同压力复测（验证）
 ```
 
-**只看压测报告，只能知道"上不去"；只有把"曲线"和"某个方法的宽度"对上，才知道该改哪一行代码。** 这种"压测数据 + 火焰图证据"的组合，也正是[架构师路线图](/projects/architect-roadmap/)里强调的"可验证产出"的一种形态——压测方案见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/)。
+**只看压测报告，只能知道"上不去"；只有把"曲线"和"某个方法的宽度"对上，才知道该改哪一行代码。** 这种"压测数据 + 火焰图证据"的组合，也正是[成长路线](/projects/architect-roadmap/)里强调的"可验证产出"的一种形态——压测方案见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/)。
 
 ## 八、面试问答 {#interview}
 

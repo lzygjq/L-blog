@@ -14,7 +14,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
 
 | 子板块 | 回答的问题 | 形态 | 状态 |
 |---|---|---|---|
-| [**架构师路线图**](/projects/architect-roadmap/) | 「我现在缺哪一块」——按能力阶段做的**自检清单** | 计划层：五阶段递进，每项挂本站对应页 | ✅ 已成篇 |
+| [**成长路线**](/projects/architect-roadmap/) | 「我在哪一级、下一步读什么」——四级能力路线**自检清单** | 计划层：四级阶梯 + 领域依赖链，每项挂本站对应页与「读到哪一层」 | ✅ 已成篇 |
 | [**架构演进地图**](/projects/architecture-evolution/) | 「什么时候该升到下一档」——五层 × 四档的判据 | **方法层**：每档的触发信号 / 代价 / 验收标准 | ✅ 已成篇 |
 | [**可验证产出工具箱**](/projects/toolkit/) | 「凭什么信你说的」——ADR / 压测报告 / 架构图怎么产出 | **方法层**：三件套的 Why → What → How | ✅ 已成篇（6 篇） |
 | [**绩效系统**](/projects/perf-system/) | 「最难的地方你怎么解的」——四个难点专题 | **案例层**：背景 → 方案对比 → 落地 → 效果 → 复盘 | ✅ 已成篇（4 篇） |
@@ -26,7 +26,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
 
 ```text
 ① 能力自检（计划层）
-   架构师路线图：五阶段 + 每阶段「本站对应页 / 仍缺」
+   成长路线：四级阶梯（开发 → 高级开发 → 架构师 → CIO）+ 领域依赖链
         │  产出：一张「我会什么、我不会什么」的清单
         │  遗留问题：知道自己会，但拿不出证据
         ▼
@@ -97,7 +97,7 @@ desc: 项目实战板块的五个子板块分工——从能力自检到可验�
 |---|---|
 | **面试前 1 小时** | [面试官问什么](#review-map)（对号入座找证据）→ [三条红线](#interview)（自查哪句会被追问） |
 | **准备项目经历表述** | [ADR](/projects/toolkit/adr/)（决策怎么记）→ [压测报告](/projects/toolkit/perf-report/)（效果怎么量化）→ [架构图](/projects/toolkit/arch-diagram/)（结构怎么画） |
-| **做长期能力规划** | [架构师路线图](/projects/architect-roadmap/) → 按图中「仍缺」逐项回到对应板块 |
+| **做长期能力规划** | [成长路线](/projects/architect-roadmap/) → 先找到自己那一级 → 按该级清单与「仍缺」逐项回到对应板块 |
 | **判断该不该升级架构** | [架构演进地图](/projects/architecture-evolution/)（先看判据，再点进对应层的分册） |
 | **看架构演进怎么讲** | [核心业务链路](/projects/property-saas/core-business/) → [微服务 → K8s](/projects/property-saas/microservice-to-k8s/) → [数仓落地](/projects/property-saas/data-warehouse/) → [容量与压测](/projects/property-saas/capacity-and-perf/) → [发布、安全与运维](/projects/property-saas/release-and-ops/) |
 | **看单点难点怎么讲** | [绩效系统导览](/projects/perf-system/) → 四个专题按 1→4 顺序读（数据进来 → 写入 → 流转 → 呈现） |

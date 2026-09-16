@@ -1,5 +1,7 @@
 ---
 date: 2026-09-11
+title: 关于本站
+desc: 站点定位、6 个领域板块与一条四级成长路线的内容规划、阅读建议与内容边界
 ---
 
 # 关于本站
@@ -10,29 +12,24 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 
 ## 内容规划
 
-| 板块 | 覆盖范围 |
+站内内容按**领域**分成 6 个板块（顶部导航），按**能力级别**另有[成长路线](/projects/architect-roadmap/)一条纵向主线。**领域轴用来查，深度轴用来走**——同一个板块里既住着「Redis 是什么」，也住着「集群脑裂怎么处理」。
+
+| 板块 / 主线 | 覆盖范围 |
 |---|---|
+| [**成长路线**](/projects/architect-roadmap/) | **纵向主线**——四级能力阶梯（开发 → 高级开发 → 架构师 → CIO）、贯穿四级不占级别的 38 页地基（网络 / 操作系统 / 算法 / Java 语言基础 / 集合）、领域依赖链；每一级给出清单、读到哪一层就停、离场自检与仍缺的知识块 |
 | [计算机基础](/fundamentals/) | 计算机网络、操作系统、算法与数据结构 —— 语言无关的三大底座 |
-| [Java 核心](/java/) | 语言基础、并发与 JUC、JVM、Spring 全家桶、设计模式 |
-| [大前端](/frontend/) | 微信小程序双线程模型、uni-app 跨端机制、组件化与分包、发布与多端打包 |
-| [数据存储](/database/) | MySQL 原理与调优、PostgreSQL 的 MVCC / VACUUM / 索引类型、Redis 原理与高可用、分库分表、**MongoDB 文档模型与原生分片** |
-| [消息队列](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT 与选型对比；**RPC 与协议**（序列化与 IDL、协议与传输、Dubbo 机制、超时与重试） |
-| [搜索与检索](/search/) | Elasticsearch：倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、运维调优与 ELK 日志栈 |
-| [数据仓库](/bigdata/) | Canal 同步、**Flink 流处理**、Doris 数仓、**ClickHouse 与 OLAP 选型**、Iceberg 冷热分层、分层建模 |
-| [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator；**CI/CD 与发布**（流水线设计与制品治理 / 发布策略与不中断 / GitOps 与渐进式交付 / 回滚与数据库变更）；**监控与可观测**（指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / 成本与许可） |
-| [AI 应用](/ai/) | AI 辅助研发（Vibe Coding、Agent）、AI 能力集成（Spring AI、数字人） |
-| [项目实战](/projects/) | 架构师路线图、绩效系统难点专题、SaaS 平台云原生与数仓落地、可验证产出三件套 |
-| [方法论](/methodology/) | DDD 战略与战术设计、架构风格谱系（六边形/洋葱/整洁/COLA）、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式与评审清单 |
-| [高可用](/high-availability/) | 可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练 |
-| [分布式理论](/distributed/) | 共识协议（Paxos/Raft 与选主）、一致性哈希与数据分布、分布式 ID、**协调服务**（ZooKeeper 与 ZAB、分布式锁与 fencing、etcd 调优与 KRaft） |
-| [安全与合规](/security/) | 认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界 |
-| [面试专题](/interview/) | 横向串联各板块的高频考点索引 |
+| [语言与框架](/java/) | Java 语言基础、集合、并发与 JUC、JVM、设计模式、Spring 全家桶（IoC / Bean / AOP / MyBatis / 横切能力 / MVC / Boot / Cloud）、测试与质量；[大前端](/frontend/)（小程序双线程模型、uni-app 跨端机制、组件化与分包、发布与多端打包） |
+| [数据与存储](/database/) | MySQL 索引与事务、PostgreSQL 的 MVCC / VACUUM / 索引类型、Redis 原理与高可用、MongoDB 文档模型与原生分片、分库分表；[搜索与检索](/search/)（Elasticsearch 倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、ELK 日志栈）；[数据仓库](/bigdata/)（Canal 同步、Flink 流处理、Doris 与 ClickHouse、Iceberg 冷热分层与建模） |
+| [中间件与分布式](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT，RPC 与协议（序列化与 IDL / 协议与传输 / Dubbo 机制 / 可靠性治理）；[分布式理论](/distributed/)（共识协议 Paxos / Raft 与选主、一致性哈希与数据分布、分布式 ID、协调服务 ZooKeeper 与 etcd） |
+| [架构与云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD 与发布、监控与可观测；[架构方法论](/methodology/)（DDD 战略与战术、架构风格谱系、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式）；[高可用](/high-availability/)（可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练）；[安全与合规](/security/)（认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界） |
+| [实战与面试](/projects/) | [成长路线](/projects/architect-roadmap/)、[架构演进地图](/projects/architecture-evolution/)、[可验证产出三件套](/projects/toolkit/)（ADR / 压测报告 / 架构图）、绩效系统与智慧物业 SaaS 两个案例系统；[AI 应用](/ai/)（AI 辅助研发、Spring AI、数字人）；[面试专题](/interview/)（高频考点索引、四层次分级、跨板块连线题） |
 
 ## 阅读建议
 
-- **体系化学习**：按「计算机基础 → Java 核心 → 数据存储 → 消息队列 → 云原生 → 数据仓库」的顺序推进，先建立主干再补细节。
-- **按需查阅**：作为技术手册使用，遇到具体问题直接在各板块内检索。
-- **面试准备**：先从各板块的「面试高频」进入，再回到正文补齐原理细节。
+- **体系化学习**：先看[成长路线](/projects/architect-roadmap/)确认自己处在哪一级，再按该级的清单顺序推进。**顺序是按依赖排的，不是按板块排的**——比如「测试」排在「框架」之后，是因为它要测的是框架。每个板块的导览页另有自己的「阅读建议」，那是板块内的顺序。
+- **按需查阅**：作为技术手册使用，遇到具体问题直接在各板块内检索；每个板块的导览页都有「与相邻板块的边界」，用来判断该去哪一页。
+- **面试准备**：先从[面试专题](/interview/)的四层次与题单索引进入，再回到各板块正文补齐原理细节；项目面的答案素材在[项目实战](/projects/)。
+- **想知道「哪里还没写」**：[成长路线](/projects/architect-roadmap/)的覆盖度一节列出了全站仍缺的知识块——**缺的写出来，比让读者自己撞墙好**。
 
 ## 内容边界
 

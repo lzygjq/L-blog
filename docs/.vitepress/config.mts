@@ -218,7 +218,13 @@ const sidebarSpec = [
     prefix: ['/projects/', '/ai/', '/interview/'],
     items: [
       { text: '板块导览', link: '/projects/' },
-      { text: '架构师路线图', dir: 'projects/architect-roadmap' },
+      {
+        // 四级清单页放在子目录里，而构建器扫目录**不递归**（sidebar.mjs 的 listMd 只读当前层），
+        // 所以子页必须显式列在 children 里；批二补 L2/L3/L4 时在此追加。
+        text: '成长路线',
+        link: '/projects/architect-roadmap/',
+        children: [{ text: 'L1 开发', link: '/projects/architect-roadmap/developer/' }]
+      },
       { text: '架构演进地图', dir: 'projects/architecture-evolution' },
       {
         // 方法层：可验证产出三件套（先读方法，再看项目案例）

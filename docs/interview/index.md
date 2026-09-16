@@ -52,7 +52,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | **基础面 / 一面** | 语言与数据结构基本功、SQL 与索引、能说清常用组件的行为 | [计算机基础 43 题](/fundamentals/#faq) → [Java 基础 39 题](/java/basics/#faq) → [集合 25 题](/java/collections/#faq) → [并发 41 题](/java/concurrent/#faq) → [MySQL 12 题](/database/mysql/#interview) |
 | **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [横切能力 60 题](/java/spring/spring-framework/crosscutting/#interview) → [Spring Boot 18 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
 | **三面 / 架构面** | 分布式取舍、云原生落地、数据链路、**方案对比与代价** | [Spring Cloud 10 题](/java/spring/spring-cloud/#interview-index) → [云原生 16 题](/cloud-native/#interview-questions) → [数据仓库 27 题](/bigdata/#faq) → [Flink 流处理 34 题](/bigdata/flink/#faq) → [ClickHouse 40 题](/bigdata/clickhouse/#faq) → [MongoDB 48 题](/database/mongodb/#faq) → [Redis 16 题](/database/redis/#interview) |
-| **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [架构师路线图](/projects/architect-roadmap/)（自检缺口）→ [可验证产出工具箱](/projects/toolkit/)（ADR / 压测报告 / 架构图） |
+| **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [成长路线](/projects/architect-roadmap/)（四级自检）→ [可验证产出工具箱](/projects/toolkit/)（ADR / 压测报告 / 架构图） |
 | **AI 方向岗** | 工程化的 AI 协作方式、Agent 与 MCP、框架选型 | [AI 应用 19 题](/ai/#faq) → [Agent 与 Harness](/ai/agent-harness/#interview) → [Spring AI](/ai/spring-ai/#interview) |
 | **大前端相关岗** | 小程序双线程模型、`setData` 边界、登录支付时序 | [大前端 6 题](/frontend/#interview) |
 | **场景设计题** | 「设计一个秒杀 / 短链 / 排行榜」——**没有标准答案，只有取舍** | [Redis 场景地图](/database/redis/scenarios) → [消息队列三条主线](/middleware/#three-threads) → [设计模式面试高频](/java/design-patterns/#interview) |
@@ -207,6 +207,6 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 各内容板块的导览页 | **纵向题单**：本领域的题与一句话答案 | **横向索引**：跨板块的连线题、轮次路径、四层难度分级 |
 | [项目实战](/projects/) | **项目层答案**：难点背景、方案对比、落地实现、效果数据 | 只把项目题**指过去**，不代答（项目题必须用真实产出答） |
 | [可验证产出工具箱](/projects/toolkit/) | **方法层**：ADR / 压测报告 / 架构图怎么产出 | 在[决策层](#layers)引用它——项目面看的是这三类证据 |
-| [架构师路线图](/projects/architect-roadmap/) | **能力自检**：按阶段列出仍缺的知识块 | 本页只给题单入口，能力评估用路线图 |
+| [成长路线](/projects/architect-roadmap/) | **能力自检**：四级阶梯 + 每级「读到哪一层」+ 仍缺的知识块 | 本页只给题单入口，能力评估用路线图 |
 
 > **本板块的取舍**：这里**不新写任何原理正文**。如果某道题的答案在正文里找不到推导过程，正确的做法是**回正文补**，而不是在此处补一段二手总结——一旦这里开始抄正文，它就会变成第二个真相源，两边会慢慢不准。
