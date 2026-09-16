@@ -1,14 +1,14 @@
 ---
 date: 2026-09-11
 title: Spring · 导览
-desc: Spring 核心机制的四块分工——IoC 容器、Bean、AOP、MyBatis，以及贯穿全篇的四条主线
+desc: Spring 核心机制的五块分工——IoC 容器、Bean、AOP、MyBatis、横切能力，以及贯穿全篇的四条主线
 ---
 
 # Spring · 导览
 
 Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**约定与封装**——所以理解 Spring 的核心机制，是读懂一切上层现象的前提：为什么事务会失效、为什么循环依赖能被解决、为什么注解在同类内部调用时不起作用。
 
-本菜单只放 **Spring Framework（核心容器）** 的内容，按主题分成四块。**Spring MVC 与 Spring Boot 是平级的独立菜单**（见左侧），因为它们各自有独立的请求链路和启动机制，混在一起反而不好找。
+本菜单放 **Spring Framework 这个库自身**的内容，按主题分成五块：前四块是**机制层**（容器怎么组织、Bean 怎么活、代理怎么织、SQL 怎么执行），第五块是**横切能力**（缓存、异步、重试、校验、序列化——每个真实项目都要配、而失效时都不报错的那一层）。**Spring MVC 与 Spring Boot 是平级的独立菜单**（见左侧），因为它们各自有独立的请求链路和启动机制，混在一起反而不好找。
 
 ## 一、知识地图
 
@@ -21,13 +21,15 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 | **AOP** | [AOP 与代理机制](/java/spring/spring-framework/aop/) | 横切逻辑怎么织入、JDK 代理与 CGLIB 如何选 | ★★★★★ |
 | | ↳ [声明式事务与传播行为](/java/spring/spring-framework/aop/transaction) | `@Transactional` 怎么生效、为什么会失效 | ★★★★★ |
 | **MyBatis** | [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | SQL 怎么被执行、延迟加载和缓存有什么坑 | ★★★★ |
+| **横切能力** | [缓存 · 异步 · 重试 · 校验 · 序列化](/java/spring/spring-framework/crosscutting/) | 加个注解就以为生效的那五个能力，各自的生效条件与失效清单 | ★★★★ |
 
-**四块的分工逻辑**（这也是它们为什么这样切分）：
+**五块的分工逻辑**（这也是它们为什么这样切分）：
 
 - **IoC** 回答"对象从哪来"——容器的组织、启动、装配规则；
 - **Bean** 回答"对象建出来之后怎么样"——生命周期、扩展点，以及**循环依赖**这个"实例化与属性填充之间留下的窗口"带来的特殊情况；
 - **AOP** 回答"横切逻辑怎么织进去"——代理机制是理解一切"注解失效"的钥匙，而**事务是 AOP 最典型的应用**，所以归在这里；
-- **MyBatis** 是持久层集成，与前三个机制层的关联度低于它们彼此之间的关联度，因此单独成块。
+- **MyBatis** 是持久层集成，与前三个机制层的关联度低于它们彼此之间的关联度，因此单独成块；
+- **横切能力** 回答"注解写上去为什么没生效"——建立在本菜单 ③ 的代理结论之上，但**视角相反**：AOP 讲**代理怎么产生**，横切能力讲**代理没走到时会发生什么**。
 
 ## 二、推荐阅读顺序
 
@@ -45,6 +47,8 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
               ④ 声明式事务与传播行为    （AOP 最典型的应用，也是失效问题最多的场景）
 
 ⑤ MyBatis 执行流程与集成   ← 独立成块，但其中的事务协同部分依赖 ①②③④
+
+⑥ 横切能力（缓存·异步·重试·校验·序列化）  ← 建立在 ③ 的代理结论之上，面向"上线后才会暴露"的问题
 ```
 
 **顺序不能跳的理由**：事务失效的八种场景，根因全部指向"代理"；循环依赖的解法，前提是知道"实例化与属性填充是两个阶段"；而 MyBatis 的 `SqlSessionTemplate` 之所以必要，取决于是否理解事务上下文与连接复用。**①②③④ 是一条链，断开任何一环，后面的结论都会变成死记硬背。**
@@ -60,6 +64,8 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 
 **主线二：代理是理解"注解失效"的唯一钥匙。**
 `@Transactional`、`@Async`、`@Cacheable`、`@PreAuthorize`——这些注解无一例外都靠代理生效。因此"同类内部调用失效""非 public 方法失效""final 类失效"是同一类问题的不同表现，而不是零散的知识点。
+
+**这条主线也解释了本菜单为什么有第五块**：上面列举的四个注解里，只有 `@Transactional` 在 ③ 有专篇，而 `@Async` 与 `@Cacheable` 长期只在别处被零星提及。它们不属于"容器机制"，但**失效的根因与事务完全一致**——第五块的[横切能力](/java/spring/spring-framework/crosscutting/)把这批缺口补齐，并把"顺序问题"（同一个方法上 `@Async` 与 `@Transactional` 谁在外层）单独立成一节。
 
 **主线三：模板方法 + 策略 + 工厂，撑起了 Spring 的骨架。**
 `AbstractApplicationContext.refresh()` 是模板方法，`PlatformTransactionManager` / `ResourceLoader` / `HandlerMapping` 是策略，`BeanFactory` 体系是工厂。**设计模式不是 Spring 的装饰，是它的组织方式**——相关内容见[设计模式板块](/java/design-patterns/)。
@@ -119,6 +125,8 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 22. 延迟加载怎么实现的？有哪些坑？
 
 > **答题提醒**：Spring 的问题几乎都能追溯到"生命周期 + 代理"两条主线。回答时先定位到具体阶段（如"这发生在属性填充阶段"），再展开细节——比直接背结论更有说服力，也更容易自证理解。
+>
+> **横切能力（缓存 / 异步 / 重试 / 校验 / 序列化）的 60 题独立成块**，见[横切能力 · 面试索引](/java/spring/spring-framework/crosscutting/#interview)。本页保持 **22 题**的口径，不把那部分重复列在这里。
 
 ## 六、相关联的菜单
 
@@ -126,4 +134,5 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 |---|---|
 | [Spring MVC](/java/spring/spring-mvc/) | Web 层的请求链路；其中"拦截器顺序"与 AOP 通知模型一致，"`@ControllerAdvice` 统一异常"也是横切思路 |
 | [Spring Boot](/java/spring/spring-boot/) | 自动配置是"条件化的 Bean 注册"，启动流程驱动容器的 `refresh()`——两者都建立在本菜单的机制之上 |
+| [Spring Cloud](/java/spring/spring-cloud/) | **服务级**容错（熔断、限流、隔离）与[横切能力](/java/spring/spring-framework/crosscutting/resilience)里的**方法级**重试构成三层分工；分布式任务调度的默认单线程与 `@Async` 形成对比 |
 | [设计模式](/java/design-patterns/) | Spring 自身就是模板方法、策略、工厂、代理等模式的教科书级应用 |

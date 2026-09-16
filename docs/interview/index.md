@@ -50,7 +50,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 轮次 | 考察重点 | 建议入口（按顺序） |
 |---|---|---|
 | **基础面 / 一面** | 语言与数据结构基本功、SQL 与索引、能说清常用组件的行为 | [计算机基础 43 题](/fundamentals/#faq) → [Java 基础 39 题](/java/basics/#faq) → [集合 25 题](/java/collections/#faq) → [并发 41 题](/java/concurrent/#faq) → [MySQL 12 题](/database/mysql/#interview) |
-| **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [Spring Boot 18 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
+| **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [横切能力 60 题](/java/spring/spring-framework/crosscutting/#interview) → [Spring Boot 18 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
 | **三面 / 架构面** | 分布式取舍、云原生落地、数据链路、**方案对比与代价** | [Spring Cloud 10 题](/java/spring/spring-cloud/#interview-index) → [云原生 16 题](/cloud-native/#interview-questions) → [数据仓库 27 题](/bigdata/#faq) → [Flink 流处理 34 题](/bigdata/flink/#faq) → [ClickHouse 40 题](/bigdata/clickhouse/#faq) → [MongoDB 48 题](/database/mongodb/#faq) → [Redis 13 题](/database/redis/#interview) |
 | **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [架构师路线图](/projects/architect-roadmap/)（自检缺口）→ [可验证产出工具箱](/projects/toolkit/)（ADR / 压测报告 / 架构图） |
 | **AI 方向岗** | 工程化的 AI 协作方式、Agent 与 MCP、框架选型 | [AI 应用 19 题](/ai/#faq) → [Agent 与 Harness](/ai/agent-harness/#interview) → [Spring AI](/ai/spring-ai/#interview) |
@@ -146,6 +146,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | Java 并发 | 41 | [高频考点速查](/java/concurrent/#faq) | 可见性、锁、JUC 工具类、线程池、并发容器 |
 | Java 虚拟机 | 72 | [面试高频索引](/java/jvm/#interview-index) | 内存结构、GC、收集器、GC 日志；**实操四篇**：命令行五件套判读（jstat 十列 / 线程栈六形态 / 三次采样）、堆转储与 MAT 支配树、Arthas 在线诊断（trace / watch / vmtool）、火焰图四类剖析（on-CPU / off-CPU / alloc / lock）与 JFR |
 | Spring 框架 | 22 | [面试高频问题](/java/spring/spring-framework/#interview) | 容器启动、Bean 生命周期、AOP、MyBatis |
+| **Spring 横切能力** | 60 | [面试索引](/java/spring/spring-framework/crosscutting/#interview) | 缓存失效条件与脏缓存、异步默认执行器与上下文传递、方法级重试与幂等前提、两条异常链与 RFC 9457、`Long` 精度与 Jackson 3 迁移 |
 | Spring Boot | 18 | [高频考点速查](/java/spring/spring-boot/#faq) | 自动配置、配置体系、Actuator、内嵌容器 |
 | Spring Cloud | 10 | [面试索引](/java/spring/spring-cloud/#interview-index) | 注册发现、网关限流、熔断、分布式事务、幂等 |
 | 设计模式 | 7 组辨析 | [面试高频](/java/design-patterns/#interview) | 只列最易混淆的边界（代理 vs 装饰、策略 vs 状态） |
@@ -171,7 +172,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 分布式协调 | 51 | [面试索引](/distributed/coordination/#interview-index) | 协调服务的边界与六种原语、znode 与约 1MB 硬上限、会话与临时节点、Watcher 三个特性与羊群效应、zxid 的 epoch + 计数器、ZAB 与 Raft 的"两套机制 vs 一套"、TRUNC 的推理链、ZK 默认读非线性的后果、锁的能力边界与 fencing token、RedLock 的定位、etcd 的 2GiB 配额与 compaction/defrag 之别、KRaft 为什么去掉 ZK、Observer 与投票集合 |
 | 安全与合规 | 26 | [面试高频索引](/security/#interview) | 会话与令牌、越权防护、OAuth2 与 PKCE、XSS/CSRF/注入、签名与重放、密码存储与脱敏 |
 
-**上表合计 1075 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
+**上表合计 1135 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
 
 ## 六、自检清单 {#checklist}
 

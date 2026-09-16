@@ -60,7 +60,9 @@ const sidebarSpec = [
               { text: 'IoC', dir: 'java/spring/spring-framework/ioc' },
               { text: 'Bean', dir: 'java/spring/spring-framework/bean', group: true },
               { text: 'AOP', dir: 'java/spring/spring-framework/aop', group: true },
-              { text: 'MyBatis', dir: 'java/spring/spring-framework/mybatis' }
+              { text: 'MyBatis', dir: 'java/spring/spring-framework/mybatis' },
+              // 横切能力：缓存/异步/重试/校验/序列化五篇 + 导览（多篇 → group）
+              { text: '横切能力', dir: 'java/spring/spring-framework/crosscutting', group: true }
             ]
           },
           // Spring MVC 与 Spring 平级：Web 层独立成菜单
