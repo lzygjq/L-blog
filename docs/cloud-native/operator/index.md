@@ -233,4 +233,4 @@ Operator = **CRD + 控制器 + 领域运维知识**，把人工运维规程固�
 **Q8：怎么给 K8s 加一个自定义资源？完整链路是什么？**
 ① 定义 **CRD**（kind、group、scope、OpenAPI schema、`status` 子资源、可选 printer columns）；② 实现**控制器**：watch 该类型 → 对比期望与实际 → 创建/更新子资源 → 写 status；③ 注册 **RBAC**（控制器要能读写它管理的所有资源）；④ 用 **Helm 或 OLM** 把 CRD + 控制器 Deployment + RBAC + ServiceAccount 一起分发；⑤ 用户 `kubectl apply` 一个 CR 即可获得自愈能力。
 
-> **下一篇**：[CI/CD 流水线](/cloud-native/cicd/) —— 从清单（Helm）到通信（网格）到运维（Operator）都齐了，剩下最后一环：让"代码 → 镜像 → 集群"的每一步自动且可追溯。
+> **下一篇**：[CI/CD 与发布](/cloud-native/cicd/) —— 从清单（Helm）到通信（网格）到运维（Operator）都齐了，剩下最后一环：让"代码 → 镜像 → 集群"的每一步自动且可追溯。

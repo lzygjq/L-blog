@@ -242,7 +242,7 @@ helm dependency build  ./mychart    # 按 Chart.lock 精确还原
 
 1. **镜像 tag 不落主干**。用 `--set image.tag=$GIT_SHA` 或由 CI 写一份临时 values，避免"每次发布都产生一个只改 tag 的提交"——那种提交会让主干历史变成发布日志，还会制造无意义的 merge 冲突。
 2. **`--atomic --wait --timeout` 三个参数一起上**，让流水线感知的是**真实部署结果**，而不是"YAML 被接受了"。
-3. **GitOps 模式下的分工**：CI 只负责把新的 image tag 写回 Git 仓库，由集群内的 Argo CD 拉取并渲染（`helm template`），**此时回滚的手段从 `helm rollback` 变成 `git revert`**。两种模式的差别与取舍，见 [CI/CD · GitOps](/cloud-native/cicd/#gitops)。
+3. **GitOps 模式下的分工**：CI 只负责把新的 image tag 写回 Git 仓库，由集群内的 Argo CD 拉取并渲染（`helm template`），**此时回滚的手段从 `helm rollback` 变成 `git revert`**。两种模式的差别与取舍，见 [GitOps 与渐进式交付](/cloud-native/cicd/progressive-delivery#gitops)。
 
 > **判断用哪种**：CI 系统能安全持有集群凭证（内网、单集群）→ 流水线直接 `helm upgrade`；集群凭证不宜外放、或多集群多环境要统一审计 → GitOps 拉模式。
 

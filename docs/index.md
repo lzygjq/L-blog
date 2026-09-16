@@ -47,7 +47,7 @@ features:
     link: /bigdata/
   - icon: ☸️
     title: 云原生
-    details: Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD，以及监控与可观测（指标与 PromQL / 日志管道 / 链路与 OTel / SLO 告警 / 成本与许可）—— 从微服务到云原生的落地路径
+    details: Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD 与发布（流水线设计 / 发布策略 / GitOps 与渐进式交付 / 回滚与数据库变更），以及监控与可观测（指标与 PromQL / 日志管道 / 链路与 OTel / SLO 告警 / 成本与许可）—— 从微服务到云原生的落地路径
     link: /cloud-native/
   - icon: 🤖
     title: AI 应用

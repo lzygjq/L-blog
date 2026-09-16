@@ -254,4 +254,4 @@ CPU 与内存的"超限后果"完全不同，这是必背点：
 **Q7：一个 Pod 一直 Pending，怎么排查？**
 按"调度链"逐段查：`kubectl describe pod` 看 `Events`（多数答案就在最后一行）。常见原因：资源不足（requests 超过任何节点可分配量）、节点选择器/亲和性无匹配、污点无容忍、PVC 未绑定（存储类不存在或容量不足）、超过 `ResourceQuota`、镜像拉取失败（`ImagePullBackOff` 与 Pending 是不同阶段）。
 
-> 下一篇：[CI/CD 流水线](/cloud-native/cicd/) —— 把上面这些对象"跑起来"之后，怎么让每一次代码提交都能自动、可回滚地走到集群里。
+> 下一篇：[CI/CD 与发布](/cloud-native/cicd/) —— 把上面这些对象"跑起来"之后，怎么让每一次代码提交都能自动、可回滚地走到集群里。

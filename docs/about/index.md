@@ -19,7 +19,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [消息队列](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT 与选型对比；**RPC 与协议**（序列化与 IDL、协议与传输、Dubbo 机制、超时与重试） |
 | [搜索与检索](/search/) | Elasticsearch：倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、运维调优与 ELK 日志栈 |
 | [数据仓库](/bigdata/) | Canal 同步、**Flink 流处理**、Doris 数仓、**ClickHouse 与 OLAP 选型**、Iceberg 冷热分层、分层建模 |
-| [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD；**监控与可观测**（指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / 成本与许可） |
+| [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator；**CI/CD 与发布**（流水线设计与制品治理 / 发布策略与不中断 / GitOps 与渐进式交付 / 回滚与数据库变更）；**监控与可观测**（指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / 成本与许可） |
 | [AI 应用](/ai/) | AI 辅助研发（Vibe Coding、Agent）、AI 能力集成（Spring AI、数字人） |
 | [项目实战](/projects/) | 架构师路线图、绩效系统难点专题、SaaS 平台云原生与数仓落地、可验证产出三件套 |
 | [方法论](/methodology/) | DDD 战略与战术设计、架构风格谱系（六边形/洋葱/整洁/COLA）、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式与评审清单 |
