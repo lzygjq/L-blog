@@ -94,7 +94,7 @@ const sidebarSpec = [
           { text: 'MySQL', dir: 'database/mysql', group: true },
           { text: 'Redis', dir: 'database/redis', group: true },
           { text: '分库分表', dir: 'database/sharding' },
-          { text: 'PostgreSQL（规划中）' }
+          { text: 'PostgreSQL', dir: 'database/postgresql', group: true }
         ]
       },
       {

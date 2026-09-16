@@ -8,7 +8,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 
 这个板块**不写新知识**。它的唯一职责是把散在各板块的题目串起来：**每条索引都指向正文锚点，答案在正文里**。
 
-各板块的导览页或正文末尾都已经有纵向题单（合计 **663 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
+各板块的导览页或正文末尾都已经有纵向题单（合计 **749 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
 
 ## 一、纵向题单解决不了的三件事 {#why}
 
@@ -151,6 +151,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 设计模式 | 7 组辨析 | [面试高频](/java/design-patterns/#interview) | 只列最易混淆的边界（代理 vs 装饰、策略 vs 状态） |
 | MySQL | 12 | [面试高频清单](/database/mysql/#interview) | 索引、事务、日志、MVCC、主从 |
 | Redis | 13 | [面试高频](/database/redis/#interview) | 缓存三大问题、锁、持久化、集群 |
+| PostgreSQL | 86 | [面试索引](/database/postgresql/#interview) | 两个根设计（版本存哪 / 索引存什么）、xmin 与快照三要素、VACUUM 三职责、长事务顶住清理水位、事务 ID 回卷、表级锁八模式与行锁记在元组头、锁队列 FIFO、SSI、GIN/GiST/BRIN 与部分索引、物理与逻辑复制、`synchronous_commit` 五档、`hot_standby_feedback` 取舍、PgBouncer 三模式、`work_mem` 与复制槽积压 |
 | 消息队列 | 26 | [面试高频清单](/middleware/#interview) | RabbitMQ / Kafka / RocketMQ / MQTT 横向对照 |
 | 搜索与检索 | 90 | [面试索引](/search/#interview) | 倒排索引与 FST 压缩、分词器三件套与中文分词、`text` 与 `keyword`、mapping 与 dynamic、refresh / flush / translog 与近实时、段合并、删除与更新的真相、query 与 filter 上下文、term / match / match_phrase、bool 四子句、BM25、分片对算分的干扰、doc_values 与 fielddata、聚合的近似性、分片与路由、深分页三方案、脑裂与选主、reindex 与别名、31GB 堆上限、ELK 栈与同步一致性 |
 | 云原生 | 22 | [面试高频清单](/cloud-native/#interview-questions) | 容器原理、K8s 对象、Helm 与配置管理、服务网格、CRD 与 Operator、发布策略、可观测 |
@@ -163,7 +164,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 分布式理论 | 24 | [面试高频索引](/distributed/#interview) | 共识与多数派、Paxos 两阶段与不变式、Raft 选举与两条安全约束、脑裂、一致性哈希与虚拟节点、哈希槽与 MOVED/ASK、雪花位分配、时钟回拨、workerId 分配、前端精度 |
 | 安全与合规 | 26 | [面试高频索引](/security/#interview) | 会话与令牌、越权防护、OAuth2 与 PKCE、XSS/CSRF/注入、签名与重放、密码存储与脱敏 |
 
-**上表合计 663 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
+**上表合计 749 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
 
 ## 六、自检清单 {#checklist}
 

@@ -28,6 +28,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 | JVM | 内存模型、类加载、GC 算法与调优、线上排查（会看 dump 文件） |
 | Java 并发 | 锁、线程池、AQS、volatile、CAS、并发工具类（源码级理解） |
 | MySQL | 索引（B+树）、事务隔离级别、MVCC、锁机制、慢查询优化 |
+| 数据库选型 | MySQL 与 PostgreSQL 各自适合什么场景、**选它的代价是什么**（[PostgreSQL 板块](/database/postgresql/)）|
 
 **投入建议**：这一层的分水岭在 MySQL 底层原理和 JVM 线上调优——目标是「能实战排查」，而不是背概念。
 
@@ -67,7 +68,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 | DevOps | CI/CD 流水线（Jenkins/GitLab CI）、灰度发布、蓝绿部署 | [CI/CD](/cloud-native/cicd/) |
 | 云原生 | Docker、Kubernetes、Helm、服务网格（Istio）、Operator、弹性伸缩 | [云原生板块](/cloud-native/)（7 篇：Docker / Kubernetes / Helm 与配置管理 / 服务网格 / CRD 与 Operator / CI/CD / 监控与可观测） |
 | 大数据 | 数仓分层、实时计算（Flink）、OLAP（Doris/ClickHouse） | [数据仓库板块](/bigdata/) |
-| 多机房架构 | 双活、异地灾备、数据同步 | 规划中 |
+| 多机房架构 | 双活、异地灾备、数据同步 | 见[高可用](/high-availability/)（多机房架构 / 单元化 / 流量调度）。**本行已补齐** |
 
 **节奏建议**：云原生与 DevOps 是加分项，优先级低于阶段3——先建立架构设计能力，再补工程效率面。
 
