@@ -31,6 +31,8 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 
 **投入建议**：这一层的分水岭在 MySQL 底层原理和 JVM 线上调优——目标是「能实战排查」，而不是背概念。
 
+> **JVM 线上排查这一项，本站已落地为实操四篇**：[JDK 命令行排查](/java/jvm/troubleshooting-cli)（五件套的输出怎么读）→ [堆转储与 MAT 分析](/java/jvm/heap-dump-analysis)（支配树与引用链）→ [Arthas 在线诊断](/java/jvm/online-diagnostics)（不改代码问一个问题）→ [火焰图与性能剖析](/java/jvm/profiling)（含 off-CPU 与 JFR）。**「会敲命令」和「能下结论」差的正是这四篇。**
+
 ## 阶段2 · 分布式核心（骨架）
 
 | 模块 | 核心内容 | 本站对应 |

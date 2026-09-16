@@ -62,6 +62,8 @@ java -XX:MaxRAMPercentage=70 -XX:+UseG1GC -XX:MaxGCPauseMillis=200 \
 - **Arthas**（生产排查首选）：`dashboard` 看全局、`thread -n 3` 看最忙线程、`heapdump` 导堆、`trace/watch` 看方法耗时与入参出参，**attach 到线上进程无需重启**；
 - **JFR/JMC**：低开销飞行记录仪，适合长时间采集线上问题。
 
+> 上面这些只解决「**用哪个**」。**每一项的输出怎么读、坑在哪里、什么时候不该用**，见实操四篇：[JDK 命令行排查](/java/jvm/troubleshooting-cli)（jstat 十列语义 / jstack 六种栈形态 / jmap 四模式取舍）→ [堆转储与 MAT 分析](/java/jvm/heap-dump-analysis)（支配树、retained size、五类泄漏图谱）→ [Arthas 在线诊断](/java/jvm/online-diagnostics)（trace / watch 的正确用法与安全边界）→ [火焰图与性能剖析](/java/jvm/profiling)（on-CPU / off-CPU / alloc / lock）。
+
 ### GC 日志：怎么配、怎么看
 
 **没有 GC 日志的调优都是猜。** JDK 9 起 GC 日志并入了**统一日志框架**（JEP 158），语法从原来一堆 `-XX:+PrintGCxxx` 变成统一的 `-Xlog`：
@@ -159,7 +161,9 @@ jcmd <pid> GC.heap_info                       # 看当前各分区实际占用
 - `GC task thread` 占满 CPU → **不是业务问题，是 GC 问题**，转内存泄漏排查（前一步法）；
 - 频繁 `WAITING` 但 CPU 高 → 可能是线程数配置不当导致上下文切换风暴（`vmstat` 看 cs 列）。
 
-Arthas 的 `thread -n 3` 一条命令即可完成前四步的信息采集。
+Arthas 的 `thread -n 3` 一条命令即可完成前四步的信息采集——**而 `thread -b` 能直接指出「谁阻塞了别人」**。
+
+> 三步法只覆盖「CPU 高」。**接口慢但 CPU 不高**这一类要走 off-CPU 视角，见[火焰图与性能剖析](/java/jvm/profiling#four-types)；线程栈的完整判读（六种形态 + 三次采样法）见 [JDK 命令行排查](/java/jvm/troubleshooting-cli#jstack)。
 
 ## 六、常见 OOM 类型对照
 
