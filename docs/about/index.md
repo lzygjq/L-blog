@@ -18,7 +18,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [数据存储](/database/) | MySQL 原理与调优、Redis 原理与高可用、分库分表 |
 | [消息队列](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT 与选型对比 |
 | [数据仓库](/bigdata/) | Canal 同步、Doris 数仓、Iceberg 冷热分层、分层建模 |
-| [云原生](/cloud-native/) | Docker、Kubernetes、CI/CD、监控与可观测 |
+| [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD、监控与可观测 |
 | [AI 应用](/ai/) | AI 辅助研发（Vibe Coding、Agent）、AI 能力集成（Spring AI、数字人） |
 | [项目实战](/projects/) | 架构师路线图、绩效系统难点专题、SaaS 平台云原生与数仓落地、可验证产出三件套 |
 | [分布式理论](/distributed/) | 共识协议（Paxos/Raft 与选主）、一致性哈希与数据分布、分布式 ID |

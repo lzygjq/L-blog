@@ -43,7 +43,7 @@ features:
     link: /bigdata/
   - icon: ☸️
     title: 云原生
-    details: Docker、Kubernetes、CI/CD 与可观测性 —— 从微服务到云原生的落地路径
+    details: Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD 与可观测 —— 从微服务到云原生的落地路径
     link: /cloud-native/
   - icon: 🤖
     title: AI 应用

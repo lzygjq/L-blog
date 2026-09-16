@@ -137,6 +137,9 @@ const sidebarSpec = [
       { text: '板块导览', link: '/cloud-native/' },
       { text: 'Docker', dir: 'cloud-native/docker' },
       { text: 'Kubernetes', dir: 'cloud-native/kubernetes' },
+      { text: 'Helm', dir: 'cloud-native/helm' },
+      { text: '服务网格', dir: 'cloud-native/service-mesh' },
+      { text: 'CRD 与 Operator', dir: 'cloud-native/operator' },
       { text: 'CI/CD', dir: 'cloud-native/cicd' },
       { text: '监控与可观测', dir: 'cloud-native/observability' }
     ]

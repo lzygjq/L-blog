@@ -63,7 +63,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 | 模块 | 核心内容 | 本站对应 |
 |---|---|---|
 | DevOps | CI/CD 流水线（Jenkins/GitLab CI）、灰度发布、蓝绿部署 | [CI/CD](/cloud-native/cicd/) |
-| 云原生 | Docker、Kubernetes、服务网格（Istio）、弹性伸缩 | [云原生板块](/cloud-native/) |
+| 云原生 | Docker、Kubernetes、Helm、服务网格（Istio）、Operator、弹性伸缩 | [云原生板块](/cloud-native/)（7 篇：Docker / Kubernetes / Helm 与配置管理 / 服务网格 / CRD 与 Operator / CI/CD / 监控与可观测） |
 | 大数据 | 数仓分层、实时计算（Flink）、OLAP（Doris/ClickHouse） | [数据仓库板块](/bigdata/) |
 | 多机房架构 | 双活、异地灾备、数据同步 | 规划中 |
 
