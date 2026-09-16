@@ -197,16 +197,8 @@ const sidebarSpec = [
           { text: '架构图', link: '/projects/toolkit/arch-diagram/' }
         ]
       },
-      {
-        text: '绩效系统',
-        link: '/projects/perf-system/',
-        children: [
-          { text: '十万人组织架构同步', dir: 'projects/perf-system/org-sync-100k' },
-          { text: '高峰期并发填报', dir: 'projects/perf-system/peak-filling' },
-          { text: '多级审批实时推送', dir: 'projects/perf-system/approval-push' },
-          { text: '报表预计算', dir: 'projects/perf-system/report-precompute' }
-        ]
-      },
+      // 「绩效系统」分组暂撤（2026-09-16）：四个专题正文仍是提纲，已由 srcExclude 排除。
+      // 写完后把这一组原样恢复即可（text / link / 四个 dir 子项）。
       {
         text: '智慧物业 SaaS',
         link: '/projects/property-saas/',
@@ -289,6 +281,14 @@ const analyticsHead: HeadConfig[] =
 
 export default defineConfig({
   base,
+  // 草稿页排除：VitePress 1.6.x **不原生支持 frontmatter `draft`**（那是 Nuxt 的行为），
+  // 页面级 draft 只能靠 srcExclude 实现。否则标了 draft 的提纲页照样进构建产物、
+  // 照样出现在侧边栏 —— 等于对外的空壳页（2026-09-16 实测确认）。
+  // ⚠️ srcExclude 会**覆盖**默认值，node_modules / dist 必须显式带上。
+  // 写完 projects/perf-system/ 的四个专题后要恢复三处：删掉本项、去掉正文的
+  // `draft: true`、恢复 themeConfig.sidebar['/projects/'] 里被移除的「绩效系统」分组。
+  srcExclude: ['**/node_modules/**', '**/dist/**', '**/perf-system/**'],
+
   lang: 'zh-CN',
   title: 'L知识库',
   description: 'Java 后端与大前端知识库 —— 语言与框架原理 / 数据存储、消息队列与搜索检索 / 云原生与数据仓库 / 跨端开发 / AI 应用，附项目实战难点复盘',
