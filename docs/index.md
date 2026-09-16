@@ -49,6 +49,10 @@ features:
     title: AI 应用
     details: AI 辅助研发（Vibe Coding、Agent 与工具链）+ AI 能力集成（Spring AI、数字人）
     link: /ai/
+  - icon: 🔐
+    title: 安全与合规
+    details: 认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界 —— 把安全从"上线前扫一遍"变成设计期选择
+    link: /security/
   - icon: 🎯
     title: 项目实战
     details: 大型集团绩效系统四大技术难点、SaaS 平台云原生与数仓落地 —— 面试弹药库

@@ -204,6 +204,13 @@ const sidebarSpec = [
   {
     prefix: '/interview/',
     items: [{ text: '板块导览', link: '/interview/' }]
+  },
+  {
+    // 安全与合规：机制与取舍视角（与 projects/property-saas/release-and-ops 的落地视角分工，交叉引用不复制）
+    prefix: '/security/',
+    items: [
+      { text: '安全与合规', dir: 'security', group: true }
+    ]
   }
 ]
 
@@ -281,8 +288,9 @@ export default defineConfig({
         // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条
         // （VPNavBarMenuGroup：active = isActive(自身 activeMatch) || 任一子项命中）
         text: '其他',
-        activeMatch: '^/(interview|archives|about)/',
+        activeMatch: '^/(security|interview|archives|about)/',
         items: [
+          { text: '安全与合规', link: '/security/' },
           { text: '面试专题', link: '/interview/' },
           { text: '归档', link: '/archives/' },
           { text: '关于本站', link: '/about/' }
