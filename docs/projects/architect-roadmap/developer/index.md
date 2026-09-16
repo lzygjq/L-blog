@@ -7,7 +7,7 @@ order: 1
 
 # L1 开发 · 能独立交付一个模块
 
-> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的起点清单。它回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。同一篇文章会在多个级别出现，只是每一级拿走的深度不同；级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。
+> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的起点清单。它回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。同一篇文章会在多个级别出现，只是每一级拿走的深度不同；级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。读完这一级，往上一级见 [L2 高级开发](/projects/architect-roadmap/senior/)。
 
 ## 一、这一级的判据
 
@@ -179,6 +179,7 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 
 | 你想干什么 | 去哪 |
 |---|---|
+| 往上走一级 | [L2 高级开发 · 能负责一块，并对线上问题给出根因](/projects/architect-roadmap/senior/) |
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
 | 看「这些知识会被问到多深」 | [面试专题的四层次](/interview/#layers) 与[按轮次的复习路径](/interview/#rounds) |
 | 看别人怎么把 L1 的东西用在一个真实系统里 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |

@@ -220,10 +220,15 @@ const sidebarSpec = [
       { text: '板块导览', link: '/projects/' },
       {
         // 四级清单页放在子目录里，而构建器扫目录**不递归**（sidebar.mjs 的 listMd 只读当前层），
-        // 所以子页必须显式列在 children 里；批二补 L2/L3/L4 时在此追加。
+        // 所以子页必须显式列在 children 里；新增级别页时在此追加。
         text: '成长路线',
         link: '/projects/architect-roadmap/',
-        children: [{ text: 'L1 开发', link: '/projects/architect-roadmap/developer/' }]
+        children: [
+          { text: 'L1 开发', link: '/projects/architect-roadmap/developer/' },
+          { text: 'L2 高级开发', link: '/projects/architect-roadmap/senior/' },
+          { text: 'L3 架构师', link: '/projects/architect-roadmap/architect/' },
+          { text: 'L4 CIO', link: '/projects/architect-roadmap/cio/' }
+        ]
       },
       { text: '架构演进地图', dir: 'projects/architecture-evolution' },
       {
