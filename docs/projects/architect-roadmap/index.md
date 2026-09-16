@@ -55,7 +55,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 | 高可用 | 多机房容灾、同城双活、限流熔断降级、故障演练 | 限流 / 熔断 / 降级见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/#protection)；**容灾与演练见[高可用](/high-availability/)（4 篇：可用性目标 / 冗余与故障转移 / 多机房架构 / 混沌与演练）。本行已补齐** |
 | 高性能 | 性能调优、全链路压测、容量规划、缓存/异步/削峰 | [容量测算与压测方案](/projects/property-saas/capacity-and-perf/)（六步推导链 + 五层防护 + 压测方案） |
 | 安全 | 认证授权（OAuth2/SSO）、数据加密脱敏、防刷防注入、等保合规 | [安全与合规](/security/)（5 篇：认证 / 授权 / OAuth2 / 攻击防护 / 加密合规）；落地视角见[发布、安全与运维](/projects/property-saas/release-and-ops/) |
-| 可观测性 | Prometheus 监控、SkyWalking 链路追踪、ELK 日志、告警体系 | [监控与可观测](/cloud-native/observability/)；**ELK 待补** |
+| 可观测性 | Prometheus 监控、SkyWalking 链路追踪、ELK 日志、告警体系 | [监控与可观测](/cloud-native/observability/)；**ELK 的存储与检索端见[搜索与检索](/search/)（5 篇），本行已补齐** |
 | 方法论 | DDD 领域驱动设计、架构风格对比、架构演进 | [方法论](/methodology/)（6 篇：战略设计 / 战术设计 / 架构风格 / 拆分粒度 / 事件驱动与 CQRS / 落地与反模式）＋[架构演进地图](/projects/architecture-evolution/)。**本行已补齐** |
 
 **为什么是核心**：这一层是架构师与高级开发的本质区别——高可用容灾与性能调优实战最能拉开差距，架构师的核心价值就体现在这一层。参考落地视角见[项目实战](/projects/)下的真实难点复盘。

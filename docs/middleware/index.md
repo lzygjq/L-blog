@@ -153,3 +153,4 @@ desc: 消息队列板块导览——可靠性/顺序性/幂等性三条主线、
 | 缓存一致性 | 用 MQ 做缓存失效的异步补偿 | [Redis · 缓存模式](/database/redis/cache-patterns) |
 | 消息轨迹与可观测 | 用轨迹排查"消息丢没丢" | [Actuator 与生产可观测](/java/spring/spring-boot/actuator)（指标与健康检查） |
 | 设备接入与 K8s | MQTT 集群与后端消费的无状态化部署 | [Kubernetes](/cloud-native/kubernetes/)（弹性伸缩、滚动升级） |
+| 全文检索与日志检索 | 消息队列**只负责搬运**，不做检索——需要"包含 + 相关性排序"时要另上检索引擎 | [搜索与检索](/search/)（Elasticsearch 5 篇）。**注：ELK 此前被列在本板块下，2026-09-16 已挪到该板块**（它既不是数据库也不是消息队列）；日志量大且不需相关性排序时，[Doris 倒排索引](/bigdata/doris/#indexes) 可替代 |

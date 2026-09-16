@@ -83,4 +83,4 @@ desc: 数据存储板块导览——MySQL 与 Redis 两条主线、分库分表�
 | 10 | Redis 主从、哨兵、分片集群的区别？ | [Redis · 持久化、主从与集群](/database/redis/ha-cluster) |
 | 11 | 分库分表的时机和策略？拆分后有哪些问题？ | [分库分表](/database/sharding/) |
 
-消息与队列相关主题见[消息队列板块](/middleware/)。
+消息与队列相关主题见[消息队列板块](/middleware/)。全文检索与日志检索见[搜索与检索板块](/search/)（Elasticsearch 5 篇）——**它与本板块同属「存储·消息·检索」这一个侧边栏，是"以检索为目的的存储"**。

@@ -268,7 +268,7 @@ desc: 领域事件/集成事件/应用事件的边界与转换规则、事件通
 | **CQRS + ES** | ES 做写侧，CQRS 做读侧——**这是 ES 的标准配套**，因为 ES 自己不能查询 | 投影器要可重放 |
 | **Saga + 事件** | 长流程跨多个服务，用 Saga 协调 | **编排（Orchestration）vs 编舞（Choreography）**：编排有一个中心协调者（易理解、易观测，但中心耦合）；编舞靠服务间互相订阅（解耦但难追踪） |
 | **发件箱 + Saga** | 发起方用发件箱保证不丢，Saga 保证补偿 | 补偿操作必须幂等 |
-| **CQRS + 缓存/搜索** | 读模型落在 Redis/ES | 见[多级缓存](/database/redis/multilevel-cache)与[Elasticsearch](/middleware/) |
+| **CQRS + 缓存/搜索** | 读模型落在 Redis/ES | 见[多级缓存](/database/redis/multilevel-cache)与[搜索与检索](/search/) |
 
 **编排与编舞的选择**：
 

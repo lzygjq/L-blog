@@ -82,8 +82,9 @@ const sidebarSpec = [
     ]
   },
   {
-    // 数据存储 + 消息队列合并板块：两个 URL 前缀共用同一份侧边栏
-    prefix: ['/database/', '/middleware/'],
+    // 数据存储 + 消息队列 + 搜索检索合并板块：三个 URL 前缀共用同一份侧边栏
+    // 「搜索与检索」原被错挂在「消息队列」分组下（标「规划中」），2026-09-16 挪出为独立分组
+    prefix: ['/database/', '/middleware/', '/search/'],
     items: [
       { text: '数据存储导览', link: '/database/' },
       { text: '消息队列导览', link: '/middleware/' },
@@ -102,9 +103,15 @@ const sidebarSpec = [
           { text: 'RabbitMQ', dir: 'middleware/rabbitmq', group: true },
           { text: 'Kafka', dir: 'middleware/kafka', group: true },
           { text: 'RocketMQ', dir: 'middleware/rocketmq' },
-          { text: '物联网 MQTT', dir: 'middleware/mqtt' },
-          { text: 'ELK（规划中）' }
+          { text: '物联网 MQTT', dir: 'middleware/mqtt' }
         ]
+      },
+      {
+        // 搜索与检索：以检索为目的的存储（Elasticsearch），既非数据库也非消息队列
+        // dir + group：分组标题链到 /search/ 导览，目录内 5 篇自动成为子项（加篇零配置改动）
+        text: '搜索与检索',
+        dir: 'search',
+        group: true
       }
     ]
   },
@@ -273,7 +280,7 @@ export default defineConfig({
   base,
   lang: 'zh-CN',
   title: 'L知识库',
-  description: 'Java 后端与大前端知识库 —— 语言与框架原理 / 数据存储与消息队列 / 云原生与数据仓库 / 跨端开发 / AI 应用，附项目实战难点复盘',
+  description: 'Java 后端与大前端知识库 —— 语言与框架原理 / 数据存储、消息队列与搜索检索 / 云原生与数据仓库 / 跨端开发 / AI 应用，附项目实战难点复盘',
   head: [
     ['link', { rel: 'icon', href: base + 'favicon.svg' }],
     ...analyticsHead
@@ -302,8 +309,8 @@ export default defineConfig({
       { text: '计算机基础', link: '/fundamentals/', activeMatch: '^/fundamentals/' },
       { text: 'Java', link: '/java/', activeMatch: '^/java/' },
       { text: '大前端', link: '/frontend/', activeMatch: '^/frontend/' },
-      // 数据存储 + 消息队列合并入口：两个前缀下都保持高亮
-      { text: '存储与消息', link: '/database/', activeMatch: '^/(database|middleware)/' },
+      // 数据存储 + 消息队列 + 搜索检索合并入口：三个前缀下都保持高亮
+      { text: '存储·消息·检索', link: '/database/', activeMatch: '^/(database|middleware|search)/' },
       { text: '数据仓库', link: '/bigdata/', activeMatch: '^/bigdata/' },
       { text: '云原生', link: '/cloud-native/', activeMatch: '^/cloud-native/' },
       { text: 'AI 应用', link: '/ai/', activeMatch: '^/ai/' },

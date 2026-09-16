@@ -4,7 +4,7 @@ layout: home
 hero:
   name: L知识库
   text: 夯实基础 · 构建体系 · 沉淀实战
-  tagline: 系统化梳理计算机基础与 Java 后端主线 —— 从网络、操作系统、算法这些语言无关的底座，到语言与框架原理，再到数据存储、消息队列、云原生与数据仓库，以及跨端开发与项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
+  tagline: 系统化梳理计算机基础与 Java 后端主线 —— 从网络、操作系统、算法这些语言无关的底座，到语言与框架原理，再到数据存储、消息队列与搜索检索、云原生与数据仓库，以及跨端开发与项目实战中的架构取舍与难点复盘，一步步构建完整技术体系。
   actions:
     - theme: brand
       text: 知识库总览
@@ -37,6 +37,10 @@ features:
     title: 消息队列
     details: RabbitMQ / RocketMQ 的可靠性、顺序性与幂等设计，物联网 MQTT 接入
     link: /middleware/
+  - icon: 🔍
+    title: 搜索与检索
+    details: Elasticsearch 倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、运维调优与 ELK 日志栈
+    link: /search/
   - icon: 📊
     title: 数据仓库
     details: Canal 实时同步、Doris 数仓、Iceberg 冷热分层与数仓分层建模
