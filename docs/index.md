@@ -49,6 +49,10 @@ features:
     title: AI 应用
     details: AI 辅助研发（Vibe Coding、Agent 与工具链）+ AI 能力集成（Spring AI、数字人）
     link: /ai/
+  - icon: 🧯
+    title: 高可用
+    details: 可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练 —— 用冗余换故障概率，用自动化换恢复时间
+    link: /high-availability/
   - icon: 🕸️
     title: 分布式理论
     details: 共识协议（Paxos / Raft 与选主）、一致性哈希与数据分布、分布式 ID —— 多节点如何表现得像一个

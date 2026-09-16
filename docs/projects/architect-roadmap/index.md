@@ -50,7 +50,7 @@ desc: 从高级开发到架构师的五阶段递进路径——地基、骨架�
 
 | 模块 | 核心内容 | 本站对应 |
 |---|---|---|
-| 高可用 | 多机房容灾、同城双活、限流熔断降级、故障演练 | 限流 / 熔断 / 降级见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/#protection)；**多机房、同城双活、故障演练待补** |
+| 高可用 | 多机房容灾、同城双活、限流熔断降级、故障演练 | 限流 / 熔断 / 降级见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/#protection)；**容灾与演练见[高可用](/high-availability/)（4 篇：可用性目标 / 冗余与故障转移 / 多机房架构 / 混沌与演练）。本行已补齐** |
 | 高性能 | 性能调优、全链路压测、容量规划、缓存/异步/削峰 | [容量测算与压测方案](/projects/property-saas/capacity-and-perf/)（六步推导链 + 五层防护 + 压测方案） |
 | 安全 | 认证授权（OAuth2/SSO）、数据加密脱敏、防刷防注入、等保合规 | [安全与合规](/security/)（5 篇：认证 / 授权 / OAuth2 / 攻击防护 / 加密合规）；落地视角见[发布、安全与运维](/projects/property-saas/release-and-ops/) |
 | 可观测性 | Prometheus 监控、SkyWalking 链路追踪、ELK 日志、告警体系 | [监控与可观测](/cloud-native/observability/)；**ELK 待补** |

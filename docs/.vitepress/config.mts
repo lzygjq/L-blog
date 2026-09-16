@@ -221,6 +221,13 @@ const sidebarSpec = [
     items: [
       { text: '分布式理论', dir: 'distributed', group: true }
     ]
+  },
+  {
+    // 高可用：架构层视角（与 java/spring/spring-cloud/resilience 的应用层实现、capacity-and-perf 的容量与防护、architecture-evolution 的单库维度分工，交叉引用不复制）
+    prefix: '/high-availability/',
+    items: [
+      { text: '高可用', dir: 'high-availability', group: true }
+    ]
   }
 ]
 
@@ -298,8 +305,9 @@ export default defineConfig({
         // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条
         // （VPNavBarMenuGroup：active = isActive(自身 activeMatch) || 任一子项命中）
         text: '其他',
-        activeMatch: '^/(distributed|security|interview|archives|about)/',
+        activeMatch: '^/(high-availability|distributed|security|interview|archives|about)/',
         items: [
+          { text: '高可用', link: '/high-availability/' },
           { text: '分布式理论', link: '/distributed/' },
           { text: '安全与合规', link: '/security/' },
           { text: '面试专题', link: '/interview/' },
