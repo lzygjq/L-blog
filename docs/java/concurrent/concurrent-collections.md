@@ -3,6 +3,7 @@ date: 2026-09-13
 title: 并发容器
 sidebar: 并发容器
 order: 7
+desc: HashMap 并发下会出什么问题、Hashtable 与 synchronizedMap 为什么不推荐、ConcurrentHashMap 从分段锁到 CAS 加 synchronized 锁首节点的演进、put 完整流程、扩容与计数、写时复制的 CopyOnWriteArrayList、阻塞队列家族
 ---
 
 # 并发容器

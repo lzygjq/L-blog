@@ -2,6 +2,7 @@
 date: 2026-09-15
 title: HTTP 演进：1.1 → 2 → 3
 order: 3
+desc: HTTP 到底在解决什么、HTTP/1.1 的两层队头阻塞、HTTP/2 的多路复用与它仍未解决的问题、HTTP/3 与 QUIC 为什么改用 UDP、HTTPS 与 TLS 1.3 握手、缓存机制与状态码
 ---
 
 # HTTP 演进：1.1 → 2 → 3

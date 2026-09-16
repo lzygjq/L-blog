@@ -3,6 +3,7 @@ title: 'ADR-001 · 事件总线：Redis Stream 而非独立消息中间件'
 order: 1
 date: 2026-09-10
 status: 已采纳
+desc: 为什么服务间异步事件用 Redis Stream 而不引入独立消息中间件——五个备选方案的逐条否决理由、决策依据，以及需要接受的后果与风险
 ---
 
 # ADR-001：服务间异步事件用 Redis Stream，不引入独立消息中间件

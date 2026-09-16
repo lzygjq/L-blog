@@ -2,6 +2,7 @@
 date: 2026-09-15
 title: DNS 与 CDN
 order: 4
+desc: 为什么不能写死 IP、递归与迭代的完整解析链路、六类记录类型的用途、CDN 的调度与回源机制、多级缓存与 TTL 的取舍
 ---
 
 # DNS 与 CDN

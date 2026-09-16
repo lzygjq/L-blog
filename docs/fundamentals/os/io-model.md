@@ -2,6 +2,7 @@
 date: 2026-09-15
 title: IO 模型与多路复用
 order: 3
+desc: 一次 IO 在内核里经历了什么、五种 IO 模型的对照、select 与 poll 与 epoll 的演进及 epoll 的三个优势、四种零拷贝实现、io_uring 为什么是现代答案
 ---
 
 # IO 模型与多路复用

@@ -3,6 +3,7 @@ date: 2026-09-13
 title: ThreadLocal
 sidebar: ThreadLocal
 order: 8
+desc: 没有它会怎样、值到底存在 ThreadLocalMap 里、为什么 key 用弱引用却依然会泄漏、正确用法与 remove 的时机、InheritableThreadLocal 与跨线程传递的坑、典型应用场景
 ---
 
 # ThreadLocal

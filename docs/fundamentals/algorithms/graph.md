@@ -2,6 +2,7 @@
 date: 2026-09-15
 title: 图
 order: 4
+desc: 邻接矩阵与邻接表的选择、BFS 与 DFS 两种遍历思维、拓扑排序与环检测、Dijkstra 与 Bellman-Ford 与 Floyd 覆盖的全部场景、最小生成树、图遍历在工程里的隐蔽身影
 ---
 
 # 图

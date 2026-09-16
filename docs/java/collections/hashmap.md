@@ -3,6 +3,7 @@ date: 2026-09-13
 title: HashMap 实现原理
 sidebar: HashMap
 order: 3
+desc: 从二叉树到红黑树、散列表要解决的基本问题、put 与扩容的完整流程、JDK 1.7 与 1.8 的结构差异、寻址算法与容量必须是 2 的次幂、1.7 的多线程死循环
 ---
 
 # HashMap 实现原理

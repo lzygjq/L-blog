@@ -3,6 +3,7 @@ date: 2026-09-13
 title: CAS 与原子类
 sidebar: CAS 与原子类
 order: 3
+desc: CAS 的指令级基础、ABA 问题与它的解法、原子类家族的分工、LongAdder 如何把热点打散、无锁方案到底适用到哪一步
 ---
 
 # CAS 与原子类

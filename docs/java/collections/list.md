@@ -3,6 +3,7 @@ date: 2026-09-13
 title: List：数组、ArrayList 与链表
 sidebar: List 集合
 order: 2
+desc: ArrayList 的源码分析路径（扩容与 modCount）、数组与 List 互转的坑、ArrayList 与 LinkedList 的横向对比与真实选型
 ---
 
 # List：数组、ArrayList 与链表

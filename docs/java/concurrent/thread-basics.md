@@ -3,6 +3,7 @@ date: 2026-09-13
 title: 线程基础与线程间协作
 sidebar: 线程基础
 order: 1
+desc: 进程与线程、并发与并行、四种创建线程的方式、run 与 start 的区别、Runnable 与 Callable、线程的六种状态、wait 与 notify 协作、sleep 与 wait 的差异、join、如何优雅停止一个线程
 ---
 
 # 线程基础与线程间协作

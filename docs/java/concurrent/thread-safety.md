@@ -3,6 +3,7 @@ date: 2026-09-13
 title: 线程安全与内存可见性
 sidebar: 线程安全与可见性
 order: 2
+desc: 从一段一定会出错的 i++ 代码讲起、并发三大特性、JMM 与 happens-before、volatile 的可见性与禁止重排、synchronized 的原理与锁升级、final 的内存语义与安全发布
 ---
 
 # 线程安全与内存可见性

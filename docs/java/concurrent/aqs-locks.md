@@ -3,6 +3,7 @@ date: 2026-09-13
 title: AQS 与锁
 sidebar: AQS 与锁
 order: 4
+desc: AQS 的 state 与等待队列如何工作、ReentrantLock 的实现、公平锁与非公平锁的差异、Condition 为什么能有多条等待队列、synchronized 与 Lock 的横向对比、AQS 家族、读写锁、死锁的四个条件与排查
 ---
 
 # AQS 与锁

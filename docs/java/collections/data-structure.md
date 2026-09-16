@@ -3,6 +3,7 @@ date: 2026-09-13
 title: Java 集合的底层选型
 sidebar: 底层选型与复杂度
 order: 1
+desc: 选型速查表、Java 实现视角的复杂度对照、ArrayList 与 LinkedList 的底层结构，以及几个看起来像 O(1) 的坑
 ---
 
 # Java 集合的底层选型
