@@ -86,6 +86,7 @@ title: 高可用 · 板块导览
 | [数据存储](/database/) | 各存储自身的 HA 机制（[Redis HA](/database/redis/ha-cluster)、[MySQL 复制](/database/mysql/replication)）；本板块讲**跨机房怎么把它们的 RPO/RTO 拼起来** |
 | [消息队列](/middleware/) | [Kafka](/middleware/kafka/high-availability)、[RabbitMQ](/middleware/rabbitmq/high-availability) 的高可用与副本语义——**消息是跨单元最终一致的主要载体** |
 | [分布式理论](/distributed/) | **理论层**：多数派、term/epoch（[共识协议](/distributed/consensus#quorum)）是仲裁与 fencing 的理论依据 |
+| [分布式协调](/distributed/coordination/) | **服务层**：ZK / etcd 是 fencing 令牌的实际来源（[fencing token](/distributed/coordination/coordination-lock#fencing)），也是"存活性判定只能靠超时"这一取舍的具体体现 |
 | [云原生](/cloud-native/) | **基础设施层**：探针、优雅停机、HPA 的[幂等与探针细节](/cloud-native/kubernetes/)是故障转移的执行手段 |
 | [监控与可观测](/cloud-native/observability/) | **前提层**：没有可观测就没有 MTTR 的"发现时间"，也没有混沌工程的稳态判定 |
 | [发布与交付策略](/projects/property-saas/release-and-ops/) | **变更层**：分批发布、金丝雀、Runbook——**发布是最常见的自造故障域** |

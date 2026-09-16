@@ -10,7 +10,7 @@
 
 ## 二、目录约定
 
-- 11 大板块：`fundamentals`（计算机基础：计算机网络 / 操作系统 / 算法与数据结构）/ `java` / `frontend`（大前端：小程序与 uni-app）/ `database` / `middleware` / `bigdata` / `cloud-native` / `ai` / `projects`（项目实战，含 `toolkit/` 产出工具方法层）/ `interview` / `about`（关于本站）。
+- **板块分布（16 个正文板块 + `archives` 归档目录）**：① **顶层导航的 8 个内容项** —— `fundamentals`（计算机基础：计算机网络 / 操作系统 / 算法与数据结构）、`java`、`frontend`（大前端：小程序与 uni-app）、**「存储·消息·检索」一组**（`database` + `middleware` + `search` 三个目录合占一个导航项）、`bigdata`（数据仓库）、`cloud-native`（云原生）、`ai`（AI 应用）、`projects`（项目实战，含 `toolkit/` 产出工具方法层）；② **「其他」下拉的 6 个** —— `methodology`（方法论）、`high-availability`（高可用）、`distributed`（分布式理论，含**子板块** `coordination/`）、`security`（安全与合规）、`interview`（面试专题）、`about`（关于本站）。
 - **顶部导航已达 10 项上限**（导航 / 计算机基础 / Java / 大前端 / 存储·消息·检索 / 数据仓库 / 云原生 / AI 应用 / 项目实战 / 其他）—— 后续新领域**不再加顶层项**，挂进现有板块或塞进「其他」下拉。
 - 每个板块目录放 `index.md` 作导览页；目录名英文、标题中文、命名统一 4 字（云原生例外）。
 - 侧边栏（`docs/.vitepress/sidebar.mjs`）：**有子项的分组默认展开、右侧带可收起的 caret**；分组标题本身即该分组的导览入口（链到目录 `index.md`），**不再单独列「导览」子条目**。新增子目录用 `{ text, dir, group: true }`，层级不超过 2 层。

@@ -66,6 +66,8 @@ try {
 
 解法是 **Redlock**：在 n 个**互相独立**的 Redis 节点上分别加锁（建议 n=5），**超过半数（n/2+1）成功才算加锁成功**——单个节点故障不足以让锁易主。但 Redlock 在工业界争议很大（Martin Kleppmann 与 antirez 的著名论战），结论是绝大多数场景**单实例 + 哨兵 + 看门狗已经足够**；真正要求极端正确性的互斥（如资金）不该依赖 Redis 锁，要么用 DB 乐观锁兜底，要么上 ZooKeeper（临时顺序节点 + Watcher，会话断开即自动释放）或 etcd。
 
+> **上面三个坑有同一个根源**：`TTL` 只能表示"过期"，不能表示"持有者还活着"。所有基于超时的锁都逃不掉这个缺口——它的完整解法（fencing token）与 Redis / ZK / etcd 三种实现的语义对照见[分布式锁与 fencing](/distributed/coordination/coordination-lock)。
+
 ## 四、秒杀链路：Lua + MQ 的组合
 
 单用锁解决不了秒杀的吞吐，标准链路是「Lua 原子预扣 + MQ 异步下单」：

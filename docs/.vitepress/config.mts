@@ -229,7 +229,9 @@ const sidebarSpec = [
     // 分布式理论：机制与算法视角（与 java/spring/spring-cloud/cap-base 的取舍判据、database/sharding 的落地视角分工，交叉引用不复制）
     prefix: '/distributed/',
     items: [
-      { text: '分布式理论', dir: 'distributed', group: true }
+      { text: '分布式理论', dir: 'distributed', group: true },
+      // 分布式协调：把共识机制服务化之后的形态（与 consensus 的协议原理、redis/lock-and-mq 的实现细节、high-availability 的冗余切换分工，交叉引用不复制）
+      { text: '分布式协调', dir: 'distributed/coordination', group: true }
     ]
   },
   {

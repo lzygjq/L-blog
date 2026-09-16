@@ -36,7 +36,7 @@ Kafka 的高可用要回答一个具体问题：**Leader 所在的 Broker 宕机
 | **Controller** | 集群中有一个 Broker 被选为 Controller，负责**分区 Leader 选举、副本分配**等管理操作 |
 | **单节点能力** | 集群本身只解决"节点活着"的问题，**数据不丢靠的是下一层的副本机制** |
 
-> **KRaft 模式**：Kafka 2.8 引入、3.3 起生产可用，用内部的 Raft 协议取代 ZooKeeper 做元数据管理。好处是**少了 ZooKeeper 这一套组件**（部署运维简化）、元数据操作更快、支持更多分区（ZK 模式下分区数受 ZK 性能限制）。新项目建议直接用 KRaft。
+> **KRaft 模式**：Kafka 2.8 引入、3.3 起生产可用，用内部的 Raft 协议取代 ZooKeeper 做元数据管理。好处是**少了 ZooKeeper 这一套组件**（部署运维简化）、元数据操作更快、支持更多分区（ZK 模式下分区数受 ZK 性能限制）。新项目建议直接用 KRaft。**为什么 ZK 会成为分区数的天花板，见[KRaft 的因果链](/distributed/coordination/coordination-selection#kraft-why)；Kafka 4.0 起 ZK 模式已被彻底移除。**
 
 ## 三、第二层：分区与副本
 

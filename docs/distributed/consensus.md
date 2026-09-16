@@ -216,7 +216,7 @@ Raft 的多数机制都很直观，但**有两条约束反直觉，且实现时�
 | 系统 | 协议 | 用在哪 | 值得注意 |
 |---|---|---|---|
 | **etcd / Consul** | Raft | 元数据、KV、分布式锁、服务发现 | K8s 的整个控制平面依赖 etcd 的一致性，**etcd 不可用则集群无法变更** |
-| **ZooKeeper** | **ZAB** | 元数据、选主、分布式锁 | 与 Raft 同族（Leader + 任期 + 多数派），差别是**选举与广播是两个独立阶段**，且用 `zxid`（epoch + 计数器）标识顺序 |
+| **ZooKeeper** | **ZAB** | 元数据、选主、分布式锁 | 与 Raft 同族（Leader + 任期 + 多数派），差别是**选举与广播是两个独立阶段**，且用 `zxid`（epoch + 计数器）标识顺序。**展开见[ZAB 协议](/distributed/coordination/zab-protocol#zxid)** |
 | **RabbitMQ 仲裁队列** | Raft | 队列数据复制 | 推荐 3 或 5 副本；相比镜像队列拿到"不丢消息 + 严格选主" |
 | **Kafka KRaft** | Raft | 元数据管理（取代 ZooKeeper） | 2.8 引入、3.3 起生产可用；**只把元数据交给 Raft，消息数据仍走 ISR 主从复制**——这是"该用共识的地方才用"的范例 |
 | **RocketMQ Controller** | Raft | **只负责选主**，数据同步仍用原生 CommitLog | DLedger 之所以被废弃，正是因为"数据也走 Raft 日志"带来额外 IO；Controller 模式把选主与数据同步拆开，各取所长 |

@@ -63,7 +63,7 @@ features:
     link: /high-availability/
   - icon: 🕸️
     title: 分布式理论
-    details: 共识协议（Paxos / Raft 与选主）、一致性哈希与数据分布、分布式 ID —— 多节点如何表现得像一个
+    details: 共识协议（Paxos / Raft 与选主）、一致性哈希与数据分布、分布式 ID、协调服务（ZooKeeper 与 ZAB、分布式锁与 fencing、etcd 与 KRaft）—— 多节点如何表现得像一个
     link: /distributed/
   - icon: 🔐
     title: 安全与合规
