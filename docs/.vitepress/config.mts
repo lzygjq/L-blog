@@ -31,7 +31,10 @@ const sidebarSpec = [
     ]
   },
   {
-    prefix: '/java/',
+    // 板块 ②：语言与框架 = Java + 大前端
+    // 2026-09-16 由两个独立板块合并 —— 二者同属「写代码的技术栈」维度。
+    // 合并只动这里的前缀数组与分组，**目录与 URL 一律不动**（零链接改动）。
+    prefix: ['/java/', '/frontend/'],
     items: [
       { text: '板块导览', link: '/java/' },
       {
@@ -80,18 +83,34 @@ const sidebarSpec = [
           { text: '结构型（7 种）', dir: 'java/design-patterns/structural', group: true },
           { text: '行为型（11 种）', dir: 'java/design-patterns/behavioral', group: true }
         ]
+      },
+      {
+        // 大前端（uni-app / 小程序）：标题即导览入口（链到 /frontend/）
+        text: '大前端',
+        link: '/frontend/',
+        children: [
+          { text: '小程序起步', dir: 'frontend/miniprogram-start' },
+          { text: '模板与样式', dir: 'frontend/miniprogram-template' },
+          { text: '导航与生命周期', dir: 'frontend/miniprogram-logic' },
+          { text: '组件化与工程化', dir: 'frontend/miniprogram-component' },
+          { text: 'uni-app 核心', dir: 'frontend/uniapp-core' },
+          { text: '跨端项目实战', dir: 'frontend/uniapp-practice' },
+          { text: '发布与多端打包', dir: 'frontend/release' }
+        ]
       }
     ]
   },
   {
-    // 数据存储 + 消息队列 + 搜索检索合并板块：三个 URL 前缀共用同一份侧边栏
-    // 「搜索与检索」原被错挂在「消息队列」分组下（标「规划中」），2026-09-16 挪出为独立分组
-    prefix: ['/database/', '/middleware/', '/search/'],
+    // 板块 ③：数据与存储 = 数据库 + 搜索检索 + 大数据
+    // 2026-09-16 由「存储·消息·检索」拆合而来：把消息/RPC 移出给板块 ④，
+    // 把 bigdata 移入（三者同属「数据怎么存、怎么算」）。
+    // 三个 URL 前缀共用同一份侧边栏 —— 这是本文件既有的合并机制（prefix 支持数组）
+    prefix: ['/database/', '/search/', '/bigdata/'],
     items: [
-      { text: '数据存储导览', link: '/database/' },
-      { text: '消息队列导览', link: '/middleware/' },
       {
+        // 标题即导览入口：链到 /database/
         text: '数据存储',
+        link: '/database/',
         children: [
           { text: 'MySQL', dir: 'database/mysql', group: true },
           { text: 'Redis', dir: 'database/redis', group: true },
@@ -101,7 +120,29 @@ const sidebarSpec = [
         ]
       },
       {
+        // 搜索与检索：以检索为目的的存储（Elasticsearch），既非数据库也非消息队列
+        // dir + group：分组标题链到 /search/ 导览，目录内 5 篇自动成为子项（加篇零配置改动）
+        text: '搜索与检索',
+        dir: 'search',
+        group: true
+      },
+      {
+        // 大数据与数仓：标题链到 /bigdata/ 导览
+        text: '大数据与数仓',
+        dir: 'bigdata',
+        group: true
+      }
+    ]
+  },
+  {
+    // 板块 ④：中间件与分布式 = 消息队列/RPC + 分布式理论
+    // 2026-09-16 合并 —— 二者同属「服务之间怎么通信与协同」：
+    // 前者是可选的落地组件，后者是它背后的机制与算法。
+    prefix: ['/middleware/', '/distributed/'],
+    items: [
+      {
         text: '消息队列',
+        link: '/middleware/',
         children: [
           { text: 'RabbitMQ', dir: 'middleware/rabbitmq', group: true },
           { text: 'Kafka', dir: 'middleware/kafka', group: true },
@@ -110,81 +151,71 @@ const sidebarSpec = [
         ]
       },
       {
-        // RPC 与协议（2026-09-16 新增）：与「消息队列」平级 —— RPC 不是消息队列的子集
+        // RPC 与协议：与「消息队列」平级 —— RPC 不是消息队列的子集
         text: 'RPC 与协议',
         dir: 'middleware/rpc',
         group: true
       },
       {
-        // 搜索与检索：以检索为目的的存储（Elasticsearch），既非数据库也非消息队列
-        // dir + group：分组标题链到 /search/ 导览，目录内 5 篇自动成为子项（加篇零配置改动）
-        text: '搜索与检索',
-        dir: 'search',
+        // 分布式理论：机制与算法视角（与 java/spring/spring-cloud/cap-base 的取舍判据、
+        // database/sharding 的落地视角分工，交叉引用不复制）
+        text: '分布式理论',
+        dir: 'distributed',
+        group: true
+      },
+      {
+        // 分布式协调：把共识机制服务化之后的形态（与 consensus 的协议原理、
+        // redis/lock-and-mq 的实现细节、high-availability 的冗余切换分工，交叉引用不复制）
+        text: '分布式协调',
+        dir: 'distributed/coordination',
         group: true
       }
     ]
   },
   {
-    prefix: '/frontend/',
+    // 板块 ⑤：架构与云原生 = 云原生落地 + 架构方法论 + 高可用 + 安全
+    // 2026-09-16 合并 —— 四者是一条线：设计（方法论）→ 保障（高可用）→ 落地（云原生）→ 合规（安全）
+    prefix: ['/cloud-native/', '/methodology/', '/high-availability/', '/security/'],
     items: [
-      { text: '板块导览', link: '/frontend/' },
-      { text: '小程序起步', dir: 'frontend/miniprogram-start' },
-      { text: '模板与样式', dir: 'frontend/miniprogram-template' },
-      { text: '导航与生命周期', dir: 'frontend/miniprogram-logic' },
-      { text: '组件化与工程化', dir: 'frontend/miniprogram-component' },
-      { text: 'uni-app 核心', dir: 'frontend/uniapp-core' },
-      { text: '跨端项目实战', dir: 'frontend/uniapp-practice' },
-      { text: '发布与多端打包', dir: 'frontend/release' }
-    ]
-  },
-  {
-    prefix: '/bigdata/',
-    items: [
-      { text: '板块导览', link: '/bigdata/' },
-      { text: 'Canal 数据同步', dir: 'bigdata/canal' },
-      { text: 'Flink 流处理', dir: 'bigdata/flink', group: true },
-      { text: 'Doris 数仓', dir: 'bigdata/doris' },
-      { text: 'ClickHouse', dir: 'bigdata/clickhouse', group: true },
-      { text: 'Lakehouse / 冷热分层', dir: 'bigdata/lakehouse' },
-      { text: '数仓分层建模', dir: 'bigdata/warehouse-design' }
-    ]
-  },
-  {
-    prefix: '/cloud-native/',
-    items: [
-      { text: '板块导览', link: '/cloud-native/' },
-      { text: 'Docker', dir: 'cloud-native/docker' },
-      { text: 'Kubernetes', dir: 'cloud-native/kubernetes' },
-      { text: 'Helm', dir: 'cloud-native/helm' },
-      { text: '服务网格', dir: 'cloud-native/service-mesh' },
-      { text: 'CRD 与 Operator', dir: 'cloud-native/operator' },
-      { text: 'CI/CD 与发布', dir: 'cloud-native/cicd', group: true },
-      { text: '监控与可观测', dir: 'cloud-native/observability', group: true }
-    ]
-  },
-  {
-    prefix: '/ai/',
-    items: [
-      { text: '板块导览', link: '/ai/' },
       {
-        text: 'AI 辅助研发',
+        text: '云原生',
+        link: '/cloud-native/',
         children: [
-          { text: 'Vibe Coding', dir: 'ai/vibe-coding' },
-          { text: 'Agent 与 Harness', dir: 'ai/agent-harness' }
+          { text: 'Docker', dir: 'cloud-native/docker' },
+          { text: 'Kubernetes', dir: 'cloud-native/kubernetes' },
+          { text: 'Helm', dir: 'cloud-native/helm' },
+          { text: '服务网格', dir: 'cloud-native/service-mesh' },
+          { text: 'CRD 与 Operator', dir: 'cloud-native/operator' },
+          { text: 'CI/CD 与发布', dir: 'cloud-native/cicd', group: true },
+          { text: '监控与可观测', dir: 'cloud-native/observability', group: true }
         ]
       },
       {
-        text: 'AI 能力集成',
-        children: [
-          { text: 'Spring AI', dir: 'ai/spring-ai' },
-          { text: 'Spring AI Alibaba', dir: 'ai/spring-ai-alibaba' },
-          { text: '数字人导览', dir: 'ai/digital-human' }
-        ]
+        // 方法论：设计方法视角（与 architecture-evolution 的演进维度、spring-cloud 的实现层、
+        // middleware 的投递机制、java/testing 的执行手段分工，交叉引用不复制）
+        text: '架构方法论',
+        dir: 'methodology',
+        group: true
+      },
+      {
+        // 高可用：架构层视角（与 java/spring/spring-cloud/resilience 的应用层实现、
+        // capacity-and-perf 的容量与防护、architecture-evolution 的单库维度分工，交叉引用不复制）
+        text: '高可用',
+        dir: 'high-availability',
+        group: true
+      },
+      {
+        // 安全与合规：机制与取舍视角（与 projects/property-saas/release-and-ops 的落地视角分工，交叉引用不复制）
+        text: '安全与合规',
+        dir: 'security',
+        group: true
       }
     ]
   },
   {
-    prefix: '/projects/',
+    // 板块 ⑥：实战与面试 = 项目案例 + AI 应用 + 面试专题
+    // 2026-09-16 合并 —— 三者同属「怎么把能力讲出来」：案例是证据，AI 是增量，面试是出口。
+    prefix: ['/projects/', '/ai/', '/interview/'],
     items: [
       { text: '板块导览', link: '/projects/' },
       { text: '架构师路线图', dir: 'projects/architect-roadmap' },
@@ -221,41 +252,21 @@ const sidebarSpec = [
           { text: '容量测算与压测方案', dir: 'projects/property-saas/capacity-and-perf' },
           { text: '发布、安全与运维', dir: 'projects/property-saas/release-and-ops' }
         ]
-      }
-    ]
-  },
-  {
-    prefix: '/interview/',
-    items: [{ text: '板块导览', link: '/interview/' }]
-  },
-  {
-    // 安全与合规：机制与取舍视角（与 projects/property-saas/release-and-ops 的落地视角分工，交叉引用不复制）
-    prefix: '/security/',
-    items: [
-      { text: '安全与合规', dir: 'security', group: true }
-    ]
-  },
-  {
-    // 分布式理论：机制与算法视角（与 java/spring/spring-cloud/cap-base 的取舍判据、database/sharding 的落地视角分工，交叉引用不复制）
-    prefix: '/distributed/',
-    items: [
-      { text: '分布式理论', dir: 'distributed', group: true },
-      // 分布式协调：把共识机制服务化之后的形态（与 consensus 的协议原理、redis/lock-and-mq 的实现细节、high-availability 的冗余切换分工，交叉引用不复制）
-      { text: '分布式协调', dir: 'distributed/coordination', group: true }
-    ]
-  },
-  {
-    // 高可用：架构层视角（与 java/spring/spring-cloud/resilience 的应用层实现、capacity-and-perf 的容量与防护、architecture-evolution 的单库维度分工，交叉引用不复制）
-    prefix: '/high-availability/',
-    items: [
-      { text: '高可用', dir: 'high-availability', group: true }
-    ]
-  },
-  {
-    // 方法论：设计方法视角（与 architecture-evolution 的演进维度、spring-cloud 的实现层、middleware 的投递机制、java/testing 的执行手段分工，交叉引用不复制）
-    prefix: '/methodology/',
-    items: [
-      { text: '方法论', dir: 'methodology', group: true }
+      },
+      {
+        // AI 应用：标题即导览入口（链到 /ai/）。原「AI 辅助研发 / AI 能力集成」两层
+        // 在合并后拍平为一层，避免侧边栏出现第四层
+        text: 'AI 应用',
+        link: '/ai/',
+        children: [
+          { text: 'Vibe Coding', dir: 'ai/vibe-coding' },
+          { text: 'Agent 与 Harness', dir: 'ai/agent-harness' },
+          { text: 'Spring AI', dir: 'ai/spring-ai' },
+          { text: 'Spring AI Alibaba', dir: 'ai/spring-ai-alibaba' },
+          { text: '数字人', dir: 'ai/digital-human', group: true }
+        ]
+      },
+      { text: '面试专题', link: '/interview/' }
     ]
   }
 ]
@@ -322,34 +333,27 @@ export default defineConfig({
       // activeMatch 是**正则**（VitePress 源码：isActive(path, match, asRegex=true)），
       // 不写就退化为「与 link 精确相等」——那样只有板块首页会高亮，
       // 进到任何子页面顶部大模块就灭掉。所以每个板块都要用 ^/前缀/ 的形式。
-      // 导航页是单文件 docs/nav.md（不是 nav/index.md）→ 构建产物是 nav.html，
-      // 线上（GitHub Pages）实测：/L-blog/nav.html 200、/L-blog/nav 200、**/L-blog/nav/ 404**。
-      // 所以 link 必须写 `/nav`（不带尾斜杠），否则「在新标签页打开」会 404
-      // （站内点击走客户端路由看不出来，只有硬加载/新标签页才暴露）。
-      // activeMatch 用正则前缀：该页 relativePath 规范化后是 `/nav`（无尾斜杠），
-      // 精确匹配 /nav/ 永远不成立。
-      { text: '导航', link: '/nav', activeMatch: '^/nav' },
-      // 计算机基础放在最前：它是跨栈底座，其余板块的技术选型都要回到这里找依据
+      // 2026-09-16 起导航按「6 个板块」组织：一个板块可覆盖多个物理目录前缀，
+      // 与 sidebarSpec 的前缀数组一一对应（导航分组 == 侧边栏分组，两处必须同步改）。
       { text: '计算机基础', link: '/fundamentals/', activeMatch: '^/fundamentals/' },
-      { text: 'Java', link: '/java/', activeMatch: '^/java/' },
-      { text: '大前端', link: '/frontend/', activeMatch: '^/frontend/' },
-      // 数据存储 + 消息队列 + 搜索检索合并入口：三个前缀下都保持高亮
-      { text: '存储·消息·检索', link: '/database/', activeMatch: '^/(database|middleware|search)/' },
-      { text: '数据仓库', link: '/bigdata/', activeMatch: '^/bigdata/' },
-      { text: '云原生', link: '/cloud-native/', activeMatch: '^/cloud-native/' },
-      { text: 'AI 应用', link: '/ai/', activeMatch: '^/ai/' },
-      { text: '项目实战', link: '/projects/', activeMatch: '^/projects/' },
+      { text: '语言与框架', link: '/java/', activeMatch: '^/(java|frontend)/' },
+      { text: '数据与存储', link: '/database/', activeMatch: '^/(database|search|bigdata)/' },
+      { text: '中间件与分布式', link: '/middleware/', activeMatch: '^/(middleware|distributed)/' },
+      { text: '架构与云原生', link: '/cloud-native/', activeMatch: '^/(cloud-native|methodology|high-availability|security)/' },
+      { text: '实战与面试', link: '/projects/', activeMatch: '^/(projects|ai|interview)/' },
       {
         // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条
         // （VPNavBarMenuGroup：active = isActive(自身 activeMatch) || 任一子项命中）
-        text: '其他',
-        activeMatch: '^/(methodology|high-availability|distributed|security|interview|archives|about)/',
+        // 导航页是单文件 docs/nav.md（不是 nav/index.md）→ 构建产物是 nav.html，
+        // 线上（GitHub Pages）实测：/L-blog/nav.html 200、/L-blog/nav 200、**/L-blog/nav/ 404**。
+        // 所以 link 必须写 `/nav`（不带尾斜杠），否则「在新标签页打开」会 404
+        // （站内点击走客户端路由看不出来，只有硬加载/新标签页才暴露）。
+        // activeMatch 用正则前缀：该页 relativePath 规范化后是 `/nav`（无尾斜杠），
+        // 精确匹配 /nav/ 永远不成立。
+        text: '更多',
+        activeMatch: '^/(nav|archives|about)',
         items: [
-          { text: '方法论', link: '/methodology/' },
-          { text: '高可用', link: '/high-availability/' },
-          { text: '分布式理论', link: '/distributed/' },
-          { text: '安全与合规', link: '/security/' },
-          { text: '面试专题', link: '/interview/' },
+          { text: '全站导航', link: '/nav' },
           { text: '归档', link: '/archives/' },
           { text: '关于本站', link: '/about/' }
         ]
