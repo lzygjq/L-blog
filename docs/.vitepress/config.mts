@@ -133,6 +133,7 @@ const sidebarSpec = [
     items: [
       { text: '板块导览', link: '/bigdata/' },
       { text: 'Canal 数据同步', dir: 'bigdata/canal' },
+      { text: 'Flink 流处理', dir: 'bigdata/flink', group: true },
       { text: 'Doris 数仓', dir: 'bigdata/doris' },
       { text: 'Lakehouse / 冷热分层', dir: 'bigdata/lakehouse' },
       { text: '数仓分层建模', dir: 'bigdata/warehouse-design' }

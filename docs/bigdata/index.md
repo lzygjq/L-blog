@@ -8,35 +8,46 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 
 这个板块回答一个连续的问题：**业务库里的数据，怎么变成能放心用的分析结果。**
 
-它由四段组成，缺一段链路就是断的——前一段的输出是后一段的输入：
+它由五段组成，缺一段链路就是断的——前一段的输出是后一段的输入：
 
 ```
-  业务 MySQL                    分析引擎                     长期归档
-  （在线事务）                  （明细与汇总）                （成本下沉）
-       │                             │                            │
-       │  ① 变更怎么同步出来           │                            │
-       ▼                             │                            │
-  ┌──────────┐   binlog    ┌──────────────┐   分区过期   ┌──────────────┐
-  │  CDC     │────────────▶│   分析库      │────────────▶│  对象存储     │
-  │ 变更捕获  │             │  列式 MPP     │  归档迁移    │  + 湖表       │
-  └──────────┘             └──────────────┘              └──────────────┘
-       │                             │                            │
-       └──────────────┬──────────────┴────────────────────────────┘
-                      ▼
-            ④ 数据在仓内怎么分层组织
-            ODS → DWD → DWS → ADS（+ DIM）
+  业务 MySQL
+  （在线事务）
+       │
+       │  ① 变更怎么同步出来
+       ▼
+  ┌──────────┐   binlog
+  │  CDC     │───────────┐
+  │ 变更捕获  │           │
+  └──────────┘           │  ② 流上做什么加工（清洗 · 打宽 · 聚合）
+                         ▼
+                  ┌──────────────┐
+                  │   Flink      │   时间语义 · 状态与一致性
+                  │   流处理      │   SQL 与 Join · 背压调优
+                  └──────┬───────┘
+                         │  写入
+                         ▼
+                  ┌──────────────┐   分区过期   ┌──────────────┐
+                  │   分析库      │────────────▶│  对象存储     │
+                  │  列式 MPP     │  归档迁移    │  + 湖表       │
+                  └──────────────┘              └──────────────┘
+                         │
+                         ▼
+                数据在仓内怎么分层组织
+                ODS → DWD → DWS → ADS（+ DIM）
 ```
 
-**一条演进主线**：数据要先能被**拿到**（同步），再要能被**算得快**（引擎），然后要能**留得住且留得起**（归档），最后要能被**组织得不产生二义**（建模）。四篇的顺序就是这条线。
+**一条演进主线**：数据要先能被**拿到**（同步），再要能被**实时加工**（流处理），然后要能**算得快**（引擎），再要能**留得住且留得起**（归档），最后要能被**组织得不产生二义**（建模）。五篇的顺序就是这条线。
 
-## 一、四篇的分工 {#modules}
+## 一、五篇的分工 {#modules}
 
 | # | 篇目 | 解决的问题 | 最值得记的结论 |
 |---|---|---|---|
 | 1 | [Canal 数据同步](/bigdata/canal/) | 业务库的变更怎么准确、完整地送出来 | CDC 读的是数据库自己的变更日志；**语义是"至少一次"，幂等必须在写入侧做** |
-| 2 | [Doris 数仓](/bigdata/doris/) | 分析负载用什么引擎承接、表怎么建 | 表模型是性能的分水岭；**存算分离下 Unique 模型的写入频率有硬约束** |
-| 3 | [Lakehouse：Iceberg / MinIO / 冷热分层](/bigdata/lakehouse/) | 冷数据放哪儿、成本怎么降下来 | Lakehouse 没发明新存储，它把"表"**从存储层搬到了元数据层** |
-| 4 | [数仓分层建模](/bigdata/warehouse-design/) | 数据怎么组织才不产生口径分叉 | 分层解决的是**协作与口径**问题，不是性能问题 |
+| 2 | [Flink 流处理](/bigdata/flink/) | 变更出来之后，在流上怎么做清洗、打宽、聚合 | 流处理难在**时间不确定、状态要保命、结果要只算一次**；端到端一致取决于 sink |
+| 3 | [Doris 数仓](/bigdata/doris/) | 分析负载用什么引擎承接、表怎么建 | 表模型是性能的分水岭；**存算分离下 Unique 模型的写入频率有硬约束** |
+| 4 | [Lakehouse：Iceberg / MinIO / 冷热分层](/bigdata/lakehouse/) | 冷数据放哪儿、成本怎么降下来 | Lakehouse 没发明新存储，它把"表"**从存储层搬到了元数据层** |
+| 5 | [数仓分层建模](/bigdata/warehouse-design/) | 数据怎么组织才不产生口径分叉 | 分层解决的是**协作与口径**问题，不是性能问题 |
 
 ## 二、与其他板块的交叉点 {#cross}
 
@@ -63,7 +74,19 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 | 重复和乱序一起怎么处理？ | 主键 UPSERT + 单调的 sequence 列（防旧事件覆盖新值） | [#idempotency-order](/bigdata/canal/#idempotency-order) |
 | 四种 CDC 方案怎么选？ | 已有多下游解耦→Debezium；国内中等规模→Canal；要连流计算→Flink CDC | [#compare](/bigdata/canal/#compare) |
 
-### 3.2 引擎侧 {#faq-doris}
+### 3.2 流处理（Flink）{#faq-flink}
+
+| 问题 | 一句话答案 | 详见 |
+|---|---|---|
+| 水印是什么？能保证数据不丢吗？ | 一条**由你配置的进度声明**，不是事实；乱序超过假设时数据仍会迟到 | [#watermark-def](/bigdata/flink/time-and-watermark#watermark-def) |
+| 夜里窗口几小时才输出一次？ | 空闲分区顶住了水印；`withIdleness` 是解法，值要大于真实静默间隔 | [#idleness](/bigdata/flink/time-and-watermark#idleness) |
+| Flink 的 exactly-once 保证了什么？ | **状态的** exactly-once；端到端要 sink 幂等或事务配合 | [#three-parts](/bigdata/flink/state-and-checkpoint#three-parts) |
+| 四种 Join 怎么选？ | 差别在"状态有没有下界"——有时间关联就用 Interval Join | [#join-compare](/bigdata/flink/sql-and-joins#join-compare) |
+| 背压在某个算子上说明什么？ | 瓶颈在它的**下游**——顺着数据流往下找 | [#mechanism](/bigdata/flink/backpressure-and-tuning#mechanism) |
+| 检查点一直超时怎么办？ | 先治背压（超时往往是它的症状），再考虑非对齐 / 增量 | [#checkpoint-tuning](/bigdata/flink/backpressure-and-tuning#checkpoint-tuning) |
+| 全量同步 CDC 要停业务吗？ | 不用——增量快照按主键切块，无锁读 + 变更回填 | [#incremental](/bigdata/flink/cdc-to-lakehouse#incremental) |
+
+### 3.3 引擎侧 {#faq-doris}
 
 | 问题 | 一句话答案 | 详见 |
 |---|---|---|
@@ -75,7 +98,7 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 | 四条写入链路怎么分工？ | Stream Load 业务直推；Routine Load 消费流；Broker Load 批量回填；INSERT INTO SELECT 仓内加工 | [#ingest](/bigdata/doris/#ingest) |
 | 为什么别用 `DELETE` 清历史？ | Duplicate/Aggregate 上的 `DELETE` 靠谓词累积，会拖慢后续所有查询——用 `TRUNCATE PARTITION` | [#query-update](/bigdata/doris/#query-update) |
 
-### 3.3 归档侧 {#faq-lakehouse}
+### 3.4 归档侧 {#faq-lakehouse}
 
 | 问题 | 一句话答案 | 详见 |
 |---|---|---|
@@ -87,7 +110,7 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 | 冷热分层分几层？ | 热（本地 SSD）/ 温（SSD+HDD）/ 冷（对象存储 + 湖表），按**访问特征**切 | [#three-tiers](/bigdata/lakehouse/#three-tiers) |
 | TTL 迁移怎么保证不丢数据？ | **先写、再校验、最后删源**，按分区可重跑，留迁移台账 | [#ttl-migration](/bigdata/lakehouse/#ttl-migration) |
 
-### 3.4 建模侧 {#faq-modeling}
+### 3.5 建模侧 {#faq-modeling}
 
 | 问题 | 一句话答案 | 详见 |
 |---|---|---|
@@ -102,7 +125,8 @@ desc: 数据从业务库到分析侧的完整链路——变更怎么同步出�
 
 | 你的情况 | 建议路径 |
 |---|---|
-| 要建一条实时同步链路 | [Canal](/bigdata/canal/) → [数仓分层建模](/bigdata/warehouse-design/) → [Doris](/bigdata/doris/) |
+| 要建一条实时同步链路 | [Canal](/bigdata/canal/) → [Flink 流处理](/bigdata/flink/) → [数仓分层建模](/bigdata/warehouse-design/) → [Doris](/bigdata/doris/) |
+| 作业跑不住 / 结果对不上账 | [Flink · 背压与调优](/bigdata/flink/backpressure-and-tuning) → [端到端三段论](/bigdata/flink/state-and-checkpoint#three-parts) |
 | 选分析引擎 / 正在做技术选型 | [Doris](/bigdata/doris/) → [Lakehouse](/bigdata/lakehouse/) |
 | 报表慢、业务库被压 | [数仓分层建模](/bigdata/warehouse-design/#why-layered) → [Doris](/bigdata/doris/#query-update) |
 | 存储成本高、要归档历史 | [Lakehouse](/bigdata/lakehouse/) → [Doris 的表与分区](/bigdata/doris/#partition-bucket) |
