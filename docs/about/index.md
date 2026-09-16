@@ -21,6 +21,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD、监控与可观测 |
 | [AI 应用](/ai/) | AI 辅助研发（Vibe Coding、Agent）、AI 能力集成（Spring AI、数字人） |
 | [项目实战](/projects/) | 架构师路线图、绩效系统难点专题、SaaS 平台云原生与数仓落地、可验证产出三件套 |
+| [方法论](/methodology/) | DDD 战略与战术设计、架构风格谱系（六边形/洋葱/整洁/COLA）、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式与评审清单 |
 | [高可用](/high-availability/) | 可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练 |
 | [分布式理论](/distributed/) | 共识协议（Paxos/Raft 与选主）、一致性哈希与数据分布、分布式 ID |
 | [安全与合规](/security/) | 认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界 |

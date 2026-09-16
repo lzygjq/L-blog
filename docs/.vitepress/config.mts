@@ -228,6 +228,13 @@ const sidebarSpec = [
     items: [
       { text: '高可用', dir: 'high-availability', group: true }
     ]
+  },
+  {
+    // 方法论：设计方法视角（与 architecture-evolution 的演进维度、spring-cloud 的实现层、middleware 的投递机制、java/testing 的执行手段分工，交叉引用不复制）
+    prefix: '/methodology/',
+    items: [
+      { text: '方法论', dir: 'methodology', group: true }
+    ]
   }
 ]
 
@@ -305,8 +312,9 @@ export default defineConfig({
         // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条
         // （VPNavBarMenuGroup：active = isActive(自身 activeMatch) || 任一子项命中）
         text: '其他',
-        activeMatch: '^/(high-availability|distributed|security|interview|archives|about)/',
+        activeMatch: '^/(methodology|high-availability|distributed|security|interview|archives|about)/',
         items: [
+          { text: '方法论', link: '/methodology/' },
           { text: '高可用', link: '/high-availability/' },
           { text: '分布式理论', link: '/distributed/' },
           { text: '安全与合规', link: '/security/' },

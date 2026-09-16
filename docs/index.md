@@ -49,6 +49,10 @@ features:
     title: AI 应用
     details: AI 辅助研发（Vibe Coding、Agent 与工具链）+ AI 能力集成（Spring AI、数字人）
     link: /ai/
+  - icon: 🧭
+    title: 方法论
+    details: DDD 战略与战术设计、架构风格谱系、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式 —— 边界先于模型，模型先于形式
+    link: /methodology/
   - icon: 🧯
     title: 高可用
     details: 可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练 —— 用冗余换故障概率，用自动化换恢复时间
