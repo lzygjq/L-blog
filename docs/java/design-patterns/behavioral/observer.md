@@ -191,7 +191,125 @@ public class CouponListener {
 - **观察者**：一个事件广播给**多个**订阅者，每个都收到（多播）；
 - **责任链**：一个请求沿链传递，通常**只有一个**最终处理（单播或终止）。
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它和中介者的拓扑差异**；本节看**Spring 的事件机制到底怎么实现的**。哪些框架用了它，速查表在下一节——这里要回答三个问题：**同步还是异步由谁决定、为什么它比 GoF 观察者多一层、以及 JDK 那个实现为什么被废弃。**
+
+### 5.1 Spring · `multicastEvent()`：同步异步只有一个判断
+
+```java
+// 精简自 org.springframework.context.event.SimpleApplicationEventMulticaster
+@Override
+public void multicastEvent(ApplicationEvent event, @Nullable ResolvableType eventType) {
+    ResolvableType type = (eventType != null ? eventType : resolveDefaultEventType(event));
+    Executor executor = getTaskExecutor();
+    for (ApplicationListener<?> listener : getApplicationListeners(event, type)) {
+        if (executor != null) {
+            executor.execute(() -> invokeListener(listener, event));   // ① 配了线程池 → 异步
+        }
+        else {
+            invokeListener(listener, event);                          // ② 没配 → 同步
+        }
+    }
+}
+```
+
+**结构差异**：这是本节最值得记的一段，因为它澄清了一个高频误解——**`@Async` 与"事件异步"是两套完全不同的机制**：
+
+| 机制 | 配置位置 | 作用范围 |
+|---|---|---|
+| `@Async` | 监听器方法上的注解 | **只有**该监听器异步 |
+| `applicationEventMulticaster` 的 `taskExecutor` | 容器里的 `ApplicationEventMulticaster` Bean | **所有**监听器都异步 |
+
+也就是说：**你以为 `@Async` 生效了，实际可能是广播器本来就配了 Executor；反之给广播器配了 Executor，想让某个监听器同步都做不到。** `multicastEvent()` 里那个 `executor != null` 是唯一的开关。
+
+**第二个坑：同步广播下的异常传播**。`invokeListener()` → `doInvokeListener()` → `listener.onApplicationEvent(event)` 抛出异常时（且没有 ErrorHandler），异常会**向上抛给 `publishEvent` 的调用方**——也就是**业务代码的事务里**。所以同步监听器里抛异常会**回滚发布方的事务**，这个副作用很多人踩过。
+
+### 5.2 Spring · 按类型路由：观察者与发布订阅的真正分界
+
+```java
+// 精简自 org.springframework.context.event.AbstractApplicationEventMulticaster
+protected Collection<ApplicationListener<?>> getApplicationListeners(
+        ApplicationEvent event, ResolvableType eventType) {
+
+    // ... 命中 listenerCache 则直接返回 ...
+    for (ApplicationListener<?> listener : listeners) {
+        // ③ 用 ResolvableType 判断：这个监听器的泛型参数是不是能接住这个事件
+        if (supportsEvent(listener, eventType)) {
+            allListeners.add(listener);
+        }
+    }
+
+    if (allListeners.size() > 1) {
+        allListeners.sort(AnnotationAwareOrderComparator.INSTANCE);   // ④ 支持 @Order 排序
+    }
+    // ...
+    return retriever.retrieveApplicationListeners(eventType, allListeners);
+}
+```
+
+**结构差异**：教科书的观察者模式里，`notify()` 会通知**所有**注册的观察者，是否关心由观察者**自己在 `update()` 里判断**。Spring 在**发布之前**就把不关心的监听器筛掉了——靠 `ResolvableType` 解析监听器的泛型参数：
+
+```java
+// 只关心 OrderCreatedEvent 的监听器，不会收到其他事件
+@Component
+public class OrderEventListener {
+    @EventListener
+    public void onCreated(OrderCreatedEvent e) { ... }
+}
+```
+
+**这就是"观察者"与"发布-订阅"的架构分界**：
+
+| 维度 | GoF 观察者 | 发布-订阅（Spring 事件 / 消息队列） |
+|---|---|---|
+| 发布者是否知道订阅者 | 知道（持有 `List<Observer>`） | 不知道（只投递给广播器/代理） |
+| 是否按类型过滤 | **否**，靠观察者自行判断 | **是**，发布前按类型路由 |
+| 通知几个 | 全部 | 匹配的那几个 |
+
+教科书上说得含蓄，但源码写得很直白：**`getApplicationListeners(event, type)` 这个"按类型取监听器"的动作，就是发布订阅比观察者多出来的那一层 broker。**
+
+**不懂会误判**：认为"Spring 事件就是观察者模式的实现"。**结构上它用了观察者的注册/通知协议，但语义上它是发布订阅**——发布方不知道订阅方、按类型路由、支持 `@Order` 排序。面试里被问"观察者和发布订阅有什么区别"，用这一层过滤来答最准。
+
+### 5.3 JDK · `java.util.Observable`：三个缺陷与一次语言演进的清算
+
+```java
+// 精简自 java.util.Observable（Java 9 起标记 @Deprecated）
+@Deprecated(since="9")
+public class Observable {
+    private boolean changed = false;
+    private final Vector<Observer> obs;              // ⑤ 用的是 Vector
+
+    public synchronized void addObserver(Observer o) { ... }
+
+    protected synchronized void setChanged() { changed = true; }   // ⑥ 必须手动调用
+
+    public void notifyObservers(Object arg) {
+        Object[] arrLocal;
+        synchronized (this) {
+            if (!changed) return;                    // ⑦ 忘了 setChanged 就不通知
+            arrLocal = obs.toArray();
+            clearChanged();
+        }
+        for (int i = arrLocal.length - 1; i >= 0; i--)                 // ⑧ 倒序通知
+            ((Observer) arrLocal[i]).update(this, arg);
+    }
+}
+```
+
+**结构差异**：这是"模式的标准库实现被语言演进淘汰"的教科书案例。它的三个缺陷恰好对应三件后来才有的东西：
+
+| 缺陷 | 后果 | 后来的解法 |
+|---|---|---|
+| 是**类**不是接口（`extends Observable`） | 占用类唯一的继承位，想同时继承别的类就不可能 | 接口 + 组合 |
+| 内部用 **`Vector`** | 每个方法都同步，读写都要抢锁，且 `Vector` 本身已过时 | `CopyOnWriteArrayList` |
+| **`update(Observable o, Object arg)` 无泛型** | 参数类型全丢，接收方必须强转，编译期无保护 | 泛型（`ApplicationListener<E>`） |
+
+还有一条设计上的别扭：**`setChanged()` 必须由发布方手动调用**，否则 `notifyObservers()` 直接 `return`。这个"两段式通知"的初衷是让发布方能合并多次变更（改完了再统一通知），但实践中几乎只会带来"忘了调 `setChanged()` 导致事件不发"的 bug。
+
+**不懂会误判**：在面试里答"观察者模式的 JDK 实现是 `Observable`/`Observer`"，会显得知识停留在 Java 8 之前。**正确的答法是：JDK 曾有该实现，Java 9 起废弃，现在应当直接用 Spring 事件或 Guava `EventBus`，并说清废弃的三个原因。** 这比单纯背模式定义更能体现判断力。
+
+## 六、使用场景与面试问答
 
 ### 典型场景
 

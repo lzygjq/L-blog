@@ -152,7 +152,128 @@ new ExcelImporter().importData(path);
 processFile(path, content -> parse(content));
 ```
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它和策略的边界**；本节看**框架里那段代码到底怎么写的**。哪些框架用了它，速查表在下一节——这里只回答一个问题：**教科书里的"父类定骨架、子类填步骤"，与真实框架之间差了哪几步。**
+
+### 5.1 Spring · `refresh()`：骨架里嵌着的那些东西
+
+`AbstractApplicationContext.refresh()` 是 Spring 容器启动的总骨架，也是模板方法最标准的形态：
+
+```java
+// 精简自 AbstractApplicationContext#refresh()（省略部分 step）
+@Override
+public void refresh() throws BeansException, IllegalStateException {
+    synchronized (this.startupShutdownMonitor) {        // ① 骨架自带并发控制
+        prepareRefresh();
+        ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
+        prepareBeanFactory(beanFactory);
+        try {
+            postProcessBeanFactory(beanFactory);        // ② 空实现的钩子
+            invokeBeanFactoryPostProcessors(beanFactory);
+            registerBeanPostProcessors(beanFactory);
+            initMessageSource();
+            initApplicationEventMulticaster();
+            onRefresh();                                // ③ 留给子类覆写
+            registerListeners();
+            finishBeanFactoryInitialization(beanFactory);
+            finishRefresh();
+        } catch (BeansException ex) {
+            destroyBeans();                             // ④ 失败即回滚
+            cancelRefresh(ex);
+            throw ex;
+        } finally {
+            resetCommonCaches();
+        }
+    }
+}
+```
+
+**结构差异**：教科书只强调"父类编排、子类填步骤"，`refresh()` 多做了三件事——
+
+1. **把不变式写进骨架**：`synchronized` 加锁、`try/catch` 失败即 `destroyBeans()` 回滚、`finally` 清缓存，全部在父类里，子类**无法绕过**。这才是模板方法相对策略的真正优势：**流程中的强制约束被继承给了所有子类**。
+2. **钩子多为空实现**：`postProcessBeanFactory()` 与 `onRefresh()` 在父类里是**空方法**（可选覆写），而不是抽象方法。真实框架里钩子数量往往远多于必须覆写的抽象步骤——因为框架要保证"最小实现成本"。
+3. **步骤数远超教科书**：这里是 12 步。步骤越多，模板方法越划算，因为**任意两步之间的顺序约束**只在一处维护。
+
+**不懂会误判**：不了解模板方法的人看 `refresh()`，会当成"一个很长的初始化方法"，进而觉得 Spring 启动流程乱。实际上这 12 步的**顺序本身就是规格**——`registerBeanPostProcessors()` 必须早于 `finishBeanFactoryInitialization()`（否则 Bean 创建时后置处理器还没就位）。按"普通长方法"去读，这些约束会全部丢失。
+
+### 5.2 `JdbcTemplate`：模板方法在 Java 8 之后的形态
+
+`JdbcTemplate` 是"模板方法"这个名字的来源之一（Spring 的 `XxxTemplate` 家族），但它的形态值得单独拎出来：
+
+```java
+// 精简自 JdbcTemplate#execute(StatementCallback<T>)
+@Override
+@Nullable
+public <T> T execute(StatementCallback<T> action) throws DataAccessException {
+    Assert.notNull(action, "Callback object must not be null");
+    Connection con = DataSourceUtils.getConnection(obtainDataSource());
+    Statement stmt = null;
+    try {
+        stmt = con.createStatement();
+        applyStatementSettings(stmt);
+        T result = action.doInStatement(stmt);      // ⑤ 变化点：回调，而非子类覆写
+        handleWarnings(stmt);
+        return result;
+    } catch (SQLException ex) {
+        throw translateException("StatementCallback", getSql(action), ex);  // ⑥ 统一异常翻译
+    } finally {
+        JdbcUtils.closeStatement(stmt);
+        DataSourceUtils.releaseConnection(con, getDataSource());
+    }
+}
+```
+
+**结构差异**：这是模板方法的**回调化变体**。教科书把变化点交给**继承**（`protected abstract void step()`），这里交给**入参**（`StatementCallback`）。骨架方法不开放继承，只开放参数。
+
+这个演化在 Java 8 之后成了主流：
+
+| 框架 | 骨架 | 变化点（回调） |
+|---|---|---|
+| `JdbcTemplate` | `execute()` | `StatementCallback` / `RowMapper` |
+| `TransactionTemplate` | `execute()` | `TransactionCallback` |
+| `RedisTemplate` | `execute()` | `RedisCallback` |
+| `RestTemplate` | `execute()` | `RequestCallback` / `ResponseExtractor` |
+
+两个继承版做不到的收益：**① 免去建子类**——每种查询不必对应一个类；**② 异常翻译只写一处**——`translateException()` 在骨架里调用一次，所有回调都自动获得 `SQLException → DataAccessException` 的转换，用继承写这坨 try-catch 会散落到每个子类。
+
+**不懂会误判**：只背"模板方法 = 继承"的人，会认为 `JdbcTemplate` **不是**模板方法（它没有任何抽象父类要继承）。但模式的定义是"**父类固定算法骨架，把可变步骤延迟**"——延迟给子类还是给回调只是手段。**能识别这个变形，读框架源码时才能把 `XxxTemplate` 一眼归类。**
+
+### 5.3 JDK · `AbstractList`：父类反过来调用子类
+
+```java
+// 精简自 java.util.AbstractList
+public abstract class AbstractList<E> extends AbstractCollection<E> implements List<E> {
+    public abstract E get(int index);        // 子类必须提供
+    public abstract int size();              // 子类必须提供
+
+    public Iterator<E> iterator() {          // 父类提供完整实现
+        return new Itr();
+    }
+
+    private class Itr implements Iterator<E> {
+        int cursor = 0;
+        public boolean hasNext() { return cursor != size(); }   // ⑦ 调的是子类的 size()
+        public E next() {
+            E next = get(cursor);                                // ⑧ 调的是子类的 get()
+            cursor += 1;
+            return next;
+        }
+    }
+}
+```
+
+**结构差异**：这是模板方法的**倒置形态**。父类提供了一个**完整可用**的 `iterator()`，而它依赖的 `get()` / `size()` 由子类实现——调用方向是"父类的方法调用子类的方法"，即所谓**好莱坞原则**（Don't call us, we'll call you）。
+
+收益很直接：`ArrayList` 只要实现 `get(int)` 与 `size()` 两个方法，就免费得到了 `iterator()`、`indexOf()`、`subList()`、`equals()`、`hashCode()` 一整套能力。**父类不是"骨架待填"，而是"用子类的原语组合出新能力"。**
+
+**不懂会误判**：在 `ArrayList` 源码里找不到 `iterator()` 的实现，容易误以为"迭代器由 `Collection` 统一提供"。实际它来自 `AbstractList`，而 `AbstractList` 的实现又建立在 `ArrayList` 自己的 `get()`/`size()` 之上——**这是三层协作，不是一层继承。**
+
+### 5.4 一句话收束
+
+模板方法在框架里有**三种面孔**：`refresh()` 是"骨架 + 强制约束"，`JdbcTemplate` 是"骨架 + 回调参数"，`AbstractList` 是"父类用子类原语组合新能力"。判断标准始终是那一条——**这段代码有没有把"不变的顺序"和"可变的步骤"分离**，而不是"有没有抽象父类"。
+
+## 六、使用场景与面试问答
 
 ### 框架与 JDK 中的实例
 

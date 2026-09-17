@@ -163,7 +163,118 @@ private static final Map<MemberLevel, UnaryOperator<BigDecimal>> DISCOUNT = Map.
 | 变化粒度 | 整个算法 | 算法中的部分步骤 |
 | 运行时替换 | 支持 | 不支持（编译期确定） |
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它与其他三个模式的边界**；本节看**真实的策略选择器是怎么实现的**。哪些框架用了它，速查表在下一节——这里只回答一个问题：**为什么框架自己常常不用策略模式。**
+
+### 5.1 JDK · `ThreadPoolExecutor` 的四种拒绝策略
+
+线程池满了怎么办，是最纯粹的"策略选择"问题。JDK 把它做成了四个独立的类：
+
+```java
+// 精简自 java.util.concurrent.ThreadPoolExecutor
+public static class AbortPolicy implements RejectedExecutionHandler {
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        throw new RejectedExecutionException("Task " + r.toString() +
+                " rejected from " + e.toString());
+    }
+}
+
+public static class CallerRunsPolicy implements RejectedExecutionHandler {
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        if (!e.isShutdown()) {
+            r.run();                       // ① 反直觉：直接在【调用线程】执行，不重试入队
+        }
+    }
+}
+
+public static class DiscardPolicy implements RejectedExecutionHandler {
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        // ② 源码就是一个空方法体 —— 静默丢弃
+    }
+}
+```
+
+**结构差异**：`RejectedExecutionHandler` 是标准的 Strategy 接口，四个实现类对应四种语义。两处反直觉：
+
+1. **`CallerRunsPolicy`（调用者运行策略）不是"重试入队"**，而是 `r.run()` —— 让提交任务的线程自己执行。它靠的是"调用线程被占用 → 它无法继续提交新任务"形成天然的**反压（back pressure）**。这条策略是所有拒绝策略里唯一带流量控制语义的，却最常被理解错。
+2. **`DiscardPolicy` 是空实现**。它在源码里真的什么也不做，连日志都没有。这不是疏漏——日志要不要打是业务决策，JDK 不做假设。
+
+**怎么选**：默认 `AbortPolicy`（快速失败，让上游知道）；离线可丢任务的场景用 `DiscardPolicy`；**不允许丢、也不允许失败**的场景用 `CallerRunsPolicy`（代价是拖慢生产者）；`DiscardOldestPolicy` 丢弃队列中最老的未执行任务。
+
+### 5.2 Spring · `DefaultResourceLoader`：框架自己反而用 if-else
+
+这是本节最有价值的一段。大多数资料会说"Spring 的 `ResourceLoader` 用了策略模式"——但看源码：
+
+```java
+// 精简自 org.springframework.core.io.DefaultResourceLoader#getResource
+@Override
+public Resource getResource(String location) {
+    Assert.notNull(location, "Location must not be null");
+    for (ProtocolResolver protocolResolver : getProtocolResolvers()) {
+        Resource resource = protocolResolver.resolve(location, this);
+        if (resource != null) {
+            return resource;
+        }
+    }
+    if (location.startsWith("/")) {
+        return getResourceByPath(location);                       // ③ 分支 1
+    }
+    else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+        return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()),
+                getClassLoader());                                // ④ 分支 2
+    }
+    else {
+        try {
+            URL url = new URL(location);
+            return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url)
+                    : new UrlResource(url));                      // ⑤ 分支 3
+        } catch (MalformedURLException ex) {
+            return getResourceByPath(location);
+        }
+    }
+}
+```
+
+**结构差异**：这里**没有策略接口、没有策略类**，就是一段 if-else + 一个"可扩展的旁路"。但它同时展示了策略模式的**真实门槛**：
+
+- **分支少（3 个）且封版稳定** → if-else 更划算。为这段代码建 3 个策略类 + 1 个注册表，只会增加阅读跳转。
+- **"可扩展"的需求用 `ProtocolResolver` 旁路满足**：需要新协议（如 `s3://`）的人，注册一个 `ProtocolResolver` 即可，**不必改这段 if-else**。这才是关键——它既保住了本体的简单，又留出了扩展口。
+
+这正好印证策略模式的判据：**收益来自"分支会持续增加"，而不是"分支数量存在"。** 分支会持续增加的场景（如业务规则、计费方式）值得抽策略；框架里地址前缀这种"十年不变"的分支，标准库作者选择写 if-else。
+
+**不懂会误判**：把"消除 if-else"当成策略模式的目的，会得出"Spring 这段代码写得不好"的结论，甚至在实际项目里为 3 个稳定分支造出 10 个类。**模式是用来应对变化的，不是用来消灭分支的。**
+
+### 5.3 Spring · `PlatformTransactionManager`：策略 + 模板的双层结构
+
+```java
+// 精简自 org.springframework.transaction.support.AbstractPlatformTransactionManager
+@Override
+public final TransactionStatus getTransaction(@Nullable TransactionDefinition definition) {
+    TransactionDefinition def = (definition != null ? definition : TransactionDefinition.withDefaults());
+    Object transaction = doGetTransaction();                 // ⑥ 抽象方法：策略层
+    // ... 大量传播行为判断（PROPAGATION_REQUIRED / NESTED / ...）
+    if (def.getPropagationBehavior() == TransactionDefinition.PROPAGATION_REQUIRED) {
+        if (isExistingTransaction(transaction)) {
+            return handleExistingTransaction(def, transaction, debugEnabled);
+        }
+    }
+    // ...
+    doBegin(transaction, def);                               // ⑦ 抽象方法：策略层
+    return prepareTransactionStatus(def, transaction, true, newSynchronization, debugEnabled, null);
+}
+```
+
+**结构差异**：模板方法与策略在这里**合体**了——
+
+- `getTransaction()` 是 `final` 的**模板方法**：传播行为的判断逻辑（7 种传播行为 × 新建/复用/挂起）在父类里一次写完，`JdbcTransactionManager`、`JtaTransactionManager`、`HibernateTransactionManager` 全部继承复用；
+- `doGetTransaction()` / `doBegin()` 是**策略钩子**：由具体实现提供"如何开启事务"（JDBC 是 `Connection.setAutoCommit(false)`，JTA 是 `UserTransaction.begin()`）。
+
+**为什么要这么做**：传播行为是**独立于底层技术**的语义（`REQUIRED` 在 JDBC 和 JTA 下含义相同），把它写在父类是唯一不重复的选择；而"怎么开事务"才是真正随技术而变的，故留在抽象方法。**这就是"骨架与策略在同一继承体系里分工"的形态**——比单纯的策略模式复杂一档，也是 Spring 事务能同时支持 JDBC/JTA/JPA 的结构原因。
+
+**不懂会误判**：只从"策略模式"的角度看，会以为换事务管理器等于换了个策略类；实际换的是**策略钩子**，而 `final` 的骨架（传播行为、挂起/恢复、只读判断）一行都不会变。**分不清"哪部分会变、哪部分不会变"，就分不清该改哪个类。**
+
+## 六、使用场景与面试问答
 
 ### JDK 与框架中的实例
 

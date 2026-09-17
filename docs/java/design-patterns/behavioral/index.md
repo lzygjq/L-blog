@@ -60,7 +60,9 @@ Spring 中两者都在用：`JdbcTemplate` 是模板方法（`execute` 固定流
 
 ## 三、面试高频速答
 
-- **Servlet Filter / Spring Interceptor / Netty Pipeline 是同一种思想吗？** 都是责任链，但传递载体和终止方式不同（Filter 用 `FilterChain`，Interceptor 用 `HandlerExecutionChain`，Netty 用双向 `ChannelPipeline`）。
+- **Servlet Filter / Spring Interceptor / Netty Pipeline 是同一种思想吗？** 都是责任链，但传递载体和终止方式不同（Filter 用 `FilterChain`，Interceptor 用 `HandlerExecutionChain`，Netty 用双向 `ChannelPipeline`）。源码级差异——Filter 用**数组下标**推进、Interceptor 记录 `interceptorIndex` 以支持**逆序清理**、Pipeline 是**双向**遍历——见[责任链篇的源码剖析](/java/design-patterns/behavioral/chain-of-responsibility)。
+- **`ConcurrentModificationException` 是并发引起的吗？** 不是。它由 `modCount != expectedModCount` 触发，**单线程**在 `for-each` 里删除元素一样会抛。真正安全的方式是迭代器自己的 `remove()`（它会同步 `expectedModCount`）或 `removeIf()`。见[迭代器篇的源码剖析](/java/design-patterns/behavioral/iterator)。
+- **`PROPAGATION_NESTED` 与 `REQUIRES_NEW` 有什么区别？** `NESTED` 是「**一个物理事务 + JDBC 保存点**」，外层回滚会带走内层；`REQUIRES_NEW` 是「**两个物理事务**」（挂起外层、开新连接），内层提交独立生效，但要多占一个连接。见[备忘录篇的源码剖析](/java/design-patterns/behavioral/memento)。
 - **Spring 的 `ApplicationEventPublisher` 是观察者模式吗？** 思想一致（发布-订阅 + 多播），但实现是应用内事件总线：监听器注册到容器，`publishEvent` 遍历通知，可配 `@Async` 异步化。
 - **JDK 里哪些是迭代器？** 所有 `Collection` 的 `iterator()`，以及 `Scanner`、`ResultSet`（数据库游标）等。
 - **哪里用了命令模式？** `Runnable` / `Callable`（把任务封装成对象交给线程池）、请求的日志与重放、数据库事务的 undo 日志。

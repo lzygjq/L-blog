@@ -198,7 +198,142 @@ System.out.println(expr.interpret(ctx));    // 270.000
 
 **GoF 原书中也直言**：解释器模式适用于"文法简单、效率不是关键"的场景；文法复杂时应改用编译器构造技术（词法分析器 + 语法分析器 + 抽象语法树 + 解释器/编译器）。
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**文法与节点结构**；本节看**解释器在工程里的真正用法**。哪些框架用了它，速查表在下一节——这里要回答一个能在生产环境立刻省钱的问题：**为什么 `String.matches()` 会慢，以及框架是怎么避免它的。**
+
+### 5.1 MyBatis · `SqlNode`：动态 SQL 是一棵解释器树
+
+MyBatis 的 `<if>` / `<foreach>` / `<where>` 常被理解成"字符串模板替换"。看源码：
+
+```java
+// 精简自 org.apache.ibatis.scripting.xmltags
+public interface SqlNode {
+    boolean apply(DynamicContext context);            // ① 就是 interpret()
+}
+
+/** 序列节点：把多个子节点依次应用 */
+public class MixedSqlNode implements SqlNode {
+    private final List<SqlNode> contents;
+    public boolean apply(DynamicContext context) {
+        contents.forEach(node -> node.apply(context));   // ② 依次递归
+        return true;
+    }
+}
+
+/** 条件节点：条件成立才应用子树 */
+public class IfSqlNode implements SqlNode {
+    private final ExpressionEvaluator evaluator;
+    private final String test;
+    private final SqlNode contents;                   // ③ 持有子树 → 天然支持嵌套
+    public boolean apply(DynamicContext context) {
+        if (evaluator.evaluateBoolean(test, context.getBindings())) {
+            contents.apply(context);                  // ④ 递归进子树
+            return true;
+        }
+        return false;
+    }
+}
+```
+
+**结构差异**：`<if>` 不是"模板占位符"，而是一个**文法节点**——`IfSqlNode` 持有 `test`（条件）与 `contents`（子树），`apply()` 就是解释执行。整段动态 SQL 被组织成一棵 `SqlNode` 树，由 `MixedSqlNode`（序列）、`IfSqlNode`（条件）、`ForEachSqlNode`（迭代）、`TextSqlNode`（终结符）等类组成。
+
+三点值得记住：
+
+1. **树的构建与执行是分离的**：`XMLScriptBuilder.parseDynamicTags()` 在**启动时**解析 XML、构建树；`SqlSource.getBoundSql()` 在**每次查询时**执行树。**解析一次、执行多次**——这正是解释器模式相对"字符串替换"的核心收益。
+2. **递归结构由"节点持有子节点"自然表达**：`IfSqlNode` 里那个 `contents` 字段，让 `<if>` 里再套 `<if>` 不需要任何额外机制。
+3. **终结符与组合符分工明确**：`TextSqlNode` 是叶子（纯文本），`MixedSqlNode` 是组合（有序列表）。这与文法里的"终结符 / 非终结符"完全对应。
+
+**不懂会误判**：把动态 SQL 的解析开销当成"每次查询都要付"。实际上 `<if>` 的**条件表达式求值**每次都要做（因为参数变了），但**树的结构**只在启动时构建一次。判断一段 MyBatis SQL 慢不慢，要看的是"树有多深、条件表达式多复杂"，而不是"XML 有多少行"。
+
+### 5.2 Spring · SpEL：解析与求值分离，才有得优化
+
+```java
+// 使用形态
+ExpressionParser parser = new SpelExpressionParser();
+Expression exp = parser.parseExpression("'Hello ' + name.toUpperCase()");   // ① 解析 → AST
+String value = (String) exp.getValue(context);                             // ② 求值（可反复调用）
+```
+
+对应到实现层：
+
+```java
+// 精简自 org.springframework.expression.spel.ast（AST 节点族）
+// SpelNodeImpl 是基类，子类对应文法中的每种构造：
+//   OpPlus / OpMinus        —— 运算符（非终结符）
+//   CompoundExpression      —— 表达式序列（非终结符）
+//   MethodReference         —— 方法调用（非终结符）
+//   PropertyOrFieldReference—— 属性访问
+//   Literal / IntLiteral    —— 字面量（终结符）
+```
+
+**结构差异**：`parseExpression()` 返回的 `Expression` 对象**内部持有整棵 AST**，`getValue()` 只是遍历这棵树。这个分离带来两个工程后果：
+
+1. **`Expression` 实例可以缓存复用**。Spring 的 `@Value("#{...}")` 在容器启动时解析成 `Expression` 并缓存，运行时只剩求值——所以"SpEL 慢"的说法只在**每次重新解析**时成立。
+2. **可以静态分析**。有了 AST，就能在解析阶段做类型推断、编译优化（SpEL 支持编译成字节码的 `SpelCompiler`），这是纯字符串替换做不到的。
+
+**这条能给出一条通用判据**：**判断一个"配置即代码"的能力（表达式、规则、SQL）性能如何，先看它有没有把"解析"和"执行"分开。** 分开 = 有优化空间；没分开 = 每次都在付解析成本。
+
+### 5.3 JDK · `Pattern.compile()`：为什么不要用 `String.matches()`
+
+```java
+// 精简自 java.util.regex.Pattern
+public final class Pattern implements java.io.Serializable {
+    private transient Node root;                    // ③ 编译后的 AST 根节点
+
+    public static Pattern compile(String regex) {
+        return new Pattern(regex, 0);               // ④ 构造时完成解析
+    }
+
+    private Pattern(String p, int f) {
+        // ... 把正则文本解析成 Node 树（内部的 Node / CharProperty / Prog 等）...
+    }
+
+    public Matcher matcher(CharSequence input) {
+        return new Matcher(this, input);            // ⑤ 求值阶段
+    }
+}
+
+// 而 String.matches() 的实现是：
+public boolean matches(String regex) {
+    return Pattern.matches(regex, this);            // ⑥ 内部 Pattern.compile(regex).matcher(this).matches()
+}
+```
+
+**结构差异**：`Pattern` **就是**解释器模式的标准实现——正则文本是"待解释的语言"，`compile()` 是**解析阶段**（构建 `Node` 树），`matcher().matches()` 是**求值阶段**。
+
+由此得出本条最实用的一条结论：
+
+```java
+// ❌ 在循环里：每次迭代都重新解析一遍正则
+for (String line : lines) {
+    if (line.matches("\d{4}-\d{2}-\d{2}")) { ... }    // 每行一次 Pattern.compile
+}
+
+// ✅ 提升为常量：解析一次，反复求值
+private static final Pattern DATE = Pattern.compile("\d{4}-\d{2}-\d{2}");
+for (String line : lines) {
+    if (DATE.matcher(line).matches()) { ... }
+}
+```
+
+`String.matches()` / `String.split()` / `String.replaceAll()` 内部**都会重新 `Pattern.compile()`**。在热点路径上（逐行处理日志、批量校验字段）这三者的开销常常是主要成本。**这不是"正则慢"，而是"每次重新编译正则慢"。**
+
+**不懂会误判**：把性能问题归因到"正则本身效率低"，于是改用字符判断、改用 `indexOf` 手写解析——而真正的损耗在于**没有复用解析结果**。识别这一点，才知道该优化的地方是"把 `Pattern` 提到循环外"，而不是"放弃正则"。
+
+### 5.4 解释器模式的三个实践判据
+
+把上面三段收拢成一张表：
+
+| 判据 | 有 | 没有 |
+|---|---|---|
+| **解析与求值是否分离** | 可缓存 AST、可静态分析、可编译优化（`Pattern`、SpEL） | 每次执行都要重新解析，无法优化 |
+| **树是否可复用** | 解析一次、执行多次（MyBatis `SqlNode` 树） | 每次请求重建结构 |
+| **结构是否由"节点持有子节点"表达** | 递归语法天然支持（`IfSqlNode.contents`） | 需要额外栈/状态机来模拟嵌套 |
+
+**收束**：解释器模式在教科书里只讲"给一个简单语言定义文法"，工程上的价值却集中在**第一个判据**上——**AST 是"可复用的解析结果"，而"可复用"才是性能的来源。** 这也是为什么几乎所有"配置即代码"的框架（SpEL、MyBatis、正则、模板引擎）都长成同一个形状：**先用一个 parser 把文本变成树，再用一个 interpreter 反复跑这棵树。**
+
+## 六、使用场景与面试问答
 
 ### 真实世界的应用形态
 

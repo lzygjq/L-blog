@@ -184,7 +184,127 @@ public class MacroCommand implements Command {
 
 `Runnable` 本质上就是一种命令——把"要做的事"封装成对象。差别在于命令模式进一步引入了 Invoker（队列/历史）和 undo，**为请求提供了完整的管理能力**；回调只是"一个可传递的函数"。
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它与备忘录、策略的边界**；本节看**框架里的"命令"长什么样**。哪些框架用了它，速查表在下一节——这里只回答一个问题：**如果命令的本质是"把请求封装成对象"，那 JDK 里最日常的实现叫什么。**
+
+### 5.1 JDK · `Runnable`：命令模式，但没有撤销
+
+```java
+// java.lang.Runnable
+@FunctionalInterface
+public interface Runnable {
+    void run();                      // ① 只有一个方法，没有 undo()
+}
+```
+
+**结构差异**：这就是命令模式的最小形态——**把"要做什么"封装成一个对象，交由执行者择机执行**。`ThreadPoolExecutor.execute(Runnable)` 接收的就是一个封装好的请求，至于何时执行、在哪个线程执行，提交方完全不需要知道。
+
+关键反直觉点：**`Runnable` 没有 `undo()`**。而几乎所有教科书讲命令模式都会从"撤销"切入，导致很多人把"支持撤销"当成命令模式的必要条件。实际上命令模式的**核心意图是"把请求对象化"**，它带来三个能力，撤销只是其中之一：
+
+| 能力 | 靠命令对象的什么特性实现 | 典型例子 |
+|---|---|---|
+| **参数化调用方** | 请求成了对象，可作为参数传递 | `execute(Runnable)` |
+| **排队与延迟执行** | 请求可被存入队列、延后取出 | 线程池任务队列、消息队列 |
+| **撤销 / 重放 / 日志** | 请求携带了完备的参数，可反向操作或重复执行 | 编辑器 undo、ES 的 reindex |
+
+**只有第三项需要额外的接口设计**（`undo()`），前两项靠"对象化"本身就能拿到。`Runnable` 选择了只保留前两项——这是绝大多数异步框架的取舍。
+
+**不懂会误判**：因为教科书总讲撤销，容易以为"不支持撤销的场景就不算命令模式"，从而在讲线程池、消息队列时不敢归因到命令模式。**判断标准是"请求有没有被对象化"，而不是"能不能撤销"。**
+
+### 5.2 JDK · `FutureTask`：命令 + 状态，以及"重复提交只跑一次"的真相
+
+`FutureTask` 不只是"可取消的任务"，它内部有一个完整的状态机：
+
+```java
+// 精简自 java.util.concurrent.FutureTask
+public class FutureTask<V> implements RunnableFuture<V> {
+    private volatile int state;                  // ② 用 int 常量表达 7 种状态
+    private static final int NEW          = 0;
+    private static final int COMPLETING   = 1;
+    private static final int NORMAL       = 2;
+    private static final int EXCEPTIONAL  = 3;
+    private static final int CANCELLED    = 4;
+    private static final int INTERRUPTING = 5;
+    private static final int INTERRUPTED  = 6;
+
+    private Callable<V> callable;
+
+    public void run() {
+        if (state != NEW ||
+            !RUNNER.compareAndSet(this, null, Thread.currentThread()))
+            return;                              // ③ 非 NEW 状态，或抢不到执行权 → 直接返回
+        try {
+            Callable<V> c = callable;
+            if (c != null && state == NEW) {
+                V result;
+                boolean ran;
+                try {
+                    result = c.call();
+                    ran = true;
+                } catch (Throwable ex) {
+                    result = null;
+                    ran = false;
+                    setException(ex);
+                }
+                if (ran) set(result);            // ④ CAS 把 state 推到 NORMAL / EXCEPTIONAL
+            }
+        } finally {
+            runner = null;
+            int s = state;
+            if (s >= INTERRUPTING) handlePossibleCancellationInterrupt(s);
+        }
+    }
+}
+```
+
+**结构差异**：`FutureTask` 是**命令 + 状态 + 备忘录**的合体——它封装了请求（`callable`），用一个 `state` 字段表达生命周期，并把**执行结果保存下来供反复查询**（备忘录的语义）。
+
+三个值得记住的点：
+
+1. **`state` 用 `int` 常量 + CAS，不用状态类对象**。原因很实际：这是并发热路径，每次状态转移都分配一个对象是不可接受的。**状态模式的"一个状态一个类"在这里是负收益。**
+2. **`run()` 开头那两行解释了一个经典现象**：同一个 `FutureTask` 提交两次，**只会执行一次**。因为第一次执行后 `state != NEW`，第二次进入 `run()` 时会在第一行直接 `return`。这不是线程池去重，而是任务**自己**用状态做了幂等保护。
+3. **`RUNNER` 的 CAS 是防"重复执行"的第一道闸**：`state` 检查与 CAS 抢执行权是两道独立的保护——即使两个线程同时看到 `state == NEW`，也只有抢到 `RUNNER` 的那个会往下走。
+
+**不懂会误判**：把 `FutureTask` 当成"只是 `Runnable` + `get()`"，会无法解释两个常见现象——① 重复提交为什么只执行一次；② `cancel()` 之后 `run()` 为什么进不去。**这两个行为都由 `state` 一个字段决定**，而 `state` 的存在正是"命令可以有自己的生命周期"这一模式思想的产物。
+
+### 5.3 MyBatis · `BatchExecutor`：命令的"排队"能力落到 SQL 上
+
+```java
+// 精简自 org.apache.ibatis.executor.BatchExecutor
+@Override
+public int doUpdate(MappedStatement ms, Object parameterObject) throws SQLException {
+    // ...
+    final Statement stmt = stmtList.get(lastSql).get(...);
+    applyTransactionTimeout(stmt);
+    handler.parameterize(stmt);
+    BatchResult batchResult = batchResultList.get(lastSql);
+    // ...
+    return handler.update(stmt);                 // ⑤ 只把参数塞进 Statement，不提交
+}
+
+@Override
+public List<BatchResult> doFlushStatements(boolean isRollback) throws SQLException {
+    List<BatchResult> results = new ArrayList<>();
+    if (isRollback) return results;
+    for (int i = 0, n = statementList.size(); i < n; i++) {
+        Statement stmt = statementList.get(i);
+        // ...
+        results.add(handler.getBatchResult(ms, parameterObject, stmt));   // ⑥ 此刻才真正执行
+    }
+    return results;
+}
+```
+
+**结构差异**：`BatchExecutor` 把 `doUpdate()` 与"真正执行 SQL"**拆开了**——`doUpdate()` 只是把参数攒起来，`doFlushStatements()` 才批量下发。这是命令模式最实用的那个能力：**控制执行的时机与批次**。
+
+为什么值得这么设计：JDBC 的 `addBatch()` / `executeBatch()` 本身就有这个语义，但 `BatchExecutor` 把它提升到了**会话级别**——业务代码只管调 `insert()`，攒批与下发由 Executor 决定。**这正是"调用者与执行者解耦"**：调用者不需要知道"什么时候会真的写库"。
+
+**代价**：`doUpdate()` 返回值在攒批阶段**不可信**（此时还没执行，拿不到影响行数）。这是命令模式"延迟执行"换取批量吞吐时必然付出的代价——**返回值语义被削弱**。
+
+**不懂会误判**：在 `BatchExecutor` 下用 `insert()` 的返回值做业务判断（如"插入成功则继续"），会得到错误结论。**识别"这个 executor 是延迟执行的"，比记住返回值是 int 重要得多。**
+
+## 六、使用场景与面试问答
 
 ### JDK 与框架中的实例
 

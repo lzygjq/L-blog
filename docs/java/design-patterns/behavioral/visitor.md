@@ -197,7 +197,128 @@ String count = doc.export(new WordCountVisitor());
 | 结构变更成本高 | 新增元素类型牵动所有访问者 |
 | 抽象复杂度 | 双分派不易理解，调试跳转层级深 |
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**双分派的结构**；本节看**工业代码里那些叫 Visitor 的类，有几个真的是访问者**。哪些场景用了它，速查表在下一节——这里要回答两个问题：**真实实现为什么要加"链"和"钩子"，以及怎么一眼识破"名字叫 Visitor 但不是访问者"的类。**
+
+### 5.1 ASM · `ClassVisitor`：访问者 + 转发链
+
+ASM 是字节码操作库（Spring、CGLIB、Lombok 都间接用它）。它的核心抽象是访问者，但形态比 GoF 复杂：
+
+```java
+// 精简自 org.objectweb.asm.ClassVisitor
+public abstract class ClassVisitor {
+    protected ClassVisitor cv;                    // ① 下一个访问者
+
+    public void visit(int version, int access, String name, String signature,
+                      String superName, String[] interfaces) {
+        if (cv != null) {
+            cv.visit(version, access, name, signature, superName, interfaces);   // ② 转发
+        }
+    }
+
+    public MethodVisitor visitMethod(int access, String name, String descriptor,
+                                     String signature, String[] exceptions) {
+        MethodVisitor mv = cv == null ? null
+                : cv.visitMethod(access, name, descriptor, signature, exceptions);
+        return mv == null ? null : new MyMethodVisitor(mv);    // ③ 包装后返回
+    }
+}
+```
+
+**结构差异**：ASM 的 `ClassVisitor` 是**访问者 + 责任链**的合体。两处与教科书不同：
+
+1. **访问者持有"下一个访问者"并转发**。教科书里访问者是无状态的处理器，处理完就完；ASM 里每个访问者都可以**只处理关心的部分、其余转发给下一个**（如"只统计方法数"的访问者不必实现其余方法）。
+2. **`visitMethod()` 返回的是包装过的子访问者**。注意第 ③ 行：它返回的不是原样透传的 `mv`，而是 `new MyMethodVisitor(mv)` —— **链的建立是通过返回值完成的**，而不是通过构造函数传入。这样做的收益是：子结构（方法）的处理也可以被逐层包装，形成"**类级 → 方法级 → 指令级**"的多层访问链。
+
+**这条能给出一条规律**：**任何需要在"结构树的每个层级都插入处理逻辑"的场景，访问者都会自然演化出转发链。** 因为访问者的 `visitXxx()` 返回值恰好是"下一层的访问者"，这正是链式组装的天然接口。
+
+### 5.2 JDK · `FileVisitor`：多出来的 pre/post 钩子与遍历控制
+
+```java
+// 精简自 java.nio.file.FileVisitor
+public interface FileVisitor<T> {
+    FileVisitResult preVisitDirectory(T dir, BasicFileAttributes attrs) throws IOException;
+    FileVisitResult visitFile(T file, BasicFileAttributes attrs) throws IOException;
+    FileVisitResult visitFileFailed(T file, IOException exc) throws IOException;
+    FileVisitResult postVisitDirectory(T dir, IOException exc) throws IOException;      // ④ 退出时
+}
+
+// 返回值控制遍历走向
+public enum FileVisitResult {
+    CONTINUE,          // 继续
+    TERMINATE,         // 全部终止
+    SKIP_SUBTREE,      // 跳过当前目录的子树
+    SKIP_SIBLINGS      // 跳过同级的后续节点
+}
+```
+
+**结构差异**：这比 GoF 访问者多了两样东西——
+
+1. **成对的进入/退出钩子**：`preVisitDirectory()` 与 `postVisitDirectory()`。为什么需要？因为**有些计算必须在子树处理完之后才能做**。典型例子是统计目录大小：进入目录时无法知道大小，必须等所有子文件都访问完（`postVisitDirectory`）才能汇总。**GoF 的 `visit(element)` 只能表达"访问到某个元素"，表达不了"离开一个容器"。**
+2. **返回值控制遍历**：`SKIP_SUBTREE` / `SKIP_SIBLINGS` / `TERMINATE`。这也不是 GoF 访问者的能力——教科书里访问者只负责"处理"，不负责"要不要继续遍历"。
+
+**这条同样能推广**：**当遍历本身有成本（要跳过某些分支）或需要"离开容器"的语义时，访问者必然进化出成对钩子 + 遍历控制。** 这两样东西在"只处理扁平集合"的场景里用不上，但在"处理树"的场景里是刚需。
+
+### 5.3 Spring · `BeanDefinitionVisitor`：名字叫 Visitor，但不是访问者
+
+```java
+// 精简自 org.springframework.beans.factory.config.BeanDefinitionVisitor
+public class BeanDefinitionVisitor {
+    public void visitBeanDefinition(BeanDefinition beanDefinition) {
+        visitParentName(beanDefinition);
+        visitBeanClassName(beanDefinition);
+        visitFactoryBeanName(beanDefinition);
+        visitFactoryMethodName(beanDefinition);
+        visitScope(beanDefinition);
+        if (beanDefinition.hasPropertyValues()) {
+            visitPropertyValues(beanDefinition.getPropertyValues());
+        }
+        // ...
+    }
+
+    protected void visitPropertyValues(MutablePropertyValues pvs) {
+        PropertyValue[] pvArray = pvs.getPropertyValues();
+        for (PropertyValue pv : pvArray) {
+            Object newVal = resolveValue(pv.getValue());          // ⑤ 对每个值做解析
+            if (!ObjectUtils.nullSafeEquals(newVal, pv.getValue())) {
+                pvs.add(pv.getName(), newVal);
+            }
+        }
+    }
+}
+```
+
+**结构差异**：这个类的名字里带 Visitor，做的事也像"遍历一个结构并处理每个部分"，但**它不是 GoF 访问者模式**。判据只有一条——**有没有双分派**：
+
+| 判据 | 教科书访问者 | `BeanDefinitionVisitor` |
+|---|---|---|
+| 元素是否提供 `accept(visitor)` | **有** | **没有** |
+| 访问方法是否随元素类型分派 | 有（`visitConcreteElementA/B`） | 没有（`visitParentName` / `visitScope` 是**按字段**分的） |
+| 增加元素类型的成本 | 要改所有访问者 | 不涉及（字段是固定的） |
+| 增加操作的成本 | 加一个访问者类 | 加一个方法 |
+
+它实际是**"对固定结构的逐字段处理"**——`BeanDefinition` 的字段是框架自己定义的、几乎不变的结构，没有"元素类型会增长"的问题。因此它既不需要双分派，也不需要 `accept()`。
+
+**这条最有价值**：**框架代码里的 `Visitor` 常常只表示"遍历者"，不代表 GoF 访问者。** 判别标准永远是那两个问题——**谁发起分派（元素还是访问者）、元素类型会不会增长。** 用"类名里有 Visitor"去认模式，会在读框架源码时频繁误判。
+
+### 5.4 什么时候该用，什么时候是反模式
+
+访问者模式解决的是**表达式问题（Expression Problem）**的一个方向：
+
+| 变化方向 | 用继承 + 多态 | 用访问者 |
+|---|---|---|
+| 增加**类型**（新子类） | **容易**（加一个类） | 困难（所有访问者都要加方法） |
+| 增加**操作**（新算法） | 困难（所有子类都要改） | **容易**（加一个访问者类） |
+
+所以访问者的**适用前提是"类型维度已经稳定、操作维度还在增长"**：
+
+- ✅ **适合**：编译器 / 解释器的 AST（节点类型被语言规范固定，但分析趟数不断新增：类型检查、常量折叠、代码生成）、字节码处理（`ClassVisitor`）、文件树扫描。
+- ❌ **反模式**：节点类型还在频繁新增的业务树（如还在迭代的表单结构、刚设计的规则引擎）。此时每加一个节点类型，都要回头改所有访问者——**访问者会把"加类型"的成本推到最高。**
+
+**一句话收束**：访问者不是"更好的多态"，而是一次**押注**——**押"操作会不断新增，类型不会"**。押对了收益极大（ASM、编译器都建立在此之上），押错了就是灾难。**判断该不该用，只要问一句：这个结构的元素类型，还会变吗？**
+
+## 六、使用场景与面试问答
 
 ### 典型场景
 

@@ -170,7 +170,101 @@ public class SettlementCenter implements SettlementMediator {
 
 有意思的是，**微服务架构的演进本身就是在重复中介者模式的思想**：最初服务直连（网状），然后加网关收敛（星形），再用服务网格（Service Mesh）把中介能力下沉到基础设施层——**Sidecar 就是"中介者模式的基础设施化"**。
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它和观察者的拓扑差异**；本节看**中介者在真实系统里的三种形态**。哪些系统用了它，速查表在下一节——这里要回答一个问题：**中介者一旦成为中心，它自己出了故障怎么办。**
+
+### 5.1 Spring MVC · `DispatcherServlet`：编排式中介者
+
+```java
+// 精简自 org.springframework.web.servlet.DispatcherServlet#doDispatch
+protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+    HttpServletRequest processedRequest = request;
+    HandlerExecutionChain mappedHandler = null;
+    ModelAndView mv = null;
+    Exception dispatchException = null;
+    try {
+        processedRequest = checkMultipart(request);
+        mappedHandler = getHandler(processedRequest);              // ① 找处理器
+        if (mappedHandler == null) {
+            noHandlerFound(processedRequest, response);            // ② 找不到就 404
+            return;
+        }
+        HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());   // ③ 找适配器
+        // ...
+        if (!mappedHandler.applyPreHandle(processedRequest, response)) {
+            return;                                                // ④ 拦截器中断
+        }
+        mv = ha.handle(processedRequest, response, mappedHandler.getHandler());   // ⑤ 执行
+        applyDefaultViewName(processedRequest, mv);
+        mappedHandler.applyPostHandle(processedRequest, response, mv);
+    } catch (Exception ex) {
+        dispatchException = ex;
+    }
+    processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
+}
+```
+
+**结构差异**：`DispatcherServlet` 是中介者的**编排式**形态。`HandlerMapping`、`HandlerAdapter`、`HandlerInterceptor`、`ViewResolver`、`HandlerExceptionResolver` 之间**互不认识**——`Controller` 不知道谁在解析视图，`ViewResolver` 不知道谁调用了它，所有协作都发生在 `doDispatch()` 这一个方法里。
+
+这与教科书的中介者有一处显著不同：**教科书里各方持有中介者引用（`colleague.setMediator(m)`），主动向中介者汇报；而 `doDispatch()` 是中介者主动、顺序地调用各方。** 各方甚至不需要知道自己是"同事"——它们是纯粹的被动组件。
+
+**代价同样明显**：`doDispatch()` 成了整个 MVC 的**唯一支点**，任何组件要参与进来（新增一个 `HandlerAdapter`、插入一段异常处理）都必须改这里或改它的扩展点。这就是中介者的固有代价：**中心化换来了解耦，也换来了中心自身的高变更频率。**
+
+### 5.2 注册中心：中介者的 N×N → N×1，以及它的单点代价
+
+Dubbo / Nacos / Eureka 这类注册中心，是中介者模式在分布式里的形态：
+
+```
+不使用注册中心：                      使用注册中心：
+consumer1 ─┬─▶ provider1              consumer1 ─┐
+           ├─▶ provider2                          │
+           └─▶ provider3              consumer2 ─┼─▶ Registry ◀─ provider1/2/3
+consumer2 ─┬─▶ provider1                          │
+           ├─▶ provider2              consumer3 ─┘
+           └─▶ provider3
+   连接数 = N × M                          连接数 = N + M
+```
+
+**结构差异**：中介者在这里解决的是**连接数与地址管理**问题——消费者不需要知道任何提供者的地址，只与注册中心交互。这带来教科书没提的一个后果：**注册中心成了全局单点，它的不可用会同时影响所有服务发现。**
+
+工程上的对策分两级，都值得记住：
+
+1. **本地缓存 + 推空保护**：Dubbo 的 `RegistryDirectory` 会把服务列表缓存在本地，注册中心断开后**继续用缓存调用**。这就是"注册中心挂了，服务还能撑一段时间"的原因。
+2. **推空保护**：如果订阅到的地址列表变**空**，Dubbo 默认**拒绝更新缓存**（保留旧列表）。因为"本该有 100 个提供者却收到 0 个"更可能是注册中心异常而非真下线——**宁可调用失败也不要清空地址**。
+
+**这条能给出一条通用判据**：**引入中介者的同时，必须为"中介者不可用"设计降级路径。** 中介者把所有依赖收敛到一点，那一点就成了可用性的上限。
+
+### 5.3 消息代理：异步形态下，中介者变成了存储
+
+Kafka / RocketMQ 是中介者的**异步形态**——生产者与消费者不仅互不认识，连**时间上也不重叠**（生产者写完可能就退出了）。
+
+**结构差异**：同步中介者只负责"转发"（收到请求、找目标、调用、返回），所以它可以很轻（`EventBus` 就是一个 `Map` + `CopyOnWriteArrayList`）。而**异步中介者必须负责"保存"**——消息可能几小时后才被消费，中介者要么持久化，要么丢失。
+
+这解释了两者的体量差异：
+
+| 形态 | 中介者要做什么 | 实现复杂度 | 例子 |
+|---|---|---|---|
+| **同步编排** | 顺序调用各方，转发结果 | 低（几百行） | `DispatcherServlet` |
+| **同步转发** | 维护订阅表，逐个通知 | 低 | Guava `EventBus`、Spring `ApplicationContext` |
+| **持久化代理** | **存消息** + 分区 + 复制 + 位移管理 + 重平衡 | 高（一个分布式系统） | Kafka、RocketMQ |
+
+**从"转发"到"存储"这一步，就是 `EventBus` 与 Kafka 之间的全部距离。** 很多团队在设计"解耦通知"时的第一个决策点就在这里：**消息丢了能不能接受**——能接受就用应用内事件总线，不能接受才需要引入消息中间件。
+
+### 5.4 中介者 vs 外观：一件常被混淆的事
+
+两者都"用一个对象包住一堆组件"，区别在**通信方向**：
+
+| 维度 | 外观 Facade | 中介者 Mediator |
+|---|---|---|
+| 谁调用谁 | 调用方 → 外观 → 子系统（**单向**） | 各方 ↔ 中介者（**双向**，中介者知道各方） |
+| 子系统是否知道它 | **不知道**，也无需知道 | **知道**，且通过它通信 |
+| 目的 | **简化接口**（把多个步骤包成一步） | **解耦协作**（把网状依赖收敛成星形） |
+| 复杂度去向 | 复杂度没消失，只是被藏起来了 | 复杂度被搬到了中介者身上 |
+
+**一句话**：外观是"**给外人看的门面**"（子系统之间该怎么调还怎么调，只是外人不用知道），中介者是"**大家都必须经过的枢纽**"（子系统之间不再直接通信）。`DispatcherServlet` 之所以是中介者而不是外观，就在于 `Controller` 与 `ViewResolver` 之间**根本不存在直接通信**。
+
+## 六、使用场景与面试问答
 
 ### 典型场景
 

@@ -188,7 +188,124 @@ for (Handler<Ctx> h : handlers) {
 | 是否支持分支 | 支持（一个节点可有多个后继） | 不支持（线性） |
 | 适用 | 需要按请求动态改变处理流程 | 固定的规则/过滤器流水线 |
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它和装饰者的边界**；本节看**真实的责任链是怎么串起来的**。哪些框架用了它，速查表在下一节——这里只回答一个问题：**教科书里的"节点持有 next 指针"，为什么在框架里普遍变成了"数组 + 下标"。**
+
+### 5.1 Tomcat · `ApplicationFilterChain`：数组下标模拟出的链
+
+```java
+// 精简自 org.apache.catalina.core.ApplicationFilterChain
+public final class ApplicationFilterChain implements FilterChain {
+    private ApplicationFilterConfig[] filters = new ApplicationFilterConfig[0];
+    private int pos = 0;                                  // ① 当前执行到第几个 Filter
+    private int n = 0;                                    // ② 一共几个 Filter
+
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response) {
+        if (Globals.STRICT_SERVLET_COMPLIANCE) {
+            request = getRequest(request);                // ③ 包装：防止 Filter 篡改原始请求
+            response = getResponse(response);
+        }
+        internalDoFilter(request, response);
+    }
+
+    private void internalDoFilter(ServletRequest request, ServletResponse response) {
+        if (pos < n) {
+            ApplicationFilterConfig filterConfig = filters[pos++];   // ④ 取下一个并前进
+            Filter filter = filterConfig.getFilter();
+            filter.doFilter(request, response, this);               // ⑤ 把 this 传回去
+            return;
+        }
+        servlet.service(request, response);                         // ⑥ 链尾才到 Servlet
+    }
+}
+```
+
+**结构差异**：三处与教科书写法不同，且都解决真实问题——
+
+1. **链用数组 + 下标表达**，不是节点指针。每个 `Filter` 收到的是同一个 `FilterChain` 对象（`this`），它调用 `chain.doFilter()` 时由 `pos++` 前进。好处是 Filter 列表**可随时增删/重排**，不必重建链。
+2. **"继续"与"终止"是同一行代码的两种结果**：调用 `chain.doFilter()` → 前进；不调用 → 链就地终止。没有 `setNext(null)` 这种显式断链动作。
+3. **链尾硬编码了终点**：`pos >= n` 时执行 `servlet.service()`。教科书里链尾通常是 `null` 或空实现，容器版把终点写死——**因为对容器而言，这条链的唯一目的就是把请求送到 Servlet**。
+
+**不懂会误判**：按"节点持有 next"去找 `setNext()`，会找不到，从而怀疑"这不是责任链"。而**判据是"请求能否被中途截断"，不是"有没有 next 字段"**。
+
+### 5.2 Spring MVC · `HandlerExecutionChain`：为了逆序回滚而记录下标
+
+```java
+// 精简自 org.springframework.web.servlet.HandlerExecutionChain
+public class HandlerExecutionChain {
+    private final Object handler;
+    private HandlerInterceptor[] interceptors;
+    private int interceptorIndex = -1;                    // ⑦ 已成功执行到第几个
+
+    boolean applyPreHandle(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        for (int i = 0; i < this.interceptorList.size(); i++) {
+            HandlerInterceptor interceptor = this.interceptorList.get(i);
+            if (!interceptor.preHandle(request, response, this.handler)) {
+                triggerAfterCompletion(request, response, null);   // ⑧ 失败即回调已完成的部分
+                return false;
+            }
+            this.interceptorIndex = i;                    // ⑨ 记住成功位置
+        }
+        return true;
+    }
+
+    void triggerAfterCompletion(HttpServletRequest request, HttpServletResponse response, Exception ex) {
+        for (int i = this.interceptorIndex; i >= 0; i--) {         // ⑩ 逆序
+            HandlerInterceptor interceptor = this.interceptorList.get(i);
+            try {
+                interceptor.afterCompletion(request, response, this.handler, ex);
+            } catch (Throwable ex2) {
+                logger.error("HandlerInterceptor.afterCompletion threw exception", ex2);
+            }
+        }
+    }
+}
+```
+
+**结构差异**：`interceptorIndex` 是教科书里不存在的角色。它记录「哪些拦截器的 `preHandle` **已经成功**」，好在请求失败时**逆序**回调它们的 `afterCompletion`。
+
+它解决的真实问题：5 个拦截器，第 3 个的 `preHandle` 返回 `false`（比如权限不足）——此时前两个的 `preHandle` 已经执行过（可能已开了资源、写了 `ThreadLocal`），**必须回滚**。用单向链表做不到这点（没有前驱指针），用数组 + 下标，逆序就是一个倒着走的 `for`。
+
+**这解释了为什么真实责任链普遍用数组：责任链的"处理"是正向的，但"清理"往往是逆向的。** 只有支持随机访问的结构才能高效支持逆向清理。
+
+**不懂会误判**：不理解"拦截器需要逆序清理"的人，会把 `afterCompletion` 当成"请求结束后每个拦截器都会被调一次"，于是写出顺序无关的成对逻辑。实际上**没执行过 `preHandle` 的拦截器永远不会收到 `afterCompletion`**，而收到回调的那些，顺序是**从后往前**。
+
+### 5.3 Netty · `ChannelPipeline`：双向链表，因为出站要往回走
+
+```java
+// 精简自 io.netty.channel.AbstractChannelHandlerContext（结构示意）
+abstract class AbstractChannelHandlerContext implements ChannelHandlerContext {
+    volatile AbstractChannelHandlerContext next;
+    volatile AbstractChannelHandlerContext prev;      // ⑪ 教科书版不会有这个字段
+}
+```
+
+**结构差异**：Netty 的 Pipeline 是**双向链表**，因为 handler 分两类，遍历方向相反：
+
+| 方向 | 触发时机 | 遍历顺序 |
+|---|---|---|
+| **入站**（Inbound，如 `channelRead`） | 数据从 socket 读进来 | head → tail |
+| **出站**（Outbound，如 `write` / `flush`） | 应用主动写出 | tail → head |
+
+一次 `write()` 从链尾往链头走，途中经过编码器、压缩器——**方向与入站正好相反**。这让编解码能用同一份 Pipeline 表达：入站 `ByteBuf → 对象`（解码），出站 `对象 → ByteBuf`（编码）。用单链表就只能做一半。
+
+**不懂会误判**：把 Netty Pipeline 当成"Servlet Filter 那样的单向链"，会困惑于"为什么 `addLast` 加的 encoder 能被 `write` 触发"。**遍历方向由语义决定，不由结构决定**——入站与出站是两条相反的链，共用一套节点。
+
+### 5.4 四种实现对着一张表
+
+| 实现 | 链的载体 | 终止方式 | 特殊设计 |
+|---|---|---|---|
+| 教科书 | 节点持有 `next` | `next == null` | — |
+| Tomcat `FilterChain` | **数组 + `pos` 下标** | 不调用 `chain.doFilter()` | 链尾硬编码 Servlet |
+| Spring `HandlerExecutionChain` | **List + `interceptorIndex`** | `preHandle` 返回 `false` | 记录下标以支持**逆序**清理 |
+| Netty `ChannelPipeline` | **双向链表** | 不调用 `ctx.fireXxx()` | 入站/出站**方向相反**，可动态增删 |
+| Sentinel `ProcessorSlotChain` | 单向链（`ProcessorSlot.next`） | slot 内抛异常 | `entry`/`exit` 成对，`exit` **逆序**执行 |
+
+**收束**：三种工程变形都源于同一个压力——**链不仅要能正向传递请求，还要能逆向清理、双向流转**。教科书的 `next` 指针只解决了第一件事。
+
+## 六、使用场景与面试问答
 
 ### Web 与框架中的实例
 

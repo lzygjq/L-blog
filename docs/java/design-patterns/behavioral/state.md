@@ -185,7 +185,100 @@ public class PaidState implements OrderState {
 
 **选择标准**：状态 ≤ 4 个且转移简单 → `enum + switch` 更直观；状态多、每个状态下行为差异大 → 状态模式。
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它与策略的边界**；本节看**JDK 与框架里处理"状态"的真实手段**。哪些系统用了它，速查表在下一节——这里要回答一个更尖锐的问题：**为什么 JDK 定义了 `Thread.State`，却没有用状态模式。**
+
+### 5.1 JDK · `Thread.State`：状态是对外汇报的标签，不是驱动转移的对象
+
+```java
+// java.lang.Thread
+public enum State {
+    NEW, RUNNABLE, BLOCKED, WAITING, TIMED_WAITING, TERMINATED    // ① 6 个状态
+}
+
+// 内部只用了一个 int 字段
+private volatile int threadStatus = 0;                             // ② 状态存在这里
+
+public State getState() {
+    return sun.misc.VM.toThreadState(threadStatus);                // ③ 读出来【映射】成枚举
+}
+```
+
+**结构差异**：JDK 有状态的定义（`Thread.State`），也记录了状态（`threadStatus`），**但没有状态对象，也没有状态之间的转移方法**。原因很清楚：
+
+1. **转移不由 Java 层决定**：线程状态的变化发生在 native 层（`Thread.start0()`、`Object.wait()`、锁竞争、`park()` 等）。Java 侧的 `State` 只是**把 native 的 `threadStatus` 翻译成人话**。
+2. **状态是查询接口，不是行为载体**。状态模式的关键在于"**把每个状态下的行为差异**放进状态类"——而线程的行为差异在 JVM 里，Java 层没有"各状态下的不同行为"要封装。
+
+所以 `Thread.State` 给出的是一个**判据**：如果"状态"只是一组枚举值 + 对外查询，**状态模式是多余的**。它只有在"每个状态下要执行的动作也不一样"时才划算。
+
+**不懂会误判**：看到 `Thread.State` 六个枚举，容易误以为"JDK 里有个线程状态机实现可以参考"。实际上它连转移逻辑都没有——**枚举 ≠ 状态模式**。
+
+### 5.2 JDK · `AQS.Node.waitStatus`：热路径上用 int 常量
+
+```java
+// 精简自 java.util.concurrent.locks.AbstractQueuedSynchronizer.Node
+static final class Node {
+    volatile int waitStatus;                      // ④ 状态就是一个 int
+    static final int CANCELLED =  1;
+    static final int SIGNAL    = -1;
+    static final int CONDITION = -2;
+    static final int PROPAGATE = -3;
+
+    final boolean compareAndSetWaitStatus(Node node, int expect, int update) {
+        return U.compareAndSetInt(this, WAITSTATUS, expect, update);
+    }
+}
+```
+
+**结构差异**：`AQS` 是 Java 并发的底座（`ReentrantLock`、`Semaphore`、`CountDownLatch` 都建在它上面），它管理节点的 4 种状态——用的是 `volatile int` + `VarHandle` CAS，**一个状态类也没有**。
+
+理由与 `FutureTask` 完全一致：**这里每秒可能发生百万次状态判断与转移，任何"一个状态一个对象"的设计都会带来分配开销和间接跳转。** 而用 int 常量表达状态，判断退化为一次整数比较，转移退化为一次 CAS。
+
+**这条能给出一条通用规律**：
+
+| 场景 | 状态的表达方式 | 理由 |
+|---|---|---|
+| 状态少（≤5）、转移规则稳定、行为差异大 | **状态类（状态模式）** | 行为差异是主要复杂度 |
+| 状态少、**高频转移**、行为差异小 | **int 常量 / 枚举 + CAS** | 转移开销是主要矛盾 |
+| 状态多（>5）、转移规则复杂 | **状态转移表 / 状态机引擎** | 类数量会爆炸 |
+
+### 5.3 Spring StateMachine：状态多时的真实选择
+
+当一个业务真的需要状态机（订单、审批、工单），工程上用的是**声明式状态机**：
+
+```java
+// Spring StateMachine 的配置形态（示意）
+@Configuration
+@EnableStateMachine
+public class OrderStateMachineConfig extends StateMachineConfigurerAdapter<OrderState, OrderEvent> {
+
+    @Override
+    public void configure(StateMachineTransitionConfigurer<OrderState, OrderEvent> transitions)
+            throws Exception {
+        transitions
+            .withExternal().source(OrderState.UNPAID).target(OrderState.PAID).event(OrderEvent.PAY)
+            .and()
+            .withExternal().source(OrderState.PAID).target(OrderState.SHIPPED).event(OrderEvent.SHIP)
+            .and()
+            .withExternal().source(OrderState.SHIPPED).target(OrderState.FINISHED).event(OrderEvent.CONFIRM);
+    }
+}
+```
+
+**结构差异**：这是状态模式在工程上的**反形态**——把"状态的转移关系"从**代码结构**（类之间的引用）挪到了**配置数据**（`source → target → event` 三元组）。
+
+它解决的正是状态模式的痛点：**用状态类写，转移关系散落在各个状态类里，无法集中查看、无法校验、无法可视化。** 一旦状态数到两位数（订单有 10 个状态、20 个事件），"每个状态下行为不同"的写法会退化为一张巨大的隐式转移表——**既然它本质是表，就该用表来表达**。
+
+**行为差异怎么办**：Spring StateMachine 把"某个状态下要执行的动作"挂到 `Action` 上（`stateEntry` / `stateExit` / `transition action`），**保留了状态模式"行为随状态变化"的优点，同时把转移关系集中到了配置**。
+
+**不懂会误判**：认为"引入状态机框架就是把状态模式换个库"。实际上两者的组织方式相反：状态模式是**行为驱动**（每个状态类内聚），状态机框架是**转移驱动**（转移表是主体，行为是挂上去的钩子）。**状态模式适合"状态少但每个状态下行为复杂"，状态机框架适合"状态多、转移复杂但每步动作用时短"。**
+
+### 5.4 一句话收束
+
+`Thread.State` 告诉你**枚举不等于状态模式**；`AQS` 告诉你**热路径上状态要退化成 int**；Spring StateMachine 告诉你**状态一多，转移关系就该从代码挪进配置**。三者共同指向同一个判据：**只有当"每个状态下的行为差异"是主要复杂度时，状态模式才划算。**
+
+## 六、使用场景与面试问答
 
 ### 典型场景
 

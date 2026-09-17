@@ -167,7 +167,123 @@ for (int i = list.size() - 1; i >= 0; i--) {
 }
 ```
 
-## 五、使用场景与面试问答
+## 五、源码剖析
+
+上一节看的是**它与 `Iterable` 的分工**；本节看**迭代器在 JDK 里承担了多少你没想到的职责**。哪些框架用了它，速查表在下一节——这里要回答三个问题：**`ConcurrentModificationException` 到底是什么意思、为什么只有迭代器能安全删除、以及并行流和迭代器有什么关系。**
+
+### 5.1 `ArrayList.Itr`：`ConcurrentModificationException` 与并发无关
+
+```java
+// 精简自 java.util.ArrayList.Itr
+private class Itr implements Iterator<E> {
+    int cursor;
+    int lastRet = -1;
+    int expectedModCount = modCount;        // ① 创建迭代器时，记下"当时的修改次数"
+
+    public E next() {
+        checkForComodification();
+        int i = cursor;
+        if (i >= size) throw new NoSuchElementException();
+        Object[] elementData = ArrayList.this.elementData;
+        if (i >= elementData.length) throw new ConcurrentModificationException();
+        cursor = i + 1;
+        return (E) elementData[lastRet = i];
+    }
+
+    final void checkForComodification() {
+        if (modCount != expectedModCount)
+            throw new ConcurrentModificationException();     // ② 在遍历前先比对
+    }
+}
+```
+
+**结构差异**：`modCount` 与 `expectedModCount` 这一对字段，是"遍历状态被封装进迭代器对象"才能成立的机制——**集合本身记录被结构修改的次数（`modCount`），迭代器在创建时快照一份（`expectedModCount`），每次取元素前比对**。不一致就抛异常。
+
+由此可纠正一个极常见的误解：**`ConcurrentModificationException` 的"Concurrent"与多线程无关**。这段代码在**单线程**下必炸：
+
+```java
+for (String s : list) {
+    if (s.startsWith("a")) list.remove(s);   // ← 抛 ConcurrentModificationException
+}
+```
+
+因为 `list.remove()` 让 `modCount++`，而迭代器的 `expectedModCount` 还停在旧值。**异常的名字起得有误导性——它实际表达的是"集合在你迭代期间被改过"，不是"有人在并发改它"。** 而这也解释了为什么 `ConcurrentHashMap` 的迭代器**不会**抛这个异常：它是弱一致性的，不维护 `modCount`。
+
+### 5.2 `HashIterator.remove()`：为什么迭代器自己删就安全
+
+```java
+// 精简自 java.util.HashMap.HashIterator
+public void remove() {
+    Node<K,V> p = current;
+    if (p == null) throw new IllegalStateException();
+    if (modCount != expectedModCount) throw new ConcurrentModificationException();
+    current = null;
+    K key = p.key;
+    removeNode(hash(key), key, null, false, false);
+    expectedModCount = modCount;              // ③ 关键：删完之后，把计数同步过来
+}
+```
+
+**结构差异**：注意最后一行——**迭代器在删除之后，主动把 `expectedModCount` 更新成了新的 `modCount`**。也就是说，它删的确实是集合的元素（一样会改 `modCount`），但它**自己承担了"保持双方一致"的责任**。
+
+`ArrayList.Itr.remove()` 是同样的写法：
+
+```java
+public void remove() {
+    if (lastRet < 0) throw new IllegalStateException();
+    checkForComodification();
+    try {
+        ArrayList.this.remove(lastRet);
+        cursor = lastRet;                     // ④ 游标回退一格，避免跳过一个元素
+        lastRet = -1;
+        expectedModCount = modCount;          // ⑤ 同样在最后同步
+    } catch (IndexOutOfBoundsException ex) {
+        throw new ConcurrentModificationException();
+    }
+}
+```
+
+**这两段代码给出一条结论**：`Iterator.remove()` 的存在**不是"顺手提供的便利"，而是"安全删除的唯一途径"**。因为只有迭代器知道自己的 `cursor` 与 `lastRet`，也只有它能同时修正"集合的修改计数"与"自己的游标位置"。
+
+这也解释了 Java 8 引入 `Collection.removeIf()` 的动机：**它把"遍历 + 判断 + 删除"封装成一个原子操作**，内部（对 `ArrayList`）用 `BitSet` 标记后统一删除，比"用迭代器逐个删"更快，也避免了使用者误用 `for-each` 删除。
+
+**不懂会误判**：以为"`for-each` 删除报错、用 `Iterator` 删除就对了"只是因为"接口不同"。真实原因是**游标与计数的一致性只有迭代器自己维护得了**——理解这一点，才会明白为什么 `removeIf` 也必须是集合自己的方法。
+
+### 5.3 `Spliterator`：迭代器在并行时代的续作
+
+```java
+// 精简自 java.util.ArrayList.ArrayListSpliterator
+static final class ArrayListSpliterator<E> implements Spliterator<E> {
+    private int index;        // 当前起始
+    private int fence;        // 结束位置
+    private int expectedModCount;
+
+    public ArrayListSpliterator<E> trySplit() {
+        int hi = getFence(), lo = index, mid = (lo + hi) >>> 1;      // ⑥ 折半切分
+        return (lo >= mid) ? null :
+            new ArrayListSpliterator<>(list, lo, index = mid, expectedModCount);
+    }
+}
+```
+
+**结构差异**：`Spliterator` 在 `Iterator` 的"逐个取"之上加了 `trySplit()` —— **把剩余元素一分为二，交给另一个线程处理**。这正是并行流（`list.parallelStream()`）能工作的前提。
+
+这里有个值得注意的转变：**迭代器模式最初的收益是"隐藏集合的内部结构"**（调用方不需要知道底层是数组还是链表，统一用 `next()`）。而在并行时代，`Spliterator` 却要**利用对内部结构的了解**（`ArrayListSpliterator` 知道底层是数组，才能按下标折半切分）。
+
+| 时代 | 迭代器的主要收益 | 做法 |
+|---|---|---|
+| 经典 GoF | **封装**：调用方不依赖集合结构 | 只暴露 `hasNext()` / `next()` |
+| 并行流时代 | **切分**：支持把遍历任务拆分到多核 | 额外暴露 `trySplit()` / `estimateSize()` |
+
+也就是说，同一个模式在"并行"这个新压力下，**从"隐藏结构"走向了"声明结构特征"**（`Spliterator` 的 `characteristics()` 会告诉流框架"这个源是有序的 / 可随机访问的 / 元素不重复的"）。这类"模式因外部约束变化而反向演化"的现象，只有读源码才能看见。
+
+**不懂会误判**：把 `Spliterator` 当成"迭代器的新名字"。它是**为切分而设计的**——`estimateSize()`、`characteristics()` 这些方法都服务于"怎么拆得更均衡"，与顺序遍历没有关系。
+
+### 5.4 一句话收束
+
+迭代器模式真正的价值不是"统一的遍历接口"，而是**把遍历状态从集合里搬到独立对象里**。这一步搬移带来了三个后果：**可以同时存在多个互不干扰的遍历**（状态不再共享）、**可以安全删除**（游标与计数能一起维护）、**可以并行切分**（每个分裂出的迭代器自带一段区间）。教科书写的是第一条，后两条才是它在 JDK 里长盛不衰的原因。
+
+## 六、使用场景与面试问答
 
 ### JDK 与框架中的实例
 
