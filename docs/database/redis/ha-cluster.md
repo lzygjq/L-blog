@@ -7,7 +7,7 @@ desc: 单点 Redis 四大问题的架构解法——RDB/AOF 触发条件与混�
 
 # 持久化、主从与集群
 
-> 本文是[架构演进地图](/projects/architecture-evolution/)的**缓存层分册**——V1 → V4 各档的触发信号、代价与验收标准见地图。
+> 本文是[架构路线](/projects/architecture-evolution/)的**缓存层分册**——[独立单机](/projects/architecture-evolution/cache/#standalone) → [主从](/projects/architecture-evolution/cache/#replica) → [哨兵（可跳）](/projects/architecture-evolution/cache/#sentinel) → [Cluster（可不到）](/projects/architecture-evolution/cache/#cluster) 的触发与包络见缓存线。
 
 单点 Redis 有四个先天问题，每个问题对应一层架构演进——这张映射表是整个高可用体系的目录：
 

@@ -1,13 +1,13 @@
 ---
 date: 2026-09-17
-title: L3 架构师 · 能设计系统，并为取舍负责
-desc: 从「负责一块」到「设计一个系统」的六步阅读顺序——分布式地基、服务化与通信、数据架构、方法论、非功能三件套、工程效能与云原生；另附 AI 进不进主链路（含评测与降级）、跳过表、离场自检与本级真正的缺口
+title: 成长 L3 架构师 · 能设计系统，并为取舍负责
+desc: 从「负责一块」到「设计一个系统」的六步阅读顺序——分布式地基、服务化与通信、数据架构、方法论、非功能三件套、工程效能与云原生；另附 AI 进不进主链路、跳过表、离场自检；本级真正的缺口用闭卷模拟盘练，不是再读一章
 order: 3
 ---
 
-# L3 架构师 · 能设计系统，并为取舍负责
+# 成长 L3 架构师 · 能设计系统，并为取舍负责
 
-> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的第三级清单，回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。上一级见 [L2 高级开发](/projects/architect-roadmap/senior/)。
+> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的第三级清单，回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。上一级见 [成长 L2 高级开发](/projects/architect-roadmap/senior/)。
 
 ## 一、这一级的判据
 
@@ -85,7 +85,7 @@ L2 回答「这条 SQL 为什么慢」，L3 回答「**这些数据该放在几�
 | [架构风格对比](/methodology/architecture-styles) | 全读——单体 / 微服务 / 事件驱动各自的代价，是方案对比的词汇表 |
 | [拆分粒度](/methodology/service-granularity) | 全读——**本级最实用的一篇**：拆过头比不拆更贵 |
 | [事件驱动与 CQRS](/methodology/event-driven-cqrs) | 读到「什么时候值得引入事件」为止 |
-| [架构演进地图](/projects/architecture-evolution/)、[五层 × 四档](/projects/architecture-evolution/#matrix) | 全读——它把「什么时候该升级架构」变成了可判定的信号，是本级少见的可复用工具 |
+| [架构路线](/projects/architecture-evolution/)、[谁先撞墙](/projects/architecture-evolution/#triggers) | 全读总览，再按层点进 [L2 应用](/projects/architecture-evolution/app/) / [L3 数据](/projects/architecture-evolution/data/) / [L4 缓存](/projects/architecture-evolution/cache/) / [L5 文件](/projects/architecture-evolution/file/) / [L6 部署](/projects/architecture-evolution/deploy/)——它把「什么时候该动哪一层」变成了可判定的信号，是本级少见的可复用工具 |
 
 ### 第五步 · 非功能三件套：高可用 / 安全 / 可观测
 
@@ -159,26 +159,26 @@ L2 停在循环机制。本级要定的是取舍：**LLM 失败时业务怎么�
 
 第 5 题是 L3 与 L2 的分界：**L2 回答「怎么修」，L3 回答「值不值得修、代价是什么」。** 附读的那一问同样适用这个分界：LLM 进主链路之前，先能说出失败时业务怎么办。
 
-## 五、本站暂无的内容
+## 五、本站暂无的内容 {#gap}
 
 L1 与 L2 的缺口是**内容缺口**（缺某一篇），L3 不是。这一级的页面已经基本铺满（见[成长路线的覆盖度一节](/projects/architect-roadmap/#coverage)），缺的是别的东西。**AI 也不是内容缺口**——[Spring AI](/ai/spring-ai/) 与 [Agent](/ai/agent-harness/) 已成篇，本级附读只是把「进不进主链路」挂上清单：
 
 | 缺的是什么 | 替代方式 |
 |---|---|
-| **真实体量**——「在 200 个服务、每天 30 亿请求的系统里做过决策」的经验 | 用[智慧物业 SaaS](/projects/property-saas/)与[大型集团绩效系统](/projects/perf-system/)两个案例当模拟盘：先读[难点地图](/projects/property-saas/#difficulty-map)，**自己把设计重推一遍，再对照它的取舍** |
-| **失败的复盘**——别人的方案是怎么错的 | 公开材料里少见完整复盘；本站[架构演进地图的个人路径](/projects/architecture-evolution/#my-path)是替代品，它把「什么时候不该升级」写成了触发信号 |
+| **真实体量**——「在 200 个服务、每天 30 亿请求的系统里做过决策」的经验 | [闭卷模拟盘](/projects/toolkit/drill/)：题干只给约束。写完再对照[智慧物业 SaaS](/projects/property-saas/)与[大型集团绩效系统](/projects/perf-system/) |
+| **失败的复盘**——别人的方案是怎么错的 | 两个案例没有可发布的故障时间线，本站不编。公开材料里也少见完整复盘；[层账](/projects/architecture-evolution/ledger/)把「什么时候不该升级」记成档位与状态 |
 | **组织与流程**——评审机制、技术债管理、跨团队推动 | 属于 L4 的边界，见下一级 |
 
-**这一节的结论是**：L3 能不能过，取决于你**有没有独立推演过一个完整系统**，而不是有没有读完某一页。这也是下面关联阅读里「案例即模拟盘」那条存在的理由。
+**这一节的结论是**：L3 能不能过，取决于你**有没有独立推演过一个完整系统**，而不是有没有读完某一页。卷子在模拟盘，答案不在这一页。
 
 ## 六、关联阅读
 
 | 你想干什么 | 去哪 |
 |---|---|
-| 回看 L2 的清单（本级的前置） | [L2 高级开发 · 能负责一块，并对线上问题给出根因](/projects/architect-roadmap/senior/) |
-| 往上走一级 | [L4 CIO · 对一条业务线的技术结果负责](/projects/architect-roadmap/cio/) |
+| 回看成长 L2 的清单（本级的前置） | [成长 L2 高级开发 · 能负责一块，并对线上问题给出根因](/projects/architect-roadmap/senior/) |
+| 往上走一级 | [成长 L4 CIO · 对一条业务线的技术结果负责](/projects/architect-roadmap/cio/) |
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
-| 看「架构题会被追问到什么程度」 | [面试专题的四层次](/interview/#layers) 与[跨板块连线题](/interview/#threads) |
-| 拿两个案例当模拟盘，自己重推一遍设计 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
+| 看「架构题会被追问到什么程度」 | [成长 L2→L3 · 下一轮该卡](/interview/#pack)的判断层 / 决策层；连线题见[面试专题](/interview/#threads) |
+| 拿两个案例当模拟盘，自己重推一遍设计 | [闭卷模拟盘](/projects/toolkit/drill/)（先写）→ 对照[项目实战](/projects/)；档位记在[层账](/projects/architecture-evolution/ledger/) |
 | 把设计写成可评审的材料 | [可验证产出工具箱](/projects/toolkit/)：立项三件套 + [方案评审](/projects/toolkit/review/) + 运行期[故障复盘](/projects/toolkit/postmortem/) |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

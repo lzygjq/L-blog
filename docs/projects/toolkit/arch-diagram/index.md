@@ -127,3 +127,10 @@ date: 2026-09-13
 - **下游**：[ADR](/projects/toolkit/adr/) 是图上的**分叉点**。画完图，把每个"为什么走这条路"的分叉抽出来写 ADR。
 - **下游**：[压测报告](/projects/toolkit/perf-report/) 的**对象清单**来自图上标出的关键路径。没有图，容易压错目标。
 - **互引**：图上有版本号，ADR 与压测报告都标注所依据的架构图版本 —— 三者构成同一时间点的证据快照。
+
+### 已画出的设计图
+
+| 页 | 议题 |
+|---|---|
+| [绩效周期链路](/projects/toolkit/arch-diagram/perf-cycle) | 一个考核周期：同步 / 填报 / 推送 / 预计算 |
+| [物业容器视图](/projects/toolkit/arch-diagram/property-saas) | 在线事务、租户分档、分析外移 |

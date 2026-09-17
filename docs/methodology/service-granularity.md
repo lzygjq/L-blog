@@ -235,4 +235,4 @@ DDD 的限界上下文是**模型边界**，微服务是**部署边界**。二�
 | 14 | "模块化单体怎么守边界？" | Maven/Gradle 子模块（**编译期约束**）+ ArchUnit 断言；跨模块优先进程内调用，事务仍是本地事务 | [模块化单体](/methodology/service-granularity#modular-monolith) |
 | 15 | "模块化单体和微服务怎么选？" | 只要"独立伸缩"和"独立发布"不是真痛点，模块化单体在多数维度更优；且它的边界就是未来的服务边界 | [对比表](/methodology/service-granularity#modular-monolith) |
 
-> **本篇是本板块第 4 篇。** 边界怎么划见 [DDD 战略设计](/methodology/ddd-strategic)；跨服务一致性怎么达成见[事件驱动与 CQRS](/methodology/event-driven-cqrs)；服务间耦合时的独立部署与发布细节见[架构演进地图](/projects/architecture-evolution/#app-line)。
+> **本篇是本板块第 4 篇。** 边界怎么划见 [DDD 战略设计](/methodology/ddd-strategic)；跨服务一致性怎么达成见[事件驱动与 CQRS](/methodology/event-driven-cqrs)；服务间耦合时的独立部署与发布细节见[架构路线 · 应用 · 垂直拆分](/projects/architecture-evolution/app/#vertical) 与 [微服务](/projects/architecture-evolution/app/#microservice)。

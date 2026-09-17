@@ -524,14 +524,16 @@ html .VPHome .VPFeatures .item {
   padding: 8px !important;
 }
 
-/* tagline 放宽换行宽度：默认 576px 折 3 行太碎，720px 收成 2 行更整 */
+/* tagline 放宽：首页身份句比原先长，800px 收成两三行 */
 html .VPHome .tagline {
-  max-width: 720px !important;
+  max-width: 800px !important;
 }
 
-/* tagline 放宽换行宽度：默认 576px 折 3 行太碎，720px 收成 2 行更整 */
-html .VPHome .tagline {
-  max-width: 720px !important;
+/* 首页 YAML 下方的「仓库」表：跟 features 同宽，不要顶到视口边缘 */
+html .VPHome .vp-doc {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 56px;
 }
 
 /* 卡片头部一行化：图标与标题同行（用户定稿），说明文字独占下一行。

@@ -7,7 +7,7 @@ desc: binlog 驱动的三步复制流程、从库 IO 线程与 SQL 线程分工�
 
 # 主从复制与读写分离
 
-> 本文是[架构演进地图](/projects/architecture-evolution/)的**数据层分册**——地图的 V2（读扩展）与 V3（自动故障转移）两档都落在这里。
+> 本文是[架构路线](/projects/architecture-evolution/)的**数据层分册**——[数据 · 主从](/projects/architecture-evolution/data/#replica) 与 [数据 · 自动切主](/projects/architecture-evolution/data/#failover) 落在这里。
 
 ## 一、问题场景
 

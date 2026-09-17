@@ -132,6 +132,7 @@ desc: 面向六万人规模组织的绩效系统技术复盘：外部权威源�
 | 你的关注点 | 建议路径 |
 |---|---|
 | 想看完整的数据链路 | [组织同步](/projects/perf-system/org-sync-100k/) → [并发填报](/projects/perf-system/peak-filling/) → [审批推送](/projects/perf-system/approval-push/) → [报表预计算](/projects/perf-system/report-precompute/) |
+| 想先自己推再对照 | [闭卷模拟盘 · 绩效](/projects/toolkit/drill/perf-system)（先写） |
 | 想看"数据量级"类难点怎么讲 | [组织同步 · 树形存储](/projects/perf-system/org-sync-100k/#tree-models) → [对账三档](/projects/perf-system/org-sync-100k/#three-checks) |
 | 想看"流量洪峰"类难点怎么讲 | [并发填报 · 流量预估](/projects/perf-system/peak-filling/#peak-factor) → [写入热点](/projects/perf-system/peak-filling/#hotspot) |
 | 想看"实时性 / 最终一致"类难点怎么讲 | [审批推送 · 推拉结合](/projects/perf-system/approval-push/#push-pull) → [本地消息表](/projects/perf-system/approval-push/#local-message-table) |

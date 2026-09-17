@@ -77,7 +77,7 @@ title: 分布式理论 · 板块导览
 | [消息队列](/middleware/) | **最密集的应用现场**：RabbitMQ 仲裁队列、Kafka KRaft、RocketMQ Controller 各取 Raft 的一部分用（见[落地对照](/distributed/consensus#practice)） |
 | [数据存储](/database/) | Redis Cluster 用**哈希槽**、Sentinel 用**类 Raft 投票**；[分库分表](/database/sharding/) 讲落地，本板块讲**算法本身** |
 | [数据仓库](/bigdata/) | Doris 的 FE 选主走类 Paxos 协议；元数据一致性同样是共识问题 |
-| [架构演进地图](/projects/architecture-evolution/) | 分片、多副本这些演进动作的**理论依据**在本板块 |
+| [架构路线](/projects/architecture-evolution/) | 分片、多副本这些演进动作的**理论依据**在本板块 |
 | [面试专题](/interview/) | 检索层：跨板块连线题与题单索引 |
 
 ## 五、面试高频索引 {#interview}

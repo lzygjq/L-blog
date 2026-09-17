@@ -1,13 +1,13 @@
 ---
 date: 2026-09-17
-title: L4 CIO · 对一条业务线的技术结果负责
+title: 成长 L4 CIO · 对一条业务线的技术结果负责
 desc: 从「设计一个系统」到「对一条业务线负责」的五步阅读顺序——技术战略、算账、风险与合规、落地叙事（含方案评审与 AI 治理）、业务语言；附跳过表、离场自检与知识域边界
 order: 4
 ---
 
-# L4 CIO · 对一条业务线的技术结果负责
+# 成长 L4 CIO · 对一条业务线的技术结果负责
 
-> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的第四级清单，回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。上一级见 [L3 架构师](/projects/architect-roadmap/architect/)。
+> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的第四级清单，回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。上一级见 [成长 L3 架构师](/projects/architect-roadmap/architect/)。
 >
 > **口径说明（2026-09-17 更新）**：L4 的主战场大半在组织、预算与风险里，不在技术知识里。这一页的作用是**把边界说清楚**，而不是给你一份能读完的清单——所以下面每一步都同时标注了「本站有什么」与「本站缺什么」。**原先标为缺口的三项（技术成本与 ROI、合规体系、研发效能度量）以及 AI 治理已成篇**，各表已更新为「本级的读法」；仍未覆盖的部分写在[第六节](#missing)。
 
@@ -31,8 +31,8 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 
 | 页 | 本级怎么读 | 覆盖度 |
 |---|---|---|
-| [架构演进地图](/projects/architecture-evolution/)、[五层 × 四档](/projects/architecture-evolution/#matrix) | 全读——它把「什么时候该升级架构」变成了触发信号，**是本级少见的可直接复用的工具** | ✅ |
-| [两个轴](/projects/architecture-evolution/#two-axes) | 读这一节——它把「业务侧演进」与「技术侧演进」分开；本级做战略判断时最常混的就是这两个轴 | ✅ |
+| [架构路线](/projects/architecture-evolution/)、[谁先撞墙](/projects/architecture-evolution/#triggers) | 全读总览，再按层点进 [L2 应用](/projects/architecture-evolution/app/) / [L3 数据](/projects/architecture-evolution/data/) / [L4 缓存](/projects/architecture-evolution/cache/) / [L5 文件](/projects/architecture-evolution/file/) / [L6 部署](/projects/architecture-evolution/deploy/)——它把「什么时候该动哪一层」变成了触发信号，**是本级少见的可直接复用的工具** | ✅ |
+| [两个轴](/projects/architecture-evolution/#two-axes) | 读这一节——它把数据/缓存的「活下来」与「装得下」分开；不要套到应用或文件上 | ✅ |
 | [架构风格对比](/methodology/architecture-styles) | 全读——向业务解释「为什么不能又便宜、又快、又稳」时候的词汇表 | ✅ |
 | [拆分粒度](/methodology/service-granularity) | 读「运维成本」那一部分——它是编制与预算的输入 | ✅ |
 | [战略设计](/methodology/ddd-strategic) | 读这一篇——限界上下文是「把业务翻译成系统边界」的唯一抓手，也是本级**直接可用**的方法论 | ✅ |
@@ -80,7 +80,7 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 |---|---|---|
 | [关于本站](/about/) | 读内容边界那一节——**知道自己不知道什么，是这一级的第一能力** | ✅ |
 | [战略设计](/methodology/ddd-strategic) | 回读——本级拿它做「业务术语与技术模块」的对齐 | ✅ |
-| [架构演进地图 · 个人路径](/projects/architecture-evolution/#my-path) | 读这一节——一个人的能力路径与一条业务线的技术路径，形状是一样的 | ✅ |
+| [架构路线 · 个人路径](/projects/architecture-evolution/#my-path) | 读这一节——一个人的能力路径与一条业务线的技术路径，形状是一样的 | ✅ |
 | [面试专题的四层次](/interview/#layers) | 读「决策层」那一栏——它描述的就是本级会被问到的问题类型 | ✅ |
 | [**研发效能度量：从 DORA 指标到团队原型**](/cloud-native/cicd/engineering-metrics)、[质量成本的四个类别](/cloud-native/cicd/engineering-metrics#beyond-dora)、[给 L4 的三条建议](/cloud-native/cicd/engineering-metrics#for-cio) | 读四节——**「DORA 四项」已是过时口径，现行是五项**（三项吞吐 + 两项不稳定）。本级只读 §四 七个团队原型、[§五 AI 让个人变快但交付变慢](/cloud-native/cicd/engineering-metrics#ai-paradox)、§六 质量成本、§七 四条铁律，**口径细节留给执行层**；组织叙事的手法见[成本篇面试口径 Q10](/methodology/tech-cost-roi#interview) | ✅ 已补齐 |
 
@@ -129,7 +129,7 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 |---|---|---|
 | **组织设计与人**（编制、职级、绩效、招聘与淘汰） | 属于人力资源与组织管理的知识域，与技术知识没有可迁移的接口 | 读管理学与组织行为学的成体系材料；**本站只提供与技术架构对齐的那一半**（[团队拓扑](/cloud-native/cicd/engineering-metrics#beyond-dora)） |
 | **财务与法务的判定**（会计准则、合同条款、诉讼风险） | 具体判定必须走专业渠道，技术站转述反而危险 | [成本篇](/methodology/tech-cost-roi)给的是**与技术投入对话的财务语言**，不是财务判断本身 |
-| **技术路线图模板** | 它高度依赖组织语境，任何模板到下一个组织都会失效 | 用[架构演进地图的触发信号](/projects/architecture-evolution/#matrix)自己拼一份——**信号可复用，模板不可复用** |
+| **技术路线图模板** | 它高度依赖组织语境，任何模板到下一个组织都会失效 | 用[架构路线的触发信号](/projects/architecture-evolution/#triggers)自己拼一份——**信号可复用，模板不可复用** |
 | **真实体量下的决策经验** | 只能来自亲身经历 | 用[智慧物业 SaaS](/projects/property-saas/)与[大型集团绩效系统](/projects/perf-system/)当模拟盘，**自己把设计重推一遍，再对照它的取舍** |
 
 **这一节的结论**：上表是知识域边界，本站永远不会覆盖——**知道自己不知道什么，是这一级的第一能力**（这也是第五节把[关于本站](/about/)排在第一行的原因）。AI 治理已成篇，不在此列。
@@ -138,10 +138,10 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 
 | 你想干什么 | 去哪 |
 |---|---|
-| 回看 L3 的清单（本级的前置） | [L3 架构师 · 能设计系统，并为取舍负责](/projects/architect-roadmap/architect/) |
+| 回看成长 L3 的清单（本级的前置） | [成长 L3 架构师 · 能设计系统，并为取舍负责](/projects/architect-roadmap/architect/) |
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
 | 看「决策层的问题长什么样」 | [面试专题的四层次](/interview/#layers) |
-| 找可复用的管理工具（演进信号、产出格式） | [架构演进地图](/projects/architecture-evolution/#matrix)、[可验证产出工具箱](/projects/toolkit/)（含[方案评审](/projects/toolkit/review/)） |
+| 找可复用的管理工具（演进信号、产出格式） | [架构路线](/projects/architecture-evolution/#triggers)、[可验证产出工具箱](/projects/toolkit/)（含[方案评审](/projects/toolkit/review/)） |
 | 把两个案例当模拟盘，自己算一遍账 | [智慧物业 SaaS](/projects/property-saas/)、[大型集团绩效系统](/projects/perf-system/) |
 | 补齐的缺口（本级最先该读） | [研发效能度量](/cloud-native/cicd/engineering-metrics)、[技术成本与 ROI](/methodology/tech-cost-roi)、[合规体系](/security/compliance-system)、[AI 治理](/ai/governance/) |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

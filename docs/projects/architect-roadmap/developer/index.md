@@ -1,13 +1,13 @@
 ---
 date: 2026-09-17
-title: L1 开发 · 能独立交付一个模块
+title: 成长 L1 开发 · 能独立交付一个模块
 desc: 从「能改功能」到「能独立交付」的七步阅读顺序，每一步给出页清单与「读到哪一层就停」；第七步接上应用日志、Compose 与 Linux 分类，另附 AI 闸门、跳过表、离场自检与原缺口已补齐后的读法
 order: 1
 ---
 
-# L1 开发 · 能独立交付一个模块
+# 成长 L1 开发 · 能独立交付一个模块
 
-> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的起点清单。它回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。同一篇文章会在多个级别出现，只是每一级拿走的深度不同；级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。读完这一级，往上一级见 [L2 高级开发](/projects/architect-roadmap/senior/)。
+> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的起点清单。它回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。同一篇文章会在多个级别出现，只是每一级拿走的深度不同；级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。读完这一级，往上一级见 [成长 L2 高级开发](/projects/architect-roadmap/senior/)。
 
 ## 一、这一级的判据
 
@@ -197,9 +197,9 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 
 | 你想干什么 | 去哪 |
 |---|---|
-| 往上走一级 | [L2 高级开发 · 能负责一块，并对线上问题给出根因](/projects/architect-roadmap/senior/) |
+| 往上走一级 | [成长 L2 高级开发 · 能负责一块，并对线上问题给出根因](/projects/architect-roadmap/senior/) |
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
-| 看「这些知识会被问到多深」 | [面试专题的四层次](/interview/#layers) 与[按轮次的复习路径](/interview/#rounds) |
-| 看别人怎么把 L1 的东西用在一个真实系统里 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
+| 看「这些知识会被问到多深」 | 还在成长 L1：走[一面路径](/interview/#rounds)和[自检清单](/interview/#checklist)。不要跳到[成长 L2→L3 那一包](/interview/#pack) |
+| 看别人怎么把 L1 的东西用在一个真实系统里 | [项目实战](/projects/)、[架构路线](/projects/architecture-evolution/#matrix) |
 | 提前准备「拿什么证明我做过」 | [可验证产出三件套](/projects/toolkit/) |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

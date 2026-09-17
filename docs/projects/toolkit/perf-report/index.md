@@ -120,3 +120,10 @@ date: 2026-09-13
 - **上游**：[架构图](/projects/toolkit/arch-diagram/) 上的**关键路径**，就是压测的对象清单 —— 没有图，压测容易挑错目标（压了不重要的接口）。
 - **下游**：压测暴露的取舍（为性能牺牲了什么），往往需要回写一篇 [ADR](/projects/toolkit/adr/) 记录"为什么接受这个代价"。
 - **互引**：ADR 的「关联」字段引用压测报告编号；压测报告的「被测版本」标注对应的架构图版本。
+
+### 已抽出的口径（不是实测）
+
+| 页 | 状态 |
+|---|---|
+| [绩效填报高峰](/projects/toolkit/perf-report/peak-filling) | 假设。分档结果表为空 |
+| [物业关键链路](/projects/toolkit/perf-report/property-capacity) | 假设。分档结果表为空 |

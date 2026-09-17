@@ -9,7 +9,7 @@ title: 高可用 · 板块导览
 
 - 不重复**应用层的熔断、限流、降级实现**——那是 [服务容错](/java/spring/spring-cloud/resilience) 的内容；
 - 不重复**容量与防护链路的落地视角**——见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/#protection)；
-- 不重复**单库高可用的两代演进**（主从 → 读写分离 → 自动切换）——见[架构演进地图](/projects/architecture-evolution/#v3)；
+- 不重复**单库高可用的两代演进**（主从 → 读写分离 → 自动切换）——见[架构路线 · 数据 · 自动切主](/projects/architecture-evolution/data/#failover)；
 - 不重复**各中间件自身的高可用机制**（Redis 哨兵与集群、Kafka ISR、RabbitMQ 仲裁队列、MySQL 主从）——那是各技术板块的事。
 
 这里讲的是**架构层的高可用**：怎么把"高可用"算成一个数、故障怎么被检测与转移、跨机房怎么选、以及怎么知道前面这些都真的有效。这些内容**与语言和框架无关**，所以它属于底座层。
@@ -82,7 +82,7 @@ title: 高可用 · 板块导览
 |---|---|
 | [服务容错](/java/spring/spring-cloud/resilience) | **应用层**：熔断、限流、降级的**实现**（Sentinel / Resilience4j）；本板块讲"这些手段在可用性公式里起什么作用"（降级 = **把串联变可选**） |
 | [容量测算与压测方案](/projects/property-saas/capacity-and-perf/#protection) | **容量层**：五层防护链路的落地与压测方法；本板块讲"容量规划的目标是什么（RTO/接管能力）" |
-| [架构演进地图](/projects/architecture-evolution/#v3) | **单库维度**的演进（主从 → 读写分离 → 自动切换）；本板块把它扩展到**机房维度** |
+| [架构路线 · 数据 · 自动切主](/projects/architecture-evolution/data/#failover) | **单库维度**：[主从](/projects/architecture-evolution/data/#replica) / [自动切主](/projects/architecture-evolution/data/#failover)；本板块把它扩展到**机房维度** |
 | [数据存储](/database/) | 各存储自身的 HA 机制（[Redis HA](/database/redis/ha-cluster)、[MySQL 复制](/database/mysql/replication)）；本板块讲**跨机房怎么把它们的 RPO/RTO 拼起来** |
 | [消息队列](/middleware/) | [Kafka](/middleware/kafka/high-availability)、[RabbitMQ](/middleware/rabbitmq/high-availability) 的高可用与副本语义——**消息是跨单元最终一致的主要载体** |
 | [分布式理论](/distributed/) | **理论层**：多数派、term/epoch（[共识协议](/distributed/consensus#quorum)）是仲裁与 fencing 的理论依据 |
@@ -126,4 +126,4 @@ title: 高可用 · 板块导览
 | 28 | 实验设计六要素 | "怎么设计一个不会变成事故的实验" | [六要素](/high-availability/chaos-drills#experiment) |
 | 29 | 演练反模式 | "为什么『切换成功』不等于演练成功" | [反模式](/high-availability/chaos-drills#antipatterns) |
 
-> **本板块 4 篇正文 / 5 页。** 与 [服务容错](/java/spring/spring-cloud/resilience) 的分工是「架构层 vs 应用层实现」，与[容量测算与压测方案](/projects/property-saas/capacity-and-perf/)的分工是「目标与恢复 vs 容量与防护」，与[架构演进地图](/projects/architecture-evolution/)的分工是「机房维度 vs 单库维度」。各处交叉引用而不复制正文。
+> **本板块 4 篇正文 / 5 页。** 与 [服务容错](/java/spring/spring-cloud/resilience) 的分工是「架构层 vs 应用层实现」，与[容量测算与压测方案](/projects/property-saas/capacity-and-perf/)的分工是「目标与恢复 vs 容量与防护」，与[架构路线](/projects/architecture-evolution/)的分工是「机房维度 vs 单库维度」。各处交叉引用而不复制正文。

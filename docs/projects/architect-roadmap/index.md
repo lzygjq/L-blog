@@ -1,12 +1,12 @@
 ---
 date: 2026-09-17
 title: 成长路线
-desc: 四级能力路线——从「开发」起步，经高级开发、架构师到 CIO；计算机基础与 Java 语言基础作为贯穿四级的地基，附领域依赖链与每级的清单入口
+desc: 成长 L1–L4 能力路线——从成长 L1 开发起步，经成长 L2 高级开发、成长 L3 架构师到成长 L4 CIO；计算机基础与 Java 语言基础作为贯穿四级的地基，附领域依赖链与每级的清单入口
 ---
 
 # 成长路线
 
-> **口径说明**：这一页回答两个问题——「**我现在在哪一级**」和「**下一步读什么**」。本站内容按**领域**分成 6 个板块（见顶部导航），按**能力级别**分成 4 级（本页）。两根轴是正交的：同一个「数据与存储」板块里，既住着「Redis 是什么」，也住着「集群脑裂怎么处理」。所以下面的分级**不是把板块重排一遍**，而是给同一批内容加一根深度轴——**领域轴用来查，深度轴用来走**。
+> **口径说明**：这一页回答两个问题——「**我现在在哪一级**」和「**下一步读什么**」。本站三根轴正交：**领域**（顶部 6 个板块，用来查）、**深度**（本页 **成长 L1–L4**，用来走）、**形态**（[架构路线](/projects/architecture-evolution/) **架构 L1–L6**，用来走）。不要把成长 L2 和架构 L2 读成同一级。同一个「数据与存储」里既住着「Redis 是什么」，也住着「集群脑裂怎么处理」——分级不是把板块重排一遍。
 
 ## 一、起点为什么是「开发」 {#start}
 
@@ -15,10 +15,10 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 | 级别 | 本站覆盖 | 判据（这一级的人能做什么） |
 |---|---|---|
 | 入门 / 助理开发 | ❌ 不覆盖 | 环境搭建、语法入门、Git 基本操作、第一个能跑起来的 Web 项目——属于「还没入行」 |
-| [**L1 开发**](/projects/architect-roadmap/developer/) | ✅ **路线起点** | 读懂别人写的代码，按现有风格独立交付一个模块 |
-| [**L2 高级开发**](/projects/architect-roadmap/senior/) | ✅ | 交付不需要人盯，能负责一块，并对线上问题给出根因 |
-| [**L3 架构师**](/projects/architect-roadmap/architect/) | ✅ | 能设计系统，并说清「为什么这么选、放弃了什么」 |
-| [**L4 CIO**](/projects/architect-roadmap/cio/) | ✅ | 对一条业务线的技术结果负责——规划、算账、带团队 |
+| [**成长 L1 开发**](/projects/architect-roadmap/developer/) | ✅ **路线起点** | 读懂别人写的代码，按现有风格独立交付一个模块 |
+| [**成长 L2 高级开发**](/projects/architect-roadmap/senior/) | ✅ | 交付不需要人盯，能负责一块，并对线上问题给出根因 |
+| [**成长 L3 架构师**](/projects/architect-roadmap/architect/) | ✅ | 能设计系统，并说清「为什么这么选、放弃了什么」 |
+| [**成长 L4 CIO**](/projects/architect-roadmap/cio/) | ✅ | 对一条业务线的技术结果负责——规划、算账、带团队 |
 
 **如果你的起点在「入门 / 助理开发」**：建议先通过一门系统课程或官方文档补齐语法与工具链，再回到这里。本站几乎没有 3000 字以下的内容页——这不是你不行，是这一站本来就不是为那个阶段写的，硬读会很挫败。
 
@@ -45,31 +45,31 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 ## 三、四级阶梯 {#ladder}
 
 ```text
-  L4  CIO         规划 · 算账 · 带团队
+  成长 L4  CIO         规划 · 算账 · 带团队
   ────────────────────────────────────────────────────
-  L3  架构师       设计系统 · 为取舍负责
+  成长 L3  架构师       设计系统 · 为取舍负责
   ────────────────────────────────────────────────────
-  L2  高级开发     负责一块 · 定位线上问题
+  成长 L2  高级开发     负责一块 · 定位线上问题
   ────────────────────────────────────────────────────
-  L1  开发         独立交付一个模块          ← 起点
+  成长 L1  开发         独立交付一个模块          ← 起点
   ════════════════════════════════════════════════════
   地基   网络 · 操作系统 · 算法 · Java 语言基础 · 集合（贯穿四级）
 ```
 
 | 级别 | 主战场（按依赖顺序，不是按板块顺序） | 这一级要跨过的坎 |
 |---|---|---|
-| **L1 开发** | 语言与集合 → 设计原则与常用模式 → 数据「会用」→ 框架「会用」→ 测试 → 排查入门（日志字段 / Compose / Linux 分类）→ AI 闸门 | 从「能改」到「能独立交付」：补上测试、排查，以及别人能接手的那一层 |
-| **L2 高级开发** | 并发 → JVM → 数据原理 → 框架原理 → 消息 → 第二数据库 → 工程质量（可观测使用侧 / 容器 JVM / 扩展-收缩）→ Agent 循环 | 从「交付」到「负责」：能把线上问题定位到根因，而不是「重启一下试试」 |
-| **L3 架构师** | 分布式地基 → 通信 → 数据架构 → 方法论 → 非功能 → 工程效能 → AI 进不进主链路 | 从「负责」到「设计」：给出方案，并为方案的代价负责 |
-| **L4 CIO** | 技术战略 → 算账 → 风险与合规 → 落地叙事（含方案评审与 AI 治理）→ 业务语言 | 从「设计」到「规划」：用业务语言表述技术投入与回报 |
+| **成长 L1 开发** | 语言与集合 → 设计原则与常用模式 → 数据「会用」→ 框架「会用」→ 测试 → 排查入门（日志字段 / Compose / Linux 分类）→ AI 闸门 | 从「能改」到「能独立交付」：补上测试、排查，以及别人能接手的那一层 |
+| **成长 L2 高级开发** | 并发 → JVM → 数据原理 → 框架原理 → 消息 → 第二数据库 → 工程质量（可观测使用侧 / 容器 JVM / 扩展-收缩）→ Agent 循环 | 从「交付」到「负责」：能把线上问题定位到根因，而不是「重启一下试试」 |
+| **成长 L3 架构师** | 分布式地基 → 通信 → 数据架构 → 方法论 → 非功能 → 工程效能 → AI 进不进主链路 | 从「负责」到「设计」：给出方案，并为方案的代价负责 |
+| **成长 L4 CIO** | 技术战略 → 算账 → 风险与合规 → 落地叙事（含方案评审与 AI 治理）→ 业务语言 | 从「设计」到「规划」：用业务语言表述技术投入与回报 |
 
-**四级清单页**：[L1 开发](/projects/architect-roadmap/developer/) · [L2 高级开发](/projects/architect-roadmap/senior/) · [L3 架构师](/projects/architect-roadmap/architect/) · [L4 CIO](/projects/architect-roadmap/cio/)——每一页给出「阅读顺序 + 每一步读到哪一层就停 + 本级明确跳过的内容 + 离场自检」。**从 L1 开始读**，因为它同时是「起点」和「全站用法说明」。
+**四级清单页**：[成长 L1 开发](/projects/architect-roadmap/developer/) · [成长 L2 高级开发](/projects/architect-roadmap/senior/) · [成长 L3 架构师](/projects/architect-roadmap/architect/) · [成长 L4 CIO](/projects/architect-roadmap/cio/)——每一页给出「阅读顺序 + 每一步读到哪一层就停 + 本级明确跳过的内容 + 离场自检」。**从成长 L1 开始读**，因为它同时是「起点」和「全站用法说明」。
 
 ## 四、级别不是页面的属性，是「读者与页面的关系」 {#levels-as-relation}
 
 这是整套设计的核心。同一篇文章，四个级别读了之后**拿走的不是同一个东西**：
 
-| 页面 | L1 开发 | L2 高级开发 | L3 架构师 | L4 CIO |
+| 页面 | 成长 L1 开发 | 成长 L2 高级开发 | 成长 L3 架构师 | 成长 L4 CIO |
 |---|---|---|---|---|
 | [索引设计与覆盖索引](/database/mysql/index-design) | 知道哪些字段该建索引，`EXPLAIN` 的 `type` 列看得懂 | 能解释为什么联合索引要守最左前缀、覆盖索引省掉了哪一步 | 能判断「索引还能不能救这个查询」，还是该改数据模型 | 能估算索引带来的存储与写入放大，据此做成本取舍 |
 | [IoC 容器与依赖注入](/java/spring/spring-framework/ioc/) | 会用注解装配，知道容器替你管了什么 | 讲得清容器启动流程，以及循环依赖为什么能解决 | 能判断什么情况下**不该**交给容器托管 | —— |
@@ -81,7 +81,7 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 1. **本站不做「页面级难度标签」。** 标签是**单值**（要么 L1 要么 L3），而上面每一行都横跨四级——贴标签等于把四行压成一行，反而丢信息。真正的分级信息是「**读到哪一层**」，它是一个区间，不是标签；而且是**读者侧**的属性，不是页面侧的。
 2. **级别页给的是「清单 + 读到哪一层」，不是「这些页属于这一级」。** 措辞差异很重要：前者是阅读指引（同一页会出现在多个级别），后者会诱导读者以为「读完这一页，这一级就过了」。
 
-**和[面试专题的四层次](/interview/#layers)配合用**：那套按「被问到的深度」切（记忆 → 原理 → 判断 → 决策），本页按「你要交付什么」切。两者可以互相校验——如果你在 L2，却答不上「判断层」的问题，说明这一级的阅读还没走完。
+**和[面试专题的四层次](/interview/#layers)配合用**：那套按「被问到的深度」切（记忆 → 原理 → 判断 → 决策），本页按「你要交付什么」切。两者可以互相校验——如果你在成长 L2，却答不上「判断层」的问题，说明这一级的阅读还没走完。
 
 ## 五、领域依赖链：五阶段 {#five-stages}
 
@@ -137,7 +137,7 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 | 高性能 | 性能调优、全链路压测、容量规划、缓存/异步/削峰 | [容量测算与压测方案](/projects/property-saas/capacity-and-perf/)（六步推导链 + 五层防护 + 压测方案） |
 | 安全 | 认证授权（OAuth2/SSO）、数据加密脱敏、防刷防注入、等保合规 | [安全与合规](/security/)（5 篇：认证 / 授权 / OAuth2 / 攻击防护 / 加密合规）；落地视角见[发布、安全与运维](/projects/property-saas/release-and-ops/) |
 | 可观测性 | Prometheus 监控、SkyWalking 链路追踪、ELK 日志、告警体系 | [监控与可观测](/cloud-native/observability/)（5 篇：指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / 成本与许可）；**ELK 的存储与检索端见[搜索与检索](/search/)（5 篇）。本行已补齐** |
-| 方法论 | DDD 领域驱动设计、架构风格对比、架构演进、对账与补偿、多租户分档 | [方法论](/methodology/)（9 篇：战略设计 / 战术设计 / 架构风格 / 拆分粒度 / 事件驱动与 CQRS / 落地与反模式 / 技术成本与 ROI / 对账与补偿 / 多租户）＋[架构演进地图](/projects/architecture-evolution/)。**本行已补齐** |
+| 方法论 | DDD 领域驱动设计、架构风格对比、架构演进、对账与补偿、多租户分档 | [方法论](/methodology/)（9 篇：战略设计 / 战术设计 / 架构风格 / 拆分粒度 / 事件驱动与 CQRS / 落地与反模式 / 技术成本与 ROI / 对账与补偿 / 多租户）＋[架构路线](/projects/architecture-evolution/)。**本行已补齐** |
 
 **为什么是核心**：这一层是架构师与高级开发的本质区别——高可用容灾与性能调优实战最能拉开差距，架构师的核心价值就体现在这一层。参考落地视角见[项目实战](/projects/)下的真实难点复盘。
 
@@ -158,7 +158,7 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 | 能力 | 说明 |
 |---|---|
 | Trade-off 权衡 | 架构的本质是取舍，能讲清「为什么这么选、放弃了什么」 |
-| 架构演进 | 从单体 → 微服务 → 云原生的演进路径判断 |
+| 架构演进 | 按层判断该不该升（应用 / 数据 / 缓存 / 文件 / 部署不必齐步），方法见[架构路线](/projects/architecture-evolution/) |
 | 技术规划 | 技术选型、技术债管理、技术路线制定 |
 | 方案评审 | 主导技术评审、说服团队、控制技术风险——方法见[方案评审](/projects/toolkit/review/) |
 | 业务理解 | 把业务需求翻译成技术架构，领域建模 |
@@ -181,22 +181,23 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 
 | 级别 | 现状（2026-09-17） |
 |---|---|
-| **L1 开发** | 三项百科缺口已补齐。清单接到：[应用日志](/java/spring/spring-boot/logging) / [Compose](/cloud-native/docker/#compose) / [Linux 分类](/fundamentals/os/linux-tools#why-tools) / [AI 闸门](/ai/vibe-coding/#five-gates) |
-| **L2 高级开发** | 连接池已补齐。清单接到：[慢请求剧本](/cloud-native/observability/slow-request) / [出站超时](/java/spring/spring-framework/crosscutting/outbound-http) / [故障复盘](/projects/toolkit/postmortem/) / [容器内 JVM](/cloud-native/docker/#jvm-in-container) / [扩展-收缩](/cloud-native/cicd/rollback-and-migration#expand-contract) / [Agent 循环](/ai/agent-harness/#agent-loop) |
-| **L3 架构师** | 仍不是内容缺口。清单接到：[方案评审](/projects/toolkit/review/) / [对账与补偿](/methodology/reconciliation) / [多租户方法](/methodology/multi-tenancy) / [AI 进不进主链路](/ai/spring-ai/#positioning)（含[评测与降级](/ai/governance/#eval)）。缺的仍是模拟盘，不是原理 |
-| **L4 CIO** | ROI / 效能 / 合规 / [AI 治理](/ai/governance/)已补齐。组织 / 财务 / 法务仍是知识域边界 |
+| **成长 L1 开发** | 三项百科缺口已补齐。清单接到：[应用日志](/java/spring/spring-boot/logging) / [Compose](/cloud-native/docker/#compose) / [Linux 分类](/fundamentals/os/linux-tools#why-tools) / [AI 闸门](/ai/vibe-coding/#five-gates) |
+| **成长 L2 高级开发** | 连接池已补齐。清单接到：[慢请求剧本](/cloud-native/observability/slow-request) / [出站超时](/java/spring/spring-framework/crosscutting/outbound-http) / [故障复盘](/projects/toolkit/postmortem/) / [容器内 JVM](/cloud-native/docker/#jvm-in-container) / [扩展-收缩](/cloud-native/cicd/rollback-and-migration#expand-contract) / [Agent 循环](/ai/agent-harness/#agent-loop) |
+| **成长 L3 架构师** | 仍不是内容缺口。清单接到：[方案评审](/projects/toolkit/review/) / [对账与补偿](/methodology/reconciliation) / [多租户方法](/methodology/multi-tenancy) / [AI 进不进主链路](/ai/spring-ai/#positioning)（含[评测与降级](/ai/governance/#eval)）。缺的仍是模拟盘：[闭卷卷子](/projects/toolkit/drill/)已挂上，过不过看你有没有写完再对照 |
+| **成长 L4 CIO** | ROI / 效能 / 合规 / [AI 治理](/ai/governance/)已补齐。组织 / 财务 / 法务仍是知识域边界 |
 
-上表里 **L1 的三项百科缺口**属于「**代价由别人承担、所以最容易被自己忽略**」的那一类：分支模型决定你的提交能不能被评审，依赖管理决定构建能不能复现，接口契约决定调用方要不要为你的接口写特殊逻辑。应用日志、Compose、闸门是同一类，只是换成「别人能不能接手你交的模块」。**L4 的机制篇已补齐**——难点不在技术深度，而在**把组织、预算与风险里的判断翻译成可验证的机制**；补齐之后 L4 仍有本站不覆盖的部分（组织设计、财务与法务判定），那些已在该级页明确列为「知识域边界」。
+上表里 **成长 L1 的三项百科缺口**属于「**代价由别人承担、所以最容易被自己忽略**」的那一类：分支模型决定你的提交能不能被评审，依赖管理决定构建能不能复现，接口契约决定调用方要不要为你的接口写特殊逻辑。应用日志、Compose、闸门是同一类，只是换成「别人能不能接手你交的模块」。**成长 L4 的机制篇已补齐**——难点不在技术深度，而在**把组织、预算与风险里的判断翻译成可验证的机制**；补齐之后成长 L4 仍有本站不覆盖的部分（组织设计、财务与法务判定），那些已在该级页明确列为「知识域边界」。
 
-**每一项在对应级别页里都有落点**——L1、L2、L4 标明本级该读到哪一层（见 [L1 开发](/projects/architect-roadmap/developer/)、[L2 高级开发](/projects/architect-roadmap/senior/)、[L4 CIO](/projects/architect-roadmap/cio/)）；L3 的该节解释的是「**为什么这一级缺的不是内容**」，见 [L3 架构师](/projects/architect-roadmap/architect/)。AI 的四级切片见 [AI 应用 · 按四级读](/ai/#by-level)。
+**每一项在对应级别页里都有落点**——成长 L1、成长 L2、成长 L4 标明本级该读到哪一层（见 [成长 L1 开发](/projects/architect-roadmap/developer/)、[成长 L2 高级开发](/projects/architect-roadmap/senior/)、[成长 L4 CIO](/projects/architect-roadmap/cio/)）；成长 L3 的该节解释的是「**为什么这一级缺的不是内容**」，见 [成长 L3 架构师](/projects/architect-roadmap/architect/)。AI 的四级切片见 [AI 应用 · 按四级读](/ai/#by-level)。
 
 ## 七、关联阅读 {#reading}
 
 | 你想干什么 | 去哪 |
 |---|---|
 | 按领域查知识 | 顶部导航的 6 个板块（每个板块导览页都有「阅读建议」） |
-| 按深度走路线 | 本页（**最右侧竖栏顶部的「成长路线」直达**，全站常驻）→ 四级清单：[L1 开发](/projects/architect-roadmap/developer/) → [L2 高级开发](/projects/architect-roadmap/senior/) → [L3 架构师](/projects/architect-roadmap/architect/) → [L4 CIO](/projects/architect-roadmap/cio/) |
-| 看「会被问到多深」 | [面试专题](/interview/)：四层次分级、按轮次的复习路径、跨板块连线题 |
+| 按深度走路线 | 本页（**最右侧竖栏顶部的「成长路线」直达**，全站常驻）→ 四级清单：[成长 L1 开发](/projects/architect-roadmap/developer/) → [成长 L2 高级开发](/projects/architect-roadmap/senior/) → [成长 L3 架构师](/projects/architect-roadmap/architect/) → [成长 L4 CIO](/projects/architect-roadmap/cio/) |
+| 判断该不该动哪一层架构 | 竖栏「成长路线」下面的[架构路线](/projects/architecture-evolution/)：架构 L1 共址与拆机 → 架构 L2 应用 → 架构 L3 数据 → 架构 L4 缓存 → 架构 L5 文件 → 架构 L6 部署；手头系统填[层账](/projects/architecture-evolution/ledger/) |
+| 拿两个案例当闭卷推演 | [闭卷模拟盘](/projects/toolkit/drill/) |
+| 看「会被问到多深」 | [成长 L2→L3 · 下一轮该卡](/interview/#pack)；1236 题是库存 |
 | 拿证据讲项目 | [项目实战](/projects/) 的两个案例系统，产出格式见[可验证产出工具箱](/projects/toolkit/) |
-| 判断该不该升级架构 | [架构演进地图](/projects/architecture-evolution/)：五层 × 四档的触发信号与验收标准 |
-| 按级别读 AI | [AI 应用 · 按四级读](/ai/#by-level)：L1 闸门 → L2 循环 → L3 主链路 → L4 试点边界与治理 |
+| 按级别读 AI | [AI 应用 · 按四级读](/ai/#by-level)：成长 L1 闸门 → 成长 L2 循环 → 成长 L3 主链路 → 成长 L4 试点边界与治理 |

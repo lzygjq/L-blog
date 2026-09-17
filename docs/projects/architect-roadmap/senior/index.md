@@ -1,13 +1,13 @@
 ---
 date: 2026-09-17
-title: L2 高级开发 · 能负责一块，并对线上问题给出根因
+title: 成长 L2 高级开发 · 能负责一块，并对线上问题给出根因
 desc: 从「交付」到「负责」的七步阅读顺序——并发、JVM、数据原理、框架原理、消息、第二数据库与工程质量；第七步接上慢请求剧本、容器内 JVM 与扩展-收缩，另附 Agent 循环、跳过表、离场自检与原缺口已补齐后的读法
 order: 2
 ---
 
-# L2 高级开发 · 能负责一块，并对线上问题给出根因
+# 成长 L2 高级开发 · 能负责一块，并对线上问题给出根因
 
-> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的第二级清单，回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。同一篇文章会在多个级别出现，只是每一级拿走的深度不同；级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。上一级见 [L1 开发](/projects/architect-roadmap/developer/)。
+> **口径说明**：这一页是[成长路线](/projects/architect-roadmap/)的第二级清单，回答的是「**在这一级，这些页读到哪就该停**」——不是「这些页属于这一级」。同一篇文章会在多个级别出现，只是每一级拿走的深度不同；级别是读者侧的属性，不是页面侧的（见[成长路线的第四节](/projects/architect-roadmap/#levels-as-relation)）。上一级见 [成长 L1 开发](/projects/architect-roadmap/developer/)。
 
 ## 一、这一级的判据
 
@@ -191,10 +191,10 @@ L1 停在闸门。本级要能解释「**模型相同，Harness 决定上限**�
 
 | 你想干什么 | 去哪 |
 |---|---|
-| 回看 L1 的清单（本级的前置） | [L1 开发 · 能独立交付一个模块](/projects/architect-roadmap/developer/) |
-| 往上走一级 | [L3 架构师 · 能设计系统，并为取舍负责](/projects/architect-roadmap/architect/) |
+| 回看成长 L1 的清单（本级的前置） | [成长 L1 开发 · 能独立交付一个模块](/projects/architect-roadmap/developer/) |
+| 往上走一级 | [成长 L3 架构师 · 能设计系统，并为取舍负责](/projects/architect-roadmap/architect/) |
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
-| 看「这些知识会被问到多深」 | [面试专题的四层次](/interview/#layers) 与[按轮次的复习路径](/interview/#rounds) |
-| 看别人怎么把这些原理用在真实系统里 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
+| 看「这些知识会被问到多深」 | [成长 L2→L3 · 下一轮该卡](/interview/#pack)；层次与轮次见[面试专题](/interview/#layers) |
+| 看别人怎么把这些原理用在真实系统里 | [项目实战](/projects/)、[架构路线](/projects/architecture-evolution/#matrix) |
 | 提前准备「拿什么证明我做过」 | [可验证产出工具箱](/projects/toolkit/)（立项三件套 + 出事之后的[故障复盘](/projects/toolkit/postmortem/)） |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

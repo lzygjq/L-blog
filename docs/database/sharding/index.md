@@ -6,7 +6,7 @@ desc: 拆分时机与经验值、垂直与水平四种策略、路由规则、�
 
 # 分库分表：时机、策略与代价
 
-> 本文是[架构演进地图](/projects/architecture-evolution/)的**分片分册**，对应地图的 **V4（规模化）**——什么时候该走到这一档、要付什么代价、怎么验收。
+> 本文是[架构路线](/projects/architecture-evolution/)的**分片分册**，对应数据层 **[分片集群](/projects/architecture-evolution/data/#shard)**——什么时候该走到这一档、要付什么代价、怎么验收。这一档可永远不到。
 
 ## 一、问题场景
 

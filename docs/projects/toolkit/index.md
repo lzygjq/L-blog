@@ -60,20 +60,22 @@ date: 2026-09-13
 
 ## How —— 怎么用起来
 
-1. **一个项目专题 = 立项三件套齐全**。`projects/` 下的每个难点专题，都以这三件作为收尾产物，而不是"做完就完了"。
-2. **产生顺序**：先画**架构图**，在图上标出**关键分叉**与**关键路径** → 分叉逐个写 ADR，路径逐条做压测 → 三者互相引用，形成闭环。
-3. **深度优先于数量**：一个项目 **3~5 篇 ADR + 1 份压测报告 + 1 套架构图**，远好过每个小决定都记一笔流水账。宁可少写，不可写空。
-4. **对外发布前脱敏**：项目名、公司名、内部规模与业务标识一律通用化。
-5. **出过用户可感知故障 → 强制写复盘**。没有故障的专题缺复盘是正常的；出过事却没有时间线，三件套再齐也补不上运行期那一环。
-6. **该上会的决策走[方案评审](/projects/toolkit/review/)**。材料是立项三件套；会上四问答不上就散会，会后 24 小时内落成 ADR。
+1. **自用顺序**：先填[层账](/projects/architecture-evolution/ledger/)（系统现在各层在哪一档）→ 两份案例用[闭卷模拟盘](/projects/toolkit/drill/)重推 → 对照专题 → 分叉落成 ADR。不要先翻案例再填卷子。
+2. **一个项目专题 = 立项三件套齐全**。`projects/` 下的每个难点专题，都以这三件作为收尾产物，而不是"做完就完了"。
+3. **产生顺序**：先画**架构图**，在图上标出**关键分叉**与**关键路径** → 分叉逐个写 ADR，路径逐条做压测 → 三者互相引用，形成闭环。
+4. **深度优先于数量**：一个项目 **3~5 篇 ADR + 1 份压测报告 + 1 套架构图**，远好过每个小决定都记一笔流水账。宁可少写，不可写空。
+5. **对外发布前脱敏**：项目名、公司名、内部规模与业务标识一律通用化。
+6. **出过用户可感知故障 → 强制写复盘**。没有故障的专题缺复盘是正常的；出过事却没有时间线，三件套再齐也补不上运行期那一环。两个案例目前没有可发布的故障时间线，**本站不编复盘**。
+7. **该上会的决策走[方案评审](/projects/toolkit/review/)**。材料是立项三件套；会上四问答不上就散会，会后 24 小时内落成 ADR。
 
 ## 立项三件套详解
 
 | 工具 | 内容 |
 |---|---|
-| **ADR 架构决策记录** | [Why / What / How](/projects/toolkit/adr/) · [模板](/projects/toolkit/adr/template) · [demo：ADR-001 事件总线选型](/projects/toolkit/adr/adr-001-event-bus-stream) |
-| **压测报告** | [Why / What / How](/projects/toolkit/perf-report/) |
-| **架构图** | [Why / What / How](/projects/toolkit/arch-diagram/) |
+| **闭卷模拟盘** | [规则](/projects/toolkit/drill/) · [绩效四段](/projects/toolkit/drill/perf-system) · [物业演进](/projects/toolkit/drill/property-saas) |
+| **ADR 架构决策记录** | [Why / What / How](/projects/toolkit/adr/) · [模板](/projects/toolkit/adr/template) · 索引见该页（ADR-001～006） |
+| **压测报告** | [Why / What / How](/projects/toolkit/perf-report/) · [填报口径](/projects/toolkit/perf-report/peak-filling) · [物业口径](/projects/toolkit/perf-report/property-capacity)（皆为假设，未实测） |
+| **架构图** | [Why / What / How](/projects/toolkit/arch-diagram/) · [绩效周期](/projects/toolkit/arch-diagram/perf-cycle) · [物业容器](/projects/toolkit/arch-diagram/property-saas) |
 
 ## 拍板过程：方案评审
 

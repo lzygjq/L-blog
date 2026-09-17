@@ -224,21 +224,38 @@ const sidebarSpec = [
         text: '成长路线',
         link: '/projects/architect-roadmap/',
         children: [
-          { text: 'L1 开发', link: '/projects/architect-roadmap/developer/' },
-          { text: 'L2 高级开发', link: '/projects/architect-roadmap/senior/' },
-          { text: 'L3 架构师', link: '/projects/architect-roadmap/architect/' },
-          { text: 'L4 CIO', link: '/projects/architect-roadmap/cio/' }
+          { text: '成长 L1 开发', link: '/projects/architect-roadmap/developer/' },
+          { text: '成长 L2 高级开发', link: '/projects/architect-roadmap/senior/' },
+          { text: '成长 L3 架构师', link: '/projects/architect-roadmap/architect/' },
+          { text: '成长 L4 CIO', link: '/projects/architect-roadmap/cio/' }
         ]
       },
-      { text: '架构演进地图', dir: 'projects/architecture-evolution' },
+      {
+        // 与「成长路线」同构：导览在 index，子页必须显式列出（构建器不递归）。
+        // 脊梁是层，不是全局 V：只在共址齐步，之后五条梯子各走各的。
+        // 「层账」是工作页（填档 + 状态），不是第七层梯子。
+        // v1～v4 目录仍保留为搬家页，不进侧栏。
+        text: '架构路线',
+        link: '/projects/architecture-evolution/',
+        children: [
+          { text: '层账', link: '/projects/architecture-evolution/ledger/' },
+          { text: '架构 L1 共址与拆机', link: '/projects/architecture-evolution/colocation/' },
+          { text: '架构 L2 应用', link: '/projects/architecture-evolution/app/' },
+          { text: '架构 L3 数据', link: '/projects/architecture-evolution/data/' },
+          { text: '架构 L4 缓存', link: '/projects/architecture-evolution/cache/' },
+          { text: '架构 L5 文件', link: '/projects/architecture-evolution/file/' },
+          { text: '架构 L6 部署', link: '/projects/architecture-evolution/deploy/' }
+        ]
+      },
       {
         // 方法层：可验证产出三件套（先读方法，再看项目案例）
         text: '产出工具',
         link: '/projects/toolkit/',
         children: [
+          { text: '闭卷模拟盘', dir: 'projects/toolkit/drill', group: true },
           { text: 'ADR 架构决策记录', dir: 'projects/toolkit/adr', group: true },
-          { text: '压测报告', link: '/projects/toolkit/perf-report/' },
-          { text: '架构图', link: '/projects/toolkit/arch-diagram/' },
+          { text: '压测报告', dir: 'projects/toolkit/perf-report', group: true },
+          { text: '架构图', dir: 'projects/toolkit/arch-diagram', group: true },
           { text: '方案评审', link: '/projects/toolkit/review/' },
           { text: '故障复盘', link: '/projects/toolkit/postmortem/' }
         ]
@@ -353,7 +370,7 @@ export default defineConfig({
       // ⚠️ 2026-09-17 曾把「成长路线」提为导航**首项**（理由：站点两轴正交 —— 6 个板块是
       // 「领域轴（用来查）」，L1→L4 是「深度轴（用来走）」，深度轴缺常驻入口），**同日撤回**。
       // 原因：用户要的固定入口是**最右侧那条竖版工具栏**（48px，现有侧栏/目录/全屏/回顶四个按钮），
-      // 不是顶部导航。→ 入口落在 `theme/components/RoadmapLink.vue`，由 RightRail 引用；
+      // 不是顶部导航。→ 入口落在 `theme/components/RoadmapLink.vue`，由 RightRail 引用（成长路线在上、架构路线在下）；
       // 此处导航恢复为「只有 6 个板块」。**别再往这里加非板块项**：顶部导航的语义就是板块。
       { text: '计算机基础', link: '/fundamentals/', activeMatch: '^/fundamentals/' },
       { text: '语言与框架', link: '/java/', activeMatch: '^/(java|frontend)/' },

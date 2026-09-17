@@ -110,6 +110,7 @@ desc: 一个多租户物业管理 SaaS 的业务图景与技术难点：租户�
 | 你的关注点 | 建议路径 |
 |---|---|
 | 想看架构决策过程 | [产出工具 · ADR](/projects/toolkit/adr/) → 本板块五篇专题 |
+| 想先自己推再对照 | [闭卷模拟盘 · 物业](/projects/toolkit/drill/property-saas)（先写） |
 | 想从业务起点看完整链路 | [核心业务链路](/projects/property-saas/core-business/) → [容量测算与压测](/projects/property-saas/capacity-and-perf/) → [发布、安全与运维](/projects/property-saas/release-and-ops/) |
 | 想看多租户与云原生落地 | [Kubernetes 编排](/cloud-native/kubernetes/) → [微服务 → K8s](/projects/property-saas/microservice-to-k8s/) |
 | 想看数据链路与数仓 | [Canal](/bigdata/canal/) → [Doris](/bigdata/doris/) → [Lakehouse](/bigdata/lakehouse/) → [数仓分层建模](/bigdata/warehouse-design/) → [数仓落地](/projects/property-saas/data-warehouse/) |

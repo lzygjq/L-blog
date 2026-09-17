@@ -7,7 +7,7 @@ title: 方法论 · 板块导览
 
 先说清这个板块**不做什么**：
 
-- 不重复**架构演进的两条主线**（数据侧的 V1~V4、应用与部署侧）——那是[架构演进地图](/projects/architecture-evolution/)的内容，本篇在拆分与部署形态处与它交叉引用；
+- 不重复**架构演进的两条主线**（共址拆机之后，数据 / 缓存 / 文件 / 应用 / 部署各走自己的梯子）——那是[架构路线](/projects/architecture-evolution/)的内容，本篇在拆分与部署形态处与它交叉引用；
 - 不重复**分布式事务的机制与实现**（TCC / Saga / Seata / 本地消息表）——见[分布式事务](/java/spring/spring-cloud/transaction)；
 - 不重复**消息中间件的投递语义与顺序机制**（Kafka 分区、RocketMQ 队列、副本）——那是[消息队列](/middleware/)的内容；
 - 不重复**设计模式的实现细节**（适配器、外观、观察者）——见[Java 设计模式](/java/design-patterns/)；
@@ -103,7 +103,7 @@ title: 方法论 · 板块导览
 
 | 板块 | 关系 |
 |---|---|
-| [架构演进地图](/projects/architecture-evolution/) | **演进维度**：数据侧的 V1~V4 与应用/部署主线；本板块讲**边界维度**（一个进程还是 N 个进程、边界怎么划） |
+| [架构路线](/projects/architecture-evolution/) | **演进维度**：共址拆机之后五层各走各的梯子；本板块讲**边界维度**（一个进程还是 N 个进程、边界怎么划） |
 | [Spring Cloud 全套](/java/spring/spring-cloud/) | **实现层**：Nacos 注册、网关、[分布式事务](/java/spring/spring-cloud/transaction)、[接口幂等](/java/spring/spring-cloud/idempotency)——本板块讲"什么时候该用它们"；做完之后两边是否一致见[对账与补偿](/methodology/reconciliation) |
 | [Java 设计模式](/java/design-patterns/) | **代码尺度**：适配器、外观、观察者是防腐层与 ACL 的实现手段（见[观察者与领域事件](/java/design-patterns/behavioral/observer)） |
 | [测试与质量](/java/testing/) | **纪律的执行手段**：ArchUnit 把包依赖规则变成 CI 断言；领域模型的规则可脱离 Spring 单测 |
@@ -132,4 +132,4 @@ title: 方法论 · 板块导览
 
 > **合计 119 题**（口径：按各篇正文的「面试问答」节逐行计数，不含各篇正文内用于讲解的表格行）。
 >
-> **与[架构演进地图](/projects/architecture-evolution/)的分工**：那一页讲"系统怎么长大"（数据侧 V1~V4 与应用/部署主线），本板块讲"系统怎么被切开"（边界、模型、依赖、粒度、一致性）。两处交叉引用而不复制。
+> **与[架构路线](/projects/architecture-evolution/)的分工**：那一套讲"系统怎么长大"（先共址后分机，五层不必齐步），本板块讲"系统怎么被切开"（边界、模型、依赖、粒度、一致性）。两处交叉引用而不复制。

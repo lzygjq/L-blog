@@ -154,10 +154,15 @@ status: 已采纳
 
 ### 第五步：看一篇真的怎么写的
 
-[ADR-001：服务间异步事件用 Redis Stream，不引入独立消息中间件](/projects/toolkit/adr/adr-001-event-bus-stream) —— 5 个候选方案（RocketMQ / RabbitMQ / Kafka / Redis Stream / DB 轮询）、4 条否决理由、5 个触发重审的条件，已脱敏，可直接对照体例。
+[ADR-001：服务间异步事件用 Redis Stream，不引入独立消息中间件](/projects/toolkit/adr/adr-001-event-bus-stream) —— 5 个候选方案、4 条否决理由、5 个触发重审的条件，已脱敏，可直接对照体例。案例里抽出来的后续决策在索引中；**先写[闭卷模拟盘](/projects/toolkit/drill/)再打开这些页。**
 
 ## 索引
 
 | 编号 | 决策 | 状态 | 日期 |
 |---|---|---|---|
-| [ADR-001](/projects/toolkit/adr/adr-001-event-bus-stream) | 事件总线：Redis Stream 而非独立消息中间件 | 已采纳 | 2026-09-10 |
+| [ADR-001](/projects/toolkit/adr/adr-001-event-bus-stream) | 脚手架：事件总线用 Redis Stream，不引入独立 MQ | 已采纳 | 2026-09-10 |
+| [ADR-002](/projects/toolkit/adr/adr-002-org-sync-dual-link) | 绩效：组织同步全量 + 增量，不订阅 HR binlog | 已采纳 | 2026-09-17 |
+| [ADR-003](/projects/toolkit/adr/adr-003-peak-fill-queue) | 绩效：填报预排队，校验同步、落库异步 | 已采纳 | 2026-09-17 |
+| [ADR-004](/projects/toolkit/adr/adr-004-push-pull) | 绩效：审批推拉结合，推送只传信号 | 已采纳 | 2026-09-17 |
+| [ADR-005](/projects/toolkit/adr/adr-005-tenant-isolation) | 物业：三级混合隔离，过滤进框架 | 已采纳 | 2026-09-17 |
+| [ADR-006](/projects/toolkit/adr/adr-006-warehouse-no-hadoop) | 物业：分析外移，不上 Hadoop 全家桶 | 已采纳 | 2026-09-17 |
