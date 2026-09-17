@@ -21,7 +21,7 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [语言与框架](/java/) | Java 语言基础、集合、并发与 JUC、JVM、设计模式、Spring 全家桶（IoC / Bean / AOP / MyBatis / 横切能力 / MVC / Boot / Cloud）、测试与质量；[大前端](/frontend/)（小程序双线程模型、uni-app 跨端机制、组件化与分包、发布与多端打包） |
 | [数据与存储](/database/) | MySQL 索引与事务、PostgreSQL 的 MVCC / VACUUM / 索引类型、Redis 原理与高可用、MongoDB 文档模型与原生分片、分库分表；[搜索与检索](/search/)（Elasticsearch 倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、ELK 日志栈）；[数据仓库](/bigdata/)（Canal 同步、Flink 流处理、Doris 与 ClickHouse、Iceberg 冷热分层与建模） |
 | [中间件与分布式](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT，RPC 与协议（序列化与 IDL / 协议与传输 / Dubbo 机制 / 可靠性治理）；[分布式理论](/distributed/)（共识协议 Paxos / Raft 与选主、一致性哈希与数据分布、分布式 ID、协调服务 ZooKeeper 与 etcd） |
-| [架构与云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD 与发布、监控与可观测；[架构方法论](/methodology/)（DDD 战略与战术、架构风格谱系、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式）；[高可用](/high-availability/)（可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练）；[安全与合规](/security/)（认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界） |
+| [架构与云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD 与发布（含研发效能度量）、监控与可观测；[架构方法论](/methodology/)（DDD 战略与战术、架构风格谱系、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式、技术成本与 ROI）；[高可用](/high-availability/)（可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练）；[安全与合规](/security/)（认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界、等保与数据出境与开源许可治理） |
 | [实战与面试](/projects/) | [成长路线](/projects/architect-roadmap/)、[架构演进地图](/projects/architecture-evolution/)、[可验证产出三件套](/projects/toolkit/)（ADR / 压测报告 / 架构图）、绩效系统与智慧物业 SaaS 两个案例系统；[AI 应用](/ai/)（AI 辅助研发、Spring AI、数字人）；[面试专题](/interview/)（高频考点索引、四层次分级、跨板块连线题） |
 
 ## 阅读建议
