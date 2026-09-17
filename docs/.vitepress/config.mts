@@ -346,12 +346,29 @@ export default defineConfig({
       // 进到任何子页面顶部大模块就灭掉。所以每个板块都要用 ^/前缀/ 的形式。
       // 2026-09-16 起导航按「6 个板块」组织：一个板块可覆盖多个物理目录前缀，
       // 与 sidebarSpec 的前缀数组一一对应（导航分组 == 侧边栏分组，两处必须同步改）。
+      //
+      // ⚠️ **唯一的例外：首项「成长路线」不是一个板块**（2026-09-17 新增）。
+      // 站点是**两轴正交**的：6 个板块是「领域轴（用来查）」，L1→L4 是「深度轴（用来走）」。
+      // 深度轴原先只能从首页 hero 按钮或「实战与面试 → 左侧栏」两步进入，缺一个常驻入口；
+      // 这里把它提为导航首项，与首页 hero 的按钮顺序（成长路线 → 知识库总览 → 项目实战 → 面试专题）对齐。
+      // 它 **不参与** sidebarSpec 的「一一对应」—— sidebar 里它仍挂在 `projects/` 前缀下，
+      // 所以下面第 6 项「实战与面试」的 activeMatch 必须**排除**它，否则进路线页会有两个菜单同时高亮。
+      { text: '成长路线', link: '/projects/architect-roadmap/', activeMatch: '^/projects/architect-roadmap/' },
       { text: '计算机基础', link: '/fundamentals/', activeMatch: '^/fundamentals/' },
       { text: '语言与框架', link: '/java/', activeMatch: '^/(java|frontend)/' },
       { text: '数据与存储', link: '/database/', activeMatch: '^/(database|search|bigdata)/' },
       { text: '中间件与分布式', link: '/middleware/', activeMatch: '^/(middleware|distributed)/' },
       { text: '架构与云原生', link: '/cloud-native/', activeMatch: '^/(cloud-native|methodology|high-availability|security)/' },
-      { text: '实战与面试', link: '/projects/', activeMatch: '^/(projects|ai|interview)/' },
+      {
+        // 「实战与面试」= 项目案例 + AI 应用 + 面试专题。
+        // activeMatch 里的 `projects(?!\/architect-roadmap)` 是**负向先行断言**：排除成长路线，
+        // 让「成长路线」与「实战与面试」互斥高亮（普通情况下 VitePress 各项独立判断，
+        // 被两条正则同时命中就会双高亮）。注意不能写成 `^/(projects/(?!architect-roadmap)|…)`——
+        // 那样末尾那个 `/` 会没有字符可匹配，`/projects/` 板块首页反而不高亮。
+        text: '实战与面试',
+        link: '/projects/',
+        activeMatch: '^/(projects(?!\\/architect-roadmap)|ai|interview)/'
+      },
       {
         // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条
         // （VPNavBarMenuGroup：active = isActive(自身 activeMatch) || 任一子项命中）
