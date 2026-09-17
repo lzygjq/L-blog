@@ -15,7 +15,7 @@ Java 是整个知识体系的主干，按「基础 → 并发 → JVM → 测试
 | 3 | [并发与 JUC](/java/concurrent/) | 线程基础、线程安全与 JMM、CAS 与原子类、AQS 与锁、JUC 工具类、线程池、并发容器、ThreadLocal、异步编排（**9 篇已成篇**） | 部分完成 |
 | 4 | [JVM](/java/jvm/) | 运行时数据区、类加载、GC 与收集器（含 ZGC / Shenandoah 与 GC 日志判读）；**实操线四篇**：命令行五件套判读 / 堆转储与 MAT / Arthas 在线诊断 / 火焰图与性能剖析（**9 篇已成篇**） | 部分完成 |
 | 5 | [测试与质量](/java/testing/) | 测试基础与 JUnit 6、Mock 与替身、Spring 切片测试、集成测试与 Testcontainers、覆盖率与质量门禁（**5 篇已成篇**） | **已完成 5 篇** |
-| 6 | [Spring 生态](/java/spring/) | Spring 核心（IoC / Bean / AOP / MyBatis，**7 篇**）+ **横切能力**（缓存 / 异步 / 重试 / 校验 / 序列化，**5 篇**）+ Spring MVC（**2 篇**，含 REST 接口设计）+ Spring Boot（**6 篇**）+ Cloud（**9 篇**，含 CAP / 分布式事务 / 幂等 / 任务调度） | 部分完成 |
+| 6 | [Spring 生态](/java/spring/) | Spring 核心（IoC / Bean / AOP / MyBatis，**7 篇**）+ **横切能力**（缓存 / 异步 / 重试 / 校验 / 序列化 / 出站 HTTP，**6 篇**）+ Spring MVC（**2 篇**，含 REST 接口设计）+ Spring Boot（**7 篇**，含应用日志）+ Cloud（**9 篇**，含 CAP / 分布式事务 / 幂等 / 任务调度） | 部分完成 |
 | 7 | [设计模式](/java/design-patterns/) | 设计原则 + 23 种模式 | **已完成 23 篇**（设计原则 1 + 模式 22） |
 
 ## 阅读建议

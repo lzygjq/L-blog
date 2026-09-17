@@ -81,7 +81,7 @@ desc: 从提交与协作、到不可变制品、发布策略与不中断、GitOp
 
 | 板块 | 分工 | 边界 |
 |---|---|---|
-| [监控与可观测](/cloud-native/observability/)（5 篇） | 指标与 PromQL、日志管道、链路与 OTel、SLO 与告警 | **渐进式交付的判定与告警同源**（都查 PromQL）；本板块只讲"怎么用指标做放量判定"，指标本身怎么算不重复 |
+| [监控与可观测](/cloud-native/observability/)（6 篇） | 指标与 PromQL、日志管道、链路与 OTel、SLO 与告警、慢请求剧本 | **渐进式交付的判定与告警同源**（都查 PromQL）；本板块只讲"怎么用指标做放量判定"，指标本身怎么算不重复 |
 | [Kubernetes](/cloud-native/kubernetes/) | 探针语义、滚动更新、QoS、HPA | 本板块的发布策略篇**只讲"四种策略的取舍与不中断的前提"**，对象语义回链那边 |
 | [Helm](/cloud-native/helm/#helm-in-cicd) | Chart 打包、`--wait --atomic`、release 生命周期 | **GitOps 模式下 `helm rollback` 不再是回滚手段**（控制器会拉回 Git 状态），这个衔接点在 Helm 篇已埋好 |
 | [服务网格](/cloud-native/service-mesh/) | Sidecar 层做流量切分与 mTLS | 网格是**金丝雀流量切分的三个层次之一**；本板块讲"什么时候需要它"，网格本身怎么配不重复 |

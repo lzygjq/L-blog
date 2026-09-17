@@ -31,7 +31,7 @@ desc: 成长 L1–L4 能力路线——从成长 L1 开发起步，经成长 L2 
 | 计算机网络 | 6 | 「排查问题从哪里开始看」的依据；HTTP 与 TCP 是所有后端接口的物理层 | [计算机网络](/fundamentals/network/) |
 | 操作系统 | 6 | 进程 / 线程 / 内存 / IO——并发问题的根因几乎都在这一层 | [操作系统](/fundamentals/os/) |
 | 算法与数据结构 | 8 | 复杂度判断力；面试必考 | [算法与数据结构](/fundamentals/algorithms/) |
-| Java 语言基础 | 10 | 语言层面的坑（泛型擦除、`finally` 的执行真相、`String` 与包装类）会一路带到 L3 | [Java 基础](/java/basics/) |
+| Java 语言基础 | 11 | 语言层面的坑（泛型擦除、`finally` 的执行真相、`String` 与包装类）会一路带到 L3 | [Java 基础](/java/basics/) |
 | Java 集合 | 7 | 日常代码里出现频率最高的数据结构，也是并发容器的前置 | [Java 集合](/java/collections/) |
 
 **地基的用法：不是从头读到尾，而是随用随补。** 判据很简单——**当你发现自己在背结论、而不是在推导时，就该回来翻地基了**：
@@ -135,8 +135,8 @@ desc: 成长 L1–L4 能力路线——从成长 L1 开发起步，经成长 L2 
 |---|---|---|
 | 高可用 | 多机房容灾、同城双活、限流熔断降级、故障演练 | 限流 / 熔断 / 降级见[容量测算与压测方案](/projects/property-saas/capacity-and-perf/#protection)；**容灾与演练见[高可用](/high-availability/)（4 篇：可用性目标 / 冗余与故障转移 / 多机房架构 / 混沌与演练）。本行已补齐** |
 | 高性能 | 性能调优、全链路压测、容量规划、缓存/异步/削峰 | [容量测算与压测方案](/projects/property-saas/capacity-and-perf/)（六步推导链 + 五层防护 + 压测方案） |
-| 安全 | 认证授权（OAuth2/SSO）、数据加密脱敏、防刷防注入、等保合规 | [安全与合规](/security/)（5 篇：认证 / 授权 / OAuth2 / 攻击防护 / 加密合规）；落地视角见[发布、安全与运维](/projects/property-saas/release-and-ops/) |
-| 可观测性 | Prometheus 监控、SkyWalking 链路追踪、ELK 日志、告警体系 | [监控与可观测](/cloud-native/observability/)（5 篇：指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / 成本与许可）；**ELK 的存储与检索端见[搜索与检索](/search/)（5 篇）。本行已补齐** |
+| 安全 | 认证授权（OAuth2/SSO）、数据加密脱敏、防刷防注入、等保合规 | [安全与合规](/security/)（6 篇：认证 / 授权 / OAuth2 / 攻击防护 / 加密合规 / **合规体系**）；落地视角见[发布、安全与运维](/projects/property-saas/release-and-ops/) |
+| 可观测性 | Prometheus 监控、SkyWalking 链路追踪、ELK 日志、告警体系 | [监控与可观测](/cloud-native/observability/)（6 篇：指标与 PromQL / 日志管道 / 链路与 OTel / SLO 与告警 / **慢请求剧本** / 成本与许可）；**ELK 的存储与检索端见[搜索与检索](/search/)（5 篇）。本行已补齐** |
 | 方法论 | DDD 领域驱动设计、架构风格对比、架构演进、对账与补偿、多租户分档 | [方法论](/methodology/)（9 篇：战略设计 / 战术设计 / 架构风格 / 拆分粒度 / 事件驱动与 CQRS / 落地与反模式 / 技术成本与 ROI / 对账与补偿 / 多租户）＋[架构路线](/projects/architecture-evolution/)。**本行已补齐** |
 
 **为什么是核心**：这一层是架构师与高级开发的本质区别——高可用容灾与性能调优实战最能拉开差距，架构师的核心价值就体现在这一层。参考落地视角见[项目实战](/projects/)下的真实难点复盘。
@@ -146,7 +146,7 @@ desc: 成长 L1–L4 能力路线——从成长 L1 开发起步，经成长 L2 
 | 模块 | 核心内容 | 本站对应 |
 |---|---|---|
 | DevOps | CI/CD 流水线（Jenkins/GitLab CI）、灰度发布、蓝绿部署、渐进式交付与 GitOps | [CI/CD 与发布](/cloud-native/cicd/) |
-| 云原生 | Docker、Kubernetes、Helm、服务网格（Istio）、Operator、弹性伸缩 | [云原生板块](/cloud-native/)（7 个主题：Docker / Kubernetes / Helm 与配置管理 / 服务网格 / CRD 与 Operator / **CI/CD 与发布（4 篇）** / **监控与可观测（5 篇）**） |
+| 云原生 | Docker、Kubernetes、Helm、服务网格（Istio）、Operator、弹性伸缩 | [云原生板块](/cloud-native/)（7 个主题：Docker / Kubernetes / Helm 与配置管理 / 服务网格 / CRD 与 Operator / **CI/CD 与发布（6 篇）** / **监控与可观测（6 篇）**） |
 | 大数据 | 数仓分层、实时计算（Flink）、OLAP（Doris/ClickHouse） | [数据仓库板块](/bigdata/)、[Flink 流处理 5 篇](/bigdata/flink/)、[ClickHouse 5 篇](/bigdata/clickhouse/) |
 | 多机房架构 | 双活、异地灾备、数据同步 | 见[高可用](/high-availability/)（多机房架构 / 单元化 / 流量调度）。**本行已补齐** |
 | **AI 辅助研发** | 协作闸门、Agent 循环与终止判据、上下文工程 | [Vibe Coding](/ai/vibe-coding/)（L1 读闸门）→ [Agent 与 Harness](/ai/agent-harness/)（L2 读循环）。**四级读法见 [AI 导览](/ai/#by-level)** |
