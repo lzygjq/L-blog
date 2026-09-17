@@ -42,11 +42,11 @@ features:
     link: /middleware/
   - icon: ☸️
     title: 架构与云原生
-    details: 高可用与容灾、混沌工程与故障演练、安全与合规、架构方法论（DDD / 架构风格 / 事件驱动 CQRS）；Docker、Kubernetes、Helm、服务网格、Operator、CI/CD 与发布、监控与可观测
+    details: 高可用与容灾、混沌工程与故障演练、安全与合规、架构方法论（DDD / 架构风格 / 事件驱动 CQRS / 对账 / 多租户）；Docker、Kubernetes、Helm、服务网格、Operator、CI/CD 与发布、监控与可观测
     link: /cloud-native/
   - icon: 🎯
     title: 实战与面试
-    details: 绩效系统四大技术难点、智慧物业 SaaS 云原生与数仓落地、架构演进地图、立项三件套与故障复盘，以及横向串联各板块的面试专题
+    details: 绩效系统四大技术难点、智慧物业 SaaS 云原生与数仓落地、架构演进地图、立项三件套与方案评审与故障复盘，以及横向串联各板块的面试专题
     link: /projects/
 date: 2026-09-11
 ---

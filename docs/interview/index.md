@@ -8,7 +8,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 
 这个板块**不写新知识**。它的唯一职责是把散在各板块的题目串起来：**每条索引都指向正文锚点，答案在正文里**。
 
-各板块的导览页或正文末尾都已经有纵向题单（合计 **1212 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
+各板块的导览页或正文末尾都已经有纵向题单（合计 **1236 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
 
 ## 一、纵向题单解决不了的三件事 {#why}
 
@@ -16,7 +16,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 |---|---|---|
 | **同一个概念横跨多个板块** | 「一致性」在 MySQL 讲事务、在 Redis 讲缓存、在 MQ 讲顺序与幂等、在 Spring Cloud 讲分布式事务——四篇各自都对，但没有人告诉你**它们是同一个问题的四种解法** | [跨板块连线题](#threads) |
 | **面试是按轮次递进的** | 题单按知识域排（Java / 存储 / 中间件…），不按「一面问什么、二面问什么」排 | [按轮次的复习路径](#rounds) |
-| **1212 道全看一遍不现实** | 题单里记忆题与决策题混在一起，不知道哪道该背题面、哪道该背推导 | [四个层次](#layers)分优先级 + [自检清单](#checklist) |
+| **1236 道全看一遍不现实** | 题单里记忆题与决策题混在一起，不知道哪道该背题面、哪道该背推导 | [四个层次](#layers)分优先级 + [自检清单](#checklist) |
 
 **一句话定位**：各板块是**内容层**（把机制讲透），这一页是**检索层**（告诉你先看什么，以及同一件事在哪几处出现过）。
 
@@ -52,8 +52,8 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | **基础面 / 一面** | 语言与数据结构基本功、SQL 与索引、能说清常用组件的行为 | [计算机基础 43 题](/fundamentals/#faq) → [Java 基础 41 题](/java/basics/#faq) → [集合 25 题](/java/collections/#faq) → [并发 41 题](/java/concurrent/#faq) → [MySQL 13 题](/database/mysql/#interview) |
 | **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [横切能力 72 题](/java/spring/spring-framework/crosscutting/#interview) → [Spring Boot 21 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
 | **三面 / 架构面** | 分布式取舍、云原生落地、数据链路、**方案对比与代价** | [Spring Cloud 10 题](/java/spring/spring-cloud/#interview-index) → [云原生 16 题](/cloud-native/#interview-questions) → [数据仓库 27 题](/bigdata/#faq) → [Flink 流处理 34 题](/bigdata/flink/#faq) → [ClickHouse 40 题](/bigdata/clickhouse/#faq) → [MongoDB 48 题](/database/mongodb/#faq) → [Redis 16 题](/database/redis/#interview) |
-| **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [成长路线](/projects/architect-roadmap/)（四级自检）→ [可验证产出工具箱](/projects/toolkit/)（立项三件套 + 故障复盘） |
-| **AI 方向岗** | 工程化的 AI 协作方式、Agent 与 MCP、框架选型 | [AI 应用 19 题](/ai/#faq) → [Agent 与 Harness](/ai/agent-harness/#interview) → [Spring AI](/ai/spring-ai/#interview) |
+| **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [成长路线](/projects/architect-roadmap/)（四级自检）→ [可验证产出工具箱](/projects/toolkit/)（立项三件套 + 方案评审 + 故障复盘） |
+| **AI 方向岗** | 工程化的 AI 协作方式、Agent 与 MCP、框架选型、治理四笔账 | [AI 应用 23 题](/ai/#faq) → [Agent 与 Harness](/ai/agent-harness/#interview) → [Spring AI](/ai/spring-ai/#interview) → [AI 治理](/ai/governance/#interview) |
 | **大前端相关岗** | 小程序双线程模型、`setData` 边界、登录支付时序 | [大前端 6 题](/frontend/#interview) |
 | **场景设计题** | 「设计一个秒杀 / 短链 / 排行榜」——**没有标准答案，只有取舍** | [Redis 场景地图](/database/redis/scenarios) → [消息队列三条主线](/middleware/#three-threads) → [设计模式面试高频](/java/design-patterns/#interview) |
 
@@ -106,7 +106,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | ① 生产端 | 消息没发出去 / 没确认 | 发送确认（confirm）、失败重试、本地消息表 | [RabbitMQ 可靠性](/middleware/rabbitmq/reliability) |
 | ② Broker 存储 | 消息落在内存，宕机丢失 | 持久化、副本（ISR / Raft）、刷盘策略 | [Kafka 可靠性](/middleware/kafka/reliability)、[RocketMQ 存储](/middleware/rocketmq/#storage) |
 | ③ 消费端 | 消费失败或异常退出 | 手动 ACK、消费重试、死信队列 | [RabbitMQ 死信](/middleware/rabbitmq/dead-letter) |
-| ④ 补偿与对账 | 上面三道都漏掉的 | 定时对账、幂等重放、人工兜底 | [接口幂等](/java/spring/spring-cloud/idempotency) |
+| ④ 补偿与对账 | 上面三道都漏掉的 | 定时对账、幂等重放、人工兜底 | [对账与补偿](/methodology/reconciliation)（以谁为准、差账分类）；[接口幂等](/java/spring/spring-cloud/idempotency) |
 
 **同一套思路迁移到其他组件**：MySQL 靠 binlog + 主从复制，Redis 靠 RDB/AOF + 哨兵，K8s 靠副本数 + 探针。**「可靠性 = 每一段都单独确认」是通用方法论，不是 MQ 专属知识。**
 
@@ -133,7 +133,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 进程 / 资源 | 内存、CPU、文件系统 | `namespace` + `cgroup` | [容器隔离的两半](/cloud-native/docker/#namespace-cgroup) |
 | 请求 / 线程 | 慢调用拖垮整条链路 | 线程池隔离、信号量隔离（舱壁模式） | [服务保护](/java/spring/spring-cloud/resilience) |
 | 事务 | 并发事务的可见性 | 四种隔离级别 + MVCC | [MVCC 与锁](/database/mysql/mvcc) |
-| 数据 / 租户 | 租户之间互相看不到数据 | `tenant_id` 行级 / 独立 Schema / 独立库三级混合 | [多租户三级混合隔离](/projects/property-saas/microservice-to-k8s/#multi-tenant) |
+| 数据 / 租户 | 租户之间互相看不到数据 | `tenant_id` 行级 / 独立 Schema / 独立库三级混合 | [多租户方法](/methodology/multi-tenancy)；案例数字见[三级混合隔离](/projects/property-saas/microservice-to-k8s/#multi-tenant) |
 | 网络 | 谁能访问谁 | NetworkPolicy、命名空间、Service 边界 | [K8s 多租户](/cloud-native/kubernetes/#multi-tenant) |
 
 ## 五、题单总索引 {#index}
@@ -165,16 +165,16 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | Flink 流处理 | 34 | [面试索引](/bigdata/flink/#faq) | 水印与空闲分区、屏障对齐与端到端三段论、四种 Join 的状态代价、背压定位与倾斜、增量快照的无锁原理 |
 | ClickHouse | 40 | [面试索引](/bigdata/clickhouse/#faq) | 不可变 part 推出的五条结论、稀疏索引与「排序键 / 主键」的分工、跳数索引与 PREWHERE、三条更新路径的代价、`internal_replication` 这个开关、先分负载再选引擎的五条判据 |
 | MongoDB | 48 | [面试索引](/database/mongodb/#faq) | 文档是原子单位推出的五条结论、ESR 与 explain 三数、读偏好与读关注两个正交旋钮、长事务压 WiredTiger 缓存、分片键四条判据、SSPL 的真实触发边界 |
-| AI 应用 | 19 | [高频考点速查](/ai/#faq) | AI 协作模式、Agent 与 MCP、Spring AI 系 |
+| AI 应用 | 23 | [高频考点速查](/ai/#faq) | AI 协作模式、Agent 与 MCP、Spring AI 系、治理四笔账 |
 | 大前端 | 6 | [面试关注点](/frontend/#interview) | 小程序双线程、`setData`、登录支付时序 |
 | 测试与质量 | 10 | [面试高频索引](/java/testing/#interview) | 测试分层判据、Mock 边界、切片、Testcontainers、覆盖率口径 |
-| 方法论 | 99 | [面试索引](/methodology/#interview) | DDD 战略（边界/通用语言/上下文映射）与战术（值对象/聚合/领域事件/仓储/贫血与充血）、架构风格谱系（六边形/洋葱/整洁/COLA）、拆分粒度与康威定律、分布式单体、模块化单体、事件语义与发件箱、CQRS 与事件溯源、落地反模式与评审清单；**外加技术成本四层结构、六步成本链、单位经济学、云成本优化顺序、自建 vs 采购与退出成本、技术债量化** |
+| 方法论 | 119 | [面试索引](/methodology/#interview) | DDD 战略（边界/通用语言/上下文映射）与战术（值对象/聚合/领域事件/仓储/贫血与充血）、架构风格谱系（六边形/洋葱/整洁/COLA）、拆分粒度与康威定律、分布式单体、模块化单体、事件语义与发件箱、CQRS 与事件溯源、落地反模式与评审清单；**外加技术成本四层结构、六步成本链、单位经济学、云成本优化顺序、自建 vs 采购与退出成本、技术债量化**；**对账以谁为准与差账四类、多租户分档与横切传播** |
 | 高可用 | 29 | [面试高频索引](/high-availability/#interview) | 几个 9 与 MTBF/MTTR、RTO/RPO 分级、故障域与单点、脑裂与 fencing、优雅停机与探针、超时预算与重试、幂等三件套、六代容灾拓扑、单元化与冲突解决、DNS 切换与切流、混沌工程前提与实验设计 |
 | 分布式理论 | 24 | [面试高频索引](/distributed/#interview) | 共识与多数派、Paxos 两阶段与不变式、Raft 选举与两条安全约束、脑裂、一致性哈希与虚拟节点、哈希槽与 MOVED/ASK、雪花位分配、时钟回拨、workerId 分配、前端精度 |
 | 分布式协调 | 51 | [面试索引](/distributed/coordination/#interview-index) | 协调服务的边界与六种原语、znode 与约 1MB 硬上限、会话与临时节点、Watcher 三个特性与羊群效应、zxid 的 epoch + 计数器、ZAB 与 Raft 的"两套机制 vs 一套"、TRUNC 的推理链、ZK 默认读非线性的后果、锁的能力边界与 fencing token、RedLock 的定位、etcd 的 2GiB 配额与 compaction/defrag 之别、KRaft 为什么去掉 ZK、Observer 与投票集合 |
 | 安全与合规 | 38 | [面试高频索引](/security/#interview) | 会话与令牌、越权防护、OAuth2 与 PKCE、XSS/CSRF/注入、签名与重放、密码存储与脱敏；**外加等保定级与一个中心三重防护、数据出境三条路径与两个阈值、开源许可传染性与传递依赖、SBOM 与 CRA、审计留痕** |
 
-**上表合计 1212 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
+**上表合计 1236 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
 
 ## 六、自检清单 {#checklist}
 
@@ -208,7 +208,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 |---|---|---|
 | 各内容板块的导览页 | **纵向题单**：本领域的题与一句话答案 | **横向索引**：跨板块的连线题、轮次路径、四层难度分级 |
 | [项目实战](/projects/) | **项目层答案**：难点背景、方案对比、落地实现、效果数据 | 只把项目题**指过去**，不代答（项目题必须用真实产出答） |
-| [可验证产出工具箱](/projects/toolkit/) | **方法层**：ADR / 压测报告 / 架构图怎么产出 | 在[决策层](#layers)引用它——项目面看的是这三类证据 |
+| [可验证产出工具箱](/projects/toolkit/) | **方法层**：ADR / 压测报告 / 架构图 / 方案评审怎么产出 | 在[决策层](#layers)引用它——项目面看的是这几类证据 |
 | [成长路线](/projects/architect-roadmap/) | **能力自检**：四级阶梯 + 每级「读到哪一层」+ [覆盖度](/projects/architect-roadmap/#coverage) | 本页只给题单入口，能力评估用路线图 |
 
 > **本板块的取舍**：这里**不新写任何原理正文**。如果某道题的答案在正文里找不到推导过程，正确的做法是**回正文补**，而不是在此处补一段二手总结——一旦这里开始抄正文，它就会变成第二个真相源，两边会慢慢不准。

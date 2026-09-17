@@ -1,6 +1,6 @@
 ---
 date: 2026-09-17
-desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线、按四级成长路线的阅读切片、七篇正文的定位与高频考点速查
+desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线、按四级成长路线的阅读切片、八篇正文的定位与高频考点速查
 ---
 
 # AI 应用 · 板块导览
@@ -27,8 +27,9 @@ desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线�
 | [**Spring AI**](/ai/spring-ai/) | Java 侧的**原子能力** | ChatClient、**Advisor 中间件模型**、结构化输出、Tool Calling、RAG 全链路与调优优先级、版本时间线 |
 | [**Spring AI Alibaba**](/ai/spring-ai-alibaba/) | Java 侧的**编排层 + 企业配套** | 与 Spring AI 的边界、**Graph 多智能体编排**、百炼与国产模型接入、Nacos MCP Registry、Human-in-the-Loop |
 | [**数字人**](/ai/digital-human/) | 多模态能力的**终端集成** | 形态分类与选型维度、实时互动链路、第三方 AI 能力接入方法论 |
+| [**AI 治理**](/ai/governance/) | 试点收成**可签字的机制** | 数据与训练用途、评测与人闸、推理账单、供应商锁定与退出 |
 
-这条线的核心问题是**工程化**：AI 能力本身由平台提供，但把它变成稳定可运维的产品，靠的仍是后端的基本功——鉴权、配额、降级、监控、成本控制。
+这条线的核心问题是**工程化**：AI 能力本身由平台提供，但把它变成稳定可运维的产品，靠的仍是后端的基本功——鉴权、配额、降级、监控、成本控制。把「做不做」变成「谁签字」，见[AI 治理](/ai/governance/)。
 
 > **`Spring AI` 与 `Spring AI Alibaba` 的分工**是一条容易混淆的边界，记住一句就够：**前者给的是砖头和水泥（模型、向量库、工具、记忆的原子抽象），后者给的是精装修方案（流程编排 + 国产模型 + 可观测配套）。** 单点能力用前者，流程需要编排时再引入后者——详见 [Spring AI Alibaba · 什么时候用哪个](/ai/spring-ai-alibaba/#when-to-use)。
 
@@ -40,20 +41,24 @@ AI 应用
 │   ├── Vibe Coding 与 AI 辅助研发    协作流程 · 上下文工程 · 五道闸门
 │   └── Agent 与 Harness             循环 · 工具 · MCP 协议 · 多 Agent
 │
-└── 【把 AI 接进系统】AI 能力集成
-    ├── Spring AI                    原子抽象 · Advisor · RAG
-    ├── Spring AI Alibaba            Graph 编排 · 国产模型 · 企业配套
-    └── 数字人                        多模态终端集成
-        ├── 数字人 · 导览             形态分类与选型维度
-        ├── 实时互动数字人            选型与集成落地
-        ├── 接入宿主：Web 与原生 App   宿主形态与硬约束
-        └── 集成清单                 第三方 AI 能力接入方法论
+├── 【把 AI 接进系统】AI 能力集成
+│   ├── Spring AI                    原子抽象 · Advisor · RAG
+│   ├── Spring AI Alibaba            Graph 编排 · 国产模型 · 企业配套
+│   └── 数字人                        多模态终端集成
+│       ├── 数字人 · 导览             形态分类与选型维度
+│       ├── 实时互动数字人            选型与集成落地
+│       ├── 接入宿主：Web 与原生 App   宿主形态与硬约束
+│       └── 集成清单                 第三方 AI 能力接入方法论
+│
+└── 【把试点收成机制】AI 治理
+    └── 数据 · 评测人闸 · 推理账单 · 锁定退出
 
 横向依赖：
   Vibe Coding ──▶ Agent 与 Harness     （先懂协作方式，再懂内部机制）
   Agent 与 Harness ──▶ Spring AI       （先懂机制，再看 Java 侧怎么实现）
   Spring AI ──▶ Spring AI Alibaba      （先会用原子能力，再上编排）
   Spring AI Alibaba ──▶ 数字人          （编排能力用于多模态链路）
+  闸门 / 效能 / 成本 / 合规 ──▶ AI 治理 （先有切片，再有签字人）
 ```
 
 **为什么把 `Agent 与 Harness` 放在 `Spring AI` 前面？** 因为框架会把机制藏起来。**先理解"工具调用本质是宿主侧执行一个 Java 方法"、"MCP 是协议而非库"，再看 Spring AI 的 `@Tool` 与 MCP starter，才知道它在帮你做什么**——否则很容易把框架当成魔法。
@@ -67,6 +72,7 @@ AI 应用
 | **要做多智能体 / 流程编排** | [Agent 与 Harness · 多 Agent](/ai/agent-harness/#multi-agent) → [Spring AI Alibaba · Graph](/ai/spring-ai-alibaba/#graph) |
 | **做面向终端的 AI 产品** | [数字人导览](/ai/digital-human/) → [实时互动数字人](/ai/digital-human/interactive-avatar) → [接入宿主：Web 与原生 App](/ai/digital-human/web-vs-native) → [集成清单](/ai/digital-human/integration-checklist) |
 | **要对接 MCP / 外部工具** | [Agent 与 Harness · MCP](/ai/agent-harness/#mcp) → [Spring AI · MCP](/ai/spring-ai/#mcp) → [Spring AI Alibaba · Nacos MCP Registry](/ai/spring-ai-alibaba/#enterprise) |
+| **把试点收成可签字的机制** | [五道闸门](/ai/vibe-coding/#five-gates) → [效能 §五](/cloud-native/cicd/engineering-metrics#ai-paradox) → [AI 治理](/ai/governance/) |
 | **面试前突击** | [高频考点速查](#faq) → 回正文看推导 |
 | **按成长路线的级别读** | 见下一节[按四级读](#by-level)——同一篇在每一级拿走的深度不同 |
 
@@ -80,8 +86,8 @@ AI 应用
 |---|---|---|---|
 | [**L1 开发**](/projects/architect-roadmap/developer/) | [五道闸门](/ai/vibe-coding/#five-gates) → [人的介入点](/ai/vibe-coding/#human-gates) → [上下文](/ai/vibe-coding/#context-files) | 什么能交给 AI、什么必须人把关；约定要写进上下文 | 工具格局、Agent 循环、Spring AI |
 | [**L2 高级开发**](/projects/architect-roadmap/senior/) | [Agent 循环](/ai/agent-harness/#agent-loop) → [Harness](/ai/agent-harness/#what-is-harness) | 模型相同、Harness 决定上限；终止判据必须来自外部可验证信号 | MCP 规范、多 Agent、Spring AI |
-| [**L3 架构师**](/projects/architect-roadmap/architect/) | [Spring AI 定位](/ai/spring-ai/#positioning) → [多 Agent](/ai/agent-harness/#multi-agent) → [何时用 Alibaba](/ai/spring-ai-alibaba/#when-to-use) | LLM 进不进主链路、失败时业务降级成什么、要不要编排 | ChatClient API、数字人实现、MCP 细节（岗位方向再读） |
-| [**L4 CIO**](/projects/architect-roadmap/cio/) | [五道闸门](/ai/vibe-coding/#five-gates) → [效能 §五：个人变快、交付变慢](/cloud-native/cicd/engineering-metrics#ai-paradox) | 试点边界、失败怎么退；采购与退出先套[自建 vs 采购](/methodology/tech-cost-roi#build-vs-buy) | 工具对比、Agent 循环、框架 API。**治理专篇尚未成篇** |
+| [**L3 架构师**](/projects/architect-roadmap/architect/) | [Spring AI 定位](/ai/spring-ai/#positioning) → [多 Agent](/ai/agent-harness/#multi-agent) → [何时用 Alibaba](/ai/spring-ai-alibaba/#when-to-use) → [评测与降级](/ai/governance/#eval) | LLM 进不进主链路、失败时业务降级成什么、要不要编排 | ChatClient API、数字人实现、MCP 细节（岗位方向再读） |
+| [**L4 CIO**](/projects/architect-roadmap/cio/) | [五道闸门](/ai/vibe-coding/#five-gates) → [效能 §五：个人变快、交付变慢](/cloud-native/cicd/engineering-metrics#ai-paradox) → [AI 治理四笔账](/ai/governance/#owners) | 试点边界、失败怎么退；四笔账有没有主人；采购与退出同周期同口径 | 工具对比、Agent 循环、框架 API |
 
 ## 五、高频考点速查 {#faq}
 
@@ -106,6 +112,10 @@ AI 应用
 | Graph 编排的核心价值？ | 把流程**从模型手里收回到开发者手里**：路径由边决定 → 可复现、可测试、可插人工确认 | [Spring AI Alibaba](/ai/spring-ai-alibaba/#graph) |
 | Human-in-the-Loop 为什么重要？ | 技术上是一个"等人确认"节点，**组织上是 AI 决策失控的兜底与免责边界** | [Spring AI Alibaba](/ai/spring-ai-alibaba/#graph) |
 | 评估一个 AI 框架该问什么？ | 三问：能接我的模型吗（合规）、能看见它干了什么吗（可观测）、流程能被约束吗（编排） | [Spring AI Alibaba](/ai/spring-ai-alibaba/#enterprise) |
+| AI 治理要管哪四笔账？ | 数据与训练用途、评测与人闸、推理单位成本、供应商退出。任一笔没有主人就还是试点 | [AI 治理](/ai/governance/#owners) |
+| 五道闸门够不够挡主链路幻觉？ | **不够。** 闸门管研发流程；主链路还要上线前评测、在线人闸、失败降级 | [AI 治理 · 评测](/ai/governance/#eval) |
+| 怎么算 AI 贵不贵？ | 用每千次 / 每座席 / 每成功任务，把重试和长上下文算进分母。不要只报 token 单价 | [AI 治理 · 账单](/ai/governance/#bill) |
+| 模型锁三年独家最大的技术风险？ | 评测集与提示词带不走，降级路径也锁死。退出成本必须进签约前 TCO | [AI 治理 · 退出](/ai/governance/#exit) |
 
 ## 六、与相邻板块的边界 {#boundary}
 
@@ -116,4 +126,5 @@ AI 应用
 | [Spring Boot](/java/spring/spring-boot/) | 模型参数的配置绑定、AI 服务的可观测（Micrometer 进 Actuator）、启动与优雅停机，都复用 Boot 的机制 |
 | [消息队列](/middleware/) | AI 任务适合异步化（推理是秒级），Agent 编排与任务分发可以走 MQ；RocketMQ 5.5 的 Lite Mode 就是朝这个方向做的 |
 | [云原生](/cloud-native/) | Agent 服务是长耗时服务，扩缩容、超时、资源限额要按这个前提设计 |
-| [技术成本与 ROI](/methodology/tech-cost-roi) | L4 算 AI 的采购与退出时，先用这篇的同周期同口径；治理专篇尚未成篇 |
+| [技术成本与 ROI](/methodology/tech-cost-roi) | L4 算 AI 的采购与退出时，先用这篇的同周期同口径；模型锁定物见[AI 治理 · 退出](/ai/governance/#exit) |
+| [合规体系](/security/compliance-system) | 出境路径与阈值在合规篇；提示词能不能出域、厂商能不能训练见[AI 治理 · 数据](/ai/governance/#data) |

@@ -334,4 +334,4 @@ UPDATE org_node
 **Q6：全量同步跑两遍会有问题吗？**
 全量写入本身幂等（同样的快照覆盖两次，结果相同），但"切换"这一步不是——所以用**批次号做乐观锁**（`WHERE active_batch < :newBatch`），受影响行数为 0 就跳过。**这引出一条通用规律：幂等不是操作本身的属性，而是"操作 + 判据"的属性**——一旦引入"当前状态"，就必须显式比较版本。
 
-> 关联阅读：重试的四个前提与背压见 [方法级重试与并发限制](/java/spring/spring-framework/crosscutting/resilience#preconditions)；接口幂等的四类方案见 [接口幂等](/java/spring/spring-cloud/idempotency#solutions)；消息不丢的四道防线见 [消息队列](/middleware/#three-threads)；数仓侧的对账与幂等设计见 [大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/#reconciliation)；本篇的容量数字怎么变成证据见 [压测报告](/projects/toolkit/perf-report/)。
+> 关联阅读：重试的四个前提与背压见 [方法级重试与并发限制](/java/spring/spring-framework/crosscutting/resilience#preconditions)；接口幂等的四类方案见 [接口幂等](/java/spring/spring-cloud/idempotency#solutions)；消息不丢的四道防线见 [消息队列](/middleware/#three-threads)；差账分类与以谁为准见 [对账与补偿](/methodology/reconciliation)；数仓侧的对账与幂等设计见 [大数据架构方案 → 数仓落地](/projects/property-saas/data-warehouse/#reconciliation)；本篇的容量数字怎么变成证据见 [压测报告](/projects/toolkit/perf-report/)。

@@ -239,6 +239,7 @@ const sidebarSpec = [
           { text: 'ADR 架构决策记录', dir: 'projects/toolkit/adr', group: true },
           { text: '压测报告', link: '/projects/toolkit/perf-report/' },
           { text: '架构图', link: '/projects/toolkit/arch-diagram/' },
+          { text: '方案评审', link: '/projects/toolkit/review/' },
           { text: '故障复盘', link: '/projects/toolkit/postmortem/' }
         ]
       },
@@ -275,6 +276,7 @@ const sidebarSpec = [
           { text: 'Agent 与 Harness', dir: 'ai/agent-harness' },
           { text: 'Spring AI', dir: 'ai/spring-ai' },
           { text: 'Spring AI Alibaba', dir: 'ai/spring-ai-alibaba' },
+          { text: 'AI 治理', link: '/ai/governance/' },
           { text: '数字人', dir: 'ai/digital-human', group: true }
         ]
       },

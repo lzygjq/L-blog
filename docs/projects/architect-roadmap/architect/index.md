@@ -1,7 +1,7 @@
 ---
 date: 2026-09-17
 title: L3 架构师 · 能设计系统，并为取舍负责
-desc: 从「负责一块」到「设计一个系统」的六步阅读顺序——分布式地基、服务化与通信、数据架构、方法论、非功能三件套、工程效能与云原生；另附 AI 进不进主链路、跳过表、离场自检与本级真正的缺口
+desc: 从「负责一块」到「设计一个系统」的六步阅读顺序——分布式地基、服务化与通信、数据架构、方法论、非功能三件套、工程效能与云原生；另附 AI 进不进主链路（含评测与降级）、跳过表、离场自检与本级真正的缺口
 order: 3
 ---
 
@@ -50,6 +50,7 @@ L3 的分水岭是**产出物变了**：从「一段能跑的代码」变成「*
 | [熔断、限流与降级](/java/spring/spring-cloud/resilience) | 全读——**本级第二重点**：区分「限流是保护自己」与「熔断是保护下游」 |
 | [分布式事务](/java/spring/spring-cloud/transaction) | 全读——2PC / TCC / SAGA 各自放弃了什么，以及「能不用就不用」的判据 |
 | [接口幂等](/java/spring/spring-cloud/idempotency) | 全读——幂等键放哪一层、去重窗口开多长 |
+| [对账与补偿](/methodology/reconciliation) | 全读——幂等管同一请求，对账管做完之后两边是否还一致；**以谁为准先于补偿方向** |
 | [分布式任务调度](/java/spring/spring-cloud/scheduling) | 读「集群任务怎么只跑一次」 |
 | [链路追踪](/java/spring/spring-cloud/tracing) | 读 Trace / Span 怎么串起来；采集与存储端见第五步 |
 | [RPC 与协议 · 导览](/middleware/rpc/)、[边界](/middleware/rpc/#map) | 读 `#map` |
@@ -71,6 +72,7 @@ L2 回答「这条 SQL 为什么慢」，L3 回答「**这些数据该放在几�
 | [数仓分层设计](/bigdata/warehouse-design/)、[OLAP 选型](/bigdata/clickhouse/olap-selection) | 全读——「MySQL 之外的那份数据放哪」是标准架构题 |
 | [Canal](/bigdata/canal/)、[湖仓](/bigdata/lakehouse/) | 按需——只在业务真的要做数仓时读 |
 | [搜索与检索 · 导览](/search/)、[分片与扩展](/search/sharding-and-scale) | 全读——倒排索引的代价与「什么时候该上 ES」 |
+| [多租户方法](/methodology/multi-tenancy) | 全读——隔离是**分档不是是非**；横切点漏一个就串；升档前提是共享档已经按租户切开。案例数字以[三级混合](/projects/property-saas/microservice-to-k8s/#multi-tenant)为准 |
 
 ### 第四步 · 方法论：从「会做」到「说得清」
 
@@ -79,6 +81,7 @@ L2 回答「这条 SQL 为什么慢」，L3 回答「**这些数据该放在几�
 | [方法论 · 导览](/methodology/)、[判据](/methodology/#criteria) | 先读 `#criteria`——**什么时候不该上 DDD**，比怎么上更重要 |
 | [战略设计](/methodology/ddd-strategic) | 全读——限界上下文是服务边界的第一手依据 |
 | [战术设计](/methodology/ddd-tactical)、[落地与反模式](/methodology/ddd-in-practice) | 读反模式那一篇——本级要能识别「为 DDD 而 DDD」 |
+| [方案评审](/projects/toolkit/review/) | 全读——会前三件材料、会上四问、散会条件；建模 12 条仍用[落地清单](/methodology/ddd-in-practice#checklist)，两边都过才叫评审过了 |
 | [架构风格对比](/methodology/architecture-styles) | 全读——单体 / 微服务 / 事件驱动各自的代价，是方案对比的词汇表 |
 | [拆分粒度](/methodology/service-granularity) | 全读——**本级最实用的一篇**：拆过头比不拆更贵 |
 | [事件驱动与 CQRS](/methodology/event-driven-cqrs) | 读到「什么时候值得引入事件」为止 |
@@ -116,7 +119,7 @@ L2 回答「这条 SQL 为什么慢」，L3 回答「**这些数据该放在几�
 
 ### 本级附读 · AI 进不进主链路
 
-L2 停在循环机制。本级要定的是取舍：**LLM 失败时业务怎么办、要不要进主链路、单点能力够不够还是必须编排。** 方案评审 / 对账 / 多租户方法尚未成篇，先用现有正文把这一问挂上清单。
+L2 停在循环机制。本级要定的是取舍：**LLM 失败时业务怎么办、要不要进主链路、单点能力够不够还是必须编排。**
 
 | 页 | 本级怎么读 |
 |---|---|
@@ -124,6 +127,7 @@ L2 停在循环机制。本级要定的是取舍：**LLM 失败时业务怎么�
 | [Advisor](/ai/spring-ai/#advisors) 与 [RAG](/ai/spring-ai/#rag) | 读 Advisor 顺序即语义、RAG 必须做元数据过滤（跨租户泄露）；调优细节按需 |
 | [Agent · 多 Agent](/ai/agent-harness/#multi-agent) | 全读——三条同时满足才值得上；否则是负债 |
 | [Spring AI Alibaba · 何时用哪个](/ai/spring-ai-alibaba/#when-to-use) | 全读——原子能力 vs 编排，按这条判据选，不要两个都上 |
+| [AI 治理 · 评测与人闸](/ai/governance/#eval) | 读评测、人闸、失败降级——**没有降级路径的主链路，等于把可用性交给模型 SLA**。四笔账的签字留给 L4 |
 | 数字人实现、MCP 规范细节、ChatClient API | **按需**——岗位方向是 AI 产品再读；本级先定进不进主链路 |
 
 ## 三、本级明确跳过的内容
@@ -176,5 +180,5 @@ L1 与 L2 的缺口是**内容缺口**（缺某一篇），L3 不是。这一级
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
 | 看「架构题会被追问到什么程度」 | [面试专题的四层次](/interview/#layers) 与[跨板块连线题](/interview/#threads) |
 | 拿两个案例当模拟盘，自己重推一遍设计 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
-| 把设计写成可评审的材料 | [可验证产出工具箱](/projects/toolkit/)：立项三件套（ADR / 压测 / 架构图）+ 运行期[故障复盘](/projects/toolkit/postmortem/) |
+| 把设计写成可评审的材料 | [可验证产出工具箱](/projects/toolkit/)：立项三件套 + [方案评审](/projects/toolkit/review/) + 运行期[故障复盘](/projects/toolkit/postmortem/) |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

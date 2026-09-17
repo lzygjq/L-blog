@@ -75,6 +75,7 @@ L1 到 L2 是**技术问题**（知道 API 就行），L2 到 L3 是**判断问�
 - **写测试要用到 Spring**：切片测试本质是「控制 Spring 容器装多少东西」，前提是懂 [IoC](/java/spring/spring-framework/ioc/) 与 [自动配置](/java/spring/spring-boot/configuration)
 - **集成测试用到容器**：Testcontainers 依赖 [Docker](/cloud-native/docker/)，这与 [CI/CD](/cloud-native/cicd/) 的门禁设计是同一件事的两面
 - **测试是项目证据**：[面试专题](/interview/) 里「怎么保证质量」这一问，落点就在本板块
+- **架构留下的绿灯**：多租户交叉查询不可见，是隔离档位的最低断言，见[多租户 · 横切点](/methodology/multi-tenancy#context)
 
 ## 六、面试高频索引 {#interview}
 
