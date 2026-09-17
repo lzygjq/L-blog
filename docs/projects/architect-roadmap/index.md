@@ -192,8 +192,8 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 
 | 你想干什么 | 去哪 |
 |---|---|
-| 按领域查知识 | 顶部导航的 6 个板块（每个板块导览页都有「阅读建议」）—— 导航里它们排在首项「成长路线」之后 |
-| 按深度走路线 | 本页（**顶部导航首项「成长路线」直达**）→ 四级清单：[L1 开发](/projects/architect-roadmap/developer/) → [L2 高级开发](/projects/architect-roadmap/senior/) → [L3 架构师](/projects/architect-roadmap/architect/) → [L4 CIO](/projects/architect-roadmap/cio/) |
+| 按领域查知识 | 顶部导航的 6 个板块（每个板块导览页都有「阅读建议」） |
+| 按深度走路线 | 本页（**最右侧竖栏顶部的「成长路线」直达**，全站常驻）→ 四级清单：[L1 开发](/projects/architect-roadmap/developer/) → [L2 高级开发](/projects/architect-roadmap/senior/) → [L3 架构师](/projects/architect-roadmap/architect/) → [L4 CIO](/projects/architect-roadmap/cio/) |
 | 看「会被问到多深」 | [面试专题](/interview/)：四层次分级、按轮次的复习路径、跨板块连线题 |
 | 拿证据讲项目 | [项目实战](/projects/) 的两个案例系统，产出格式见[可验证产出三件套](/projects/toolkit/) |
 | 判断该不该升级架构 | [架构演进地图](/projects/architecture-evolution/)：五层 × 四档的触发信号与验收标准 |

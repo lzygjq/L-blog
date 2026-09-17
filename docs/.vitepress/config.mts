@@ -347,13 +347,11 @@ export default defineConfig({
       // 2026-09-16 起导航按「6 个板块」组织：一个板块可覆盖多个物理目录前缀，
       // 与 sidebarSpec 的前缀数组一一对应（导航分组 == 侧边栏分组，两处必须同步改）。
       //
-      // ⚠️ **唯一的例外：首项「成长路线」不是一个板块**（2026-09-17 新增）。
-      // 站点是**两轴正交**的：6 个板块是「领域轴（用来查）」，L1→L4 是「深度轴（用来走）」。
-      // 深度轴原先只能从首页 hero 按钮或「实战与面试 → 左侧栏」两步进入，缺一个常驻入口；
-      // 这里把它提为导航首项，与首页 hero 的按钮顺序（成长路线 → 知识库总览 → 项目实战 → 面试专题）对齐。
-      // 它 **不参与** sidebarSpec 的「一一对应」—— sidebar 里它仍挂在 `projects/` 前缀下，
-      // 所以下面第 6 项「实战与面试」的 activeMatch 必须**排除**它，否则进路线页会有两个菜单同时高亮。
-      { text: '成长路线', link: '/projects/architect-roadmap/', activeMatch: '^/projects/architect-roadmap/' },
+      // ⚠️ 2026-09-17 曾把「成长路线」提为导航**首项**（理由：站点两轴正交 —— 6 个板块是
+      // 「领域轴（用来查）」，L1→L4 是「深度轴（用来走）」，深度轴缺常驻入口），**同日撤回**。
+      // 原因：用户要的固定入口是**最右侧那条竖版工具栏**（48px，现有侧栏/目录/全屏/回顶四个按钮），
+      // 不是顶部导航。→ 入口落在 `theme/components/RoadmapLink.vue`，由 RightRail 引用；
+      // 此处导航恢复为「只有 6 个板块」。**别再往这里加非板块项**：顶部导航的语义就是板块。
       { text: '计算机基础', link: '/fundamentals/', activeMatch: '^/fundamentals/' },
       { text: '语言与框架', link: '/java/', activeMatch: '^/(java|frontend)/' },
       { text: '数据与存储', link: '/database/', activeMatch: '^/(database|search|bigdata)/' },
@@ -361,13 +359,11 @@ export default defineConfig({
       { text: '架构与云原生', link: '/cloud-native/', activeMatch: '^/(cloud-native|methodology|high-availability|security)/' },
       {
         // 「实战与面试」= 项目案例 + AI 应用 + 面试专题。
-        // activeMatch 里的 `projects(?!\/architect-roadmap)` 是**负向先行断言**：排除成长路线，
-        // 让「成长路线」与「实战与面试」互斥高亮（普通情况下 VitePress 各项独立判断，
-        // 被两条正则同时命中就会双高亮）。注意不能写成 `^/(projects/(?!architect-roadmap)|…)`——
-        // 那样末尾那个 `/` 会没有字符可匹配，`/projects/` 板块首页反而不高亮。
+        // （2026-09-17 曾因「成长路线」占据导航首项而需要 `projects(?!\/architect-roadmap)`
+        //  负向先行断言把路线页排除掉；首项同日撤回后已不需要，恢复为普通前缀正则。）
         text: '实战与面试',
         link: '/projects/',
-        activeMatch: '^/(projects(?!\\/architect-roadmap)|ai|interview)/'
+        activeMatch: '^/(projects|ai|interview)/'
       },
       {
         // 下拉分组自身没有 link，高亮靠 activeMatch + 「子项是否有命中的」两条

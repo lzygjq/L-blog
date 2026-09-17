@@ -1,10 +1,15 @@
 <!-- 最右侧竖版工具栏（参考 pdai.tech 右侧悬浮条）：
+     - 成长路线固定入口（跳转链接，非开关；全站常驻，见 RoadmapLink.vue）
      - 侧边栏显示/隐藏（原导航栏左上角汉堡按钮移到这里）
      - 本页目录显示/隐藏（原导航栏右侧按钮移到这里）
      - 全屏阅读（参考 pdai.tech 的全屏图标，浏览器原生 Fullscreen API）
      - 回到顶部（滚动超过 400px 出现）
-     整条 fixed 在视口右缘、导航栏以下；Layout 预留 padding-right 让内容不压住工具栏 -->
+     整条 fixed 在视口右缘、导航栏以下；Layout 预留 padding-right 让内容不压住工具栏
+
+     排列取「导航 / 面板开关 / 阅读工具」三段式：成长路线单独在顶部、下面用 1px 分隔线隔开，
+     与原有那条（分隔开关与工具）一致。 -->
 <script setup>
+import RoadmapLink from './RoadmapLink.vue'
 import SidebarToggle from './SidebarToggle.vue'
 import AsideToggle from './AsideToggle.vue'
 import FullScreenToggle from './FullScreenToggle.vue'
@@ -13,6 +18,8 @@ import BackToTop from './BackToTop.vue'
 
 <template>
   <div class="right-rail">
+    <RoadmapLink />
+    <div class="rail-divider" aria-hidden="true"></div>
     <SidebarToggle />
     <AsideToggle />
     <div class="rail-divider" aria-hidden="true"></div>
