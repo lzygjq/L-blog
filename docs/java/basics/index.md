@@ -9,7 +9,7 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 
 这些问题往回追一步，全都落在这个板块里。**它的定位不是「入门教程」，而是「所有上层知识的解释层」**：`HashMap` 为什么要求 key 重写 `hashCode`、Spring 的注解为什么不生效、网关为什么不能用阻塞写法——答案都在这里。
 
-本板块共 **9 篇**，按「**语法地基 → 类型系统 → 平台能力 → 语言演进**」四层递进组织。
+本板块共 **10 篇**，按「**语法地基 → 类型系统 → 平台能力 → 语言演进**」四层递进组织，另加一篇**工程基础**（依赖管理与构建）——它不属于语言本身，却是开发第一天就要用的东西。
 
 ## 一、整体体系
 
@@ -18,6 +18,7 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 | **语法地基** | 对象之间怎么协作、值怎么比较、出错怎么表达 | [面向对象与 Object 契约](/java/basics/oop-object)、[String 与包装类](/java/basics/string-wrapper)、[异常体系](/java/basics/exception) |
 | **类型系统** | 泛型到底给了什么、运行期能拿到什么、注解怎么落地 | [泛型](/java/basics/generics)、[反射](/java/basics/reflection)、[注解](/java/basics/annotation) |
 | **平台能力** | 数据怎么进出、文件与网络怎么高效读写 | [IO 与 NIO](/java/basics/io-nio) |
+| **工程基础** | Java 项目怎么被组织、依赖从哪里来、构建为什么不可复现 | [依赖管理与构建](/java/basics/dependency-build) |
 | **语言演进** | Java 8 改变了什么、9~21 又补上了什么 | [Java 8 特性](/java/basics/java8)、[Java 9~21 演进](/java/basics/java9-21) |
 
 ## 二、四条主线
@@ -61,6 +62,7 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 | [注解](/java/basics/annotation) | 注解的本质（编译后是接口）、五个元注解、三档保留策略与各自的读取者、注解处理器与多轮处理、运行期反射与组合注解 | 加了注解为什么没反应？`@Retention` 忘写会怎样？Java 的注解为什么不能继承？ |
 | [IO 与 NIO](/java/basics/io-nio) | BIO 流体系与装饰器模式、Buffer / Channel / Selector 的用法与坑、Reactor 模式、零拷贝的 Java API、序列化（**五种 IO 模型与 epoll 的内核机制见[计算机基础](/fundamentals/os/io-model)**） | NIO 到底是不是异步？`select` 和 `epoll` 差在哪？Kafka 为什么快（零拷贝）？ |
 | [Java 8 特性](/java/basics/java8) | Lambda 的底层（`invokedynamic`）、四大函数式接口与变体、接口 `default` 与菱形冲突、Stream 的惰性与并行流四个坑、`Optional` 纪律、新日期时间 API | Lambda 和匿名内部类的区别？并行流什么时候别用？`orElse` 和 `orElseGet` 差在哪？ |
+| [依赖管理与构建](/java/basics/dependency-build) | GAV 坐标与仓库解析、Maven 与 Gradle **相反**的冲突调解规则、`NoSuchMethodError` 等三类症状的定位、生命周期与插件绑定、聚合与继承、BOM 与可复现构建 | pom 里写了 2.0 为什么运行时是 1.0？`NoSuchMethodError` 怎么查？聚合和继承差在哪？ |
 | [Java 9~21 演进](/java/basics/java9-21) | 模块化与强封装、`var` / `record` / `sealed` / 模式匹配、类库与 GC 的关键变化、虚拟线程的原理与三条禁忌、升级 LTS 排查清单 | 升级 JDK 17 为什么框架会挂？`record` 能不能做实体？虚拟线程为什么不能池化？ |
 
 ## 四、高频考点速查 {#faq}
@@ -97,6 +99,8 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 | `select` / `poll` / `epoll` 的差别？ | 前两者每次调用都要把全部 fd 传入内核并**线性遍历**（`select` 还有 1024 上限）；`epoll` 把 fd 集合维护在内核、用回调维护就绪链表，**只返回就绪的 fd** | [IO 与 NIO](/java/basics/io-nio#channel-selector) |
 | 零拷贝到底省了什么？ | 传统 `read`+`write` 是 **4 次拷贝 + 4 次上下文切换**；`mmap` 省一次 CPU 拷贝，`sendfile` 让数据不经过用户空间（Kafka 就是这么快的） | [IO 与 NIO](/java/basics/io-nio#zero-copy) |
 | Java 原生序列化有什么问题？ | 安全（`readObject` 可执行代码，历史 RCE 主因）、性能与体积、不能跨语言、兼容性脆弱。**必须显式声明 `serialVersionUID`** | [IO 与 NIO](/java/basics/io-nio#serialization-problems) |
+| pom 里写了 2.0，为什么运行期是 1.0？ | **Maven 与 Gradle 的调解规则正好相反**：Maven 是「最近优先」（路径最短者胜，同级则先声明者胜），所以被传递依赖带进来的近版本会压掉你直接写的远版本；Gradle 默认取**最高版本**。Maven 里用 `dependencyManagement` 或 `exclusions` 钉死 | [依赖管理与构建](/java/basics/dependency-build#resolution) |
+| `NoSuchMethodError` 怎么定位？ | 编译期有、运行期没有，说明**类路径里有同一坐标的多个版本**（编译用 A，运行加载到 B）。三步：`mvn dependency:tree -Dverbose` 找谁带进来的 → `dependency:tree -Dincludes=groupId:artifactId` 精确定位路径 → 用 `exclusions` 或 `dependencyManagement` 收敛 | [依赖管理与构建](/java/basics/dependency-build#conflicts) |
 | Lambda 和匿名内部类有什么区别？ | Lambda 只生成 `invokedynamic`、**运行期动态生成**、可被 JIT 内联；**`this` 指向外层实例**（匿名类指向自己）。捕获变量必须 effectively final | [Java 8](/java/basics/java8#lambda-bytecode) |
 | 接口 `default` 方法为什么出现？ | **向后兼容地给接口加方法**（Java 8 给 `Collection` 加 `stream()` 不能破坏已有实现类）。菱形冲突：类优先 → 子接口优先 → 冲突必须显式重写 | [Java 8](/java/basics/java8#default-method) |
 | 并行流什么时候不要用？ | 它用**全局共享的 `ForkJoinPool.commonPool`**（并行度 = CPU 核数 − 1），**IO 任务会占满并拖累整个 JVM**；有状态操作、共享可变状态也是坑 | [Java 8](/java/basics/java8#parallel-stream) |
@@ -118,5 +122,6 @@ Java 基础是最容易被轻视、也最容易在面试里失分的一块——
 3. **反射与动态代理** —— 把注解、Spring AOP、事务失效这几块串成一条线。
 4. **IO 模型与零拷贝** —— 高并发话题的地基，也是中间件面试的常考区。
 5. **Java 9~21 与虚拟线程** —— 决定你讲的是「Java 8 时代的 Java」还是「现在的 Java」。
+6. **依赖管理与构建** —— 它不属于语言本身，却是「开发第一天就要用」的一项。**重点读第三节的两条冲突调解规则**（Maven 与 Gradle 正好相反）与第四节的排查流程；多模块与构建加速用到时再回头查。
 
 **相关板块**：集合的 `HashMap` 原理见 [Java 集合](/java/collections/)；`ThreadLocal` 与 AQS 见 [Java 并发](/java/concurrent/)；类加载过程见 [Java 虚拟机](/java/jvm/)；动态代理在 Spring 里的落地见 [Spring 生态](/java/spring/)；装饰器模式见 [设计模式](/java/design-patterns/structural/decorator)。

@@ -373,3 +373,5 @@ public class B {
 **Q7：`@ControllerAdvice` 是怎么生效的？**
 
 它是 `HandlerExceptionResolver` 体系的入口。`DispatcherServlet` 捕获 Handler 抛出的异常后交给 `HandlerExceptionResolver` 处理链，其中 `ExceptionHandlerExceptionResolver` 会扫描所有 `@ControllerAdvice` 类中匹配异常类型的 `@ExceptionHandler` 方法并调用，把返回值按正常流程（走 `HttpMessageConverter`）写成响应。所以它能在**业务代码完全不感知**的情况下统一异常出口——这也是它与 [AOP](/java/spring/spring-framework/aop/) 的思路一致的地方：把横切逻辑从业务方法中抽走。
+
+> **延伸**：[REST 接口设计：状态码、错误契约、分页与演进](/java/spring/spring-mvc/rest-api-design) —— 这一篇讲「一个请求怎么被处理」，那一篇讲「接口该长什么样」：资源建模与 HTTP 方法的幂等语义、4xx 与 5xx 的分界线、统一错误体与 `traceId`、游标分页、兼容性演进清单与幂等键。

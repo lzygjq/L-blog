@@ -15,7 +15,7 @@ desc: Spring 核心 / Spring MVC / Spring Boot / Spring Cloud 四个菜单的分
 | 菜单 | 定位 | 解决的问题 | 状态 |
 |---|---|---|---|
 | **[Spring](/java/spring/spring-framework/)** | 核心容器 + 横切能力 | 对象管理与横切逻辑：IoC、Bean、AOP、事务、ORM 集成；以及缓存、异步、重试、校验、序列化 | **已成篇（12 篇）** |
-| **[Spring MVC](/java/spring/spring-mvc/)** | Web 层 | 请求怎么被路由到 Controller、参数怎么绑定、响应怎么序列化 | 已成篇（1 篇） |
+| **[Spring MVC](/java/spring/spring-mvc/)** | Web 层 | 请求怎么被路由到 Controller、参数怎么绑定、响应怎么序列化；以及**接口对外该长什么样**（状态码 / 错误契约 / 分页 / 演进） | 已成篇（**2 篇**） |
 | **[Spring Boot](/java/spring/spring-boot/)** | 提效 | 消除配置：自动配置、Starter、启动流程、配置体系、Actuator、内嵌容器 | **已成篇（6 篇）** |
 | [Spring Cloud](/java/spring/spring-cloud/) | 分布式 | 服务治理与分布式能力：注册发现、网关、熔断降级、链路追踪、CAP、分布式事务、幂等、任务调度 | **已成篇（9 篇）** |
 

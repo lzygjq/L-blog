@@ -8,7 +8,7 @@ desc: MySQL 知识地图、学习主线与面试高频清单
 
 MySQL 是「数据存储」板块的地基。它看起来只是一句 `select * from t where id = 1`，但这句 SQL 背后要经过**存储引擎选型 → B+ 树索引定位 → 事务隔离与 MVCC 可见性判断 → 日志持久化 → 主从复制分发**五层机制。面试考的也从来不是"会不会写 SQL"，而是**这五层你拆到哪一层**。
 
-本板块按「会选型 → 懂索引 → 会诊断 → 懂事务 → 能扛量」五层组织。
+本板块按「会选型 → 懂索引 → 会诊断 → 懂事务 → 能扛量」五层组织，另加一篇**连接池**——它是应用与数据库之间的那道边界，参数必须与 `wait_timeout`、`max_connections` 成对看。
 
 ## 一、学习主线
 
@@ -22,14 +22,16 @@ MySQL 是「数据存储」板块的地基。它看起来只是一句 `select * 
 | 6 | [日志体系：redo / undo / binlog](/database/mysql/log) | 懂原理：WAL、组提交、两阶段提交 | ✅ 已成篇 |
 | 7 | [MVCC 与锁](/database/mysql/mvcc) | 懂原理：版本链、ReadView、Next-Key Lock | ✅ 已成篇 |
 | 8 | [主从复制与读写分离](/database/mysql/replication) | 能扛量：三种复制模式、主从延迟治理 | ✅ 已成篇 |
+| 9 | [连接池：参数、池大小与超时对齐](/database/mysql/connection-pool) | 会连接：池化模型、HikariCP 参数、池大小推导、超时对齐与泄漏排查 | ✅ 已成篇 |
 
-**推荐顺序**：1 → 2 是地基（不懂 B+ 树，后面所有"索引为什么失效"都是死记）；**3 → 4 是面试主战场与日常最常用**；5 → 6 → 7 是一条因果链——**事务要 ACID → 靠日志实现 → 隔离性靠 MVCC 和锁**，断开任何一环都只能背结论；8 面向架构演进。分库分表单独成篇，见[分库分表](/database/sharding/)。
+**推荐顺序**：1 → 2 是地基（不懂 B+ 树，后面所有"索引为什么失效"都是死记）；**3 → 4 是面试主战场与日常最常用**；5 → 6 → 7 是一条因果链——**事务要 ACID → 靠日志实现 → 隔离性靠 MVCC 和锁**，断开任何一环都只能背结论；8 面向架构演进。分库分表单独成篇，见[分库分表](/database/sharding/)；**9 是应用侧的入口**——当问题表现为「连不上、连接不够用、时好时坏」时，从它进入。
 
 ## 二、板块约定
 
 - 示例基于 **MySQL 8.0 + InnoDB**；涉及 5.7 差异的地方会单独标注（如 `.frm` 文件、并行复制）。
 - 所有"索引失效""回表"的判断，**统一以 `EXPLAIN` 的 `key` 与 `Extra` 字段为准**，不靠经验猜。
 - 与[分库分表](/database/sharding/)的分工：单库单表内的优化在本板块，跨库跨表的路由、扩容、分布式事务在那篇；与 [Redis](/database/redis/) 的交界是缓存一致性，在缓存篇展开。
+- **连接池篇横跨应用与数据库两侧**：它讲的是「应用怎么用连接」，但每个参数都对应数据库侧的一个约束（`maxLifetime` 对 `wait_timeout`、总连接数对 `max_connections`）——所以放在本板块，而不是应用板块。
 
 ## 三、面试高频清单 {#interview}
 
@@ -49,5 +51,6 @@ MySQL 是「数据存储」板块的地基。它看起来只是一句 `select * 
 | 10 | InnoDB 和 MyISAM 的区别？ | [存储引擎](/database/mysql/storage-engine) |
 | 11 | 主从复制的原理？主从延迟怎么解决？ | [主从复制](/database/mysql/replication) |
 | 12 | 分库分表的时机和策略？ | [分库分表](/database/sharding/) |
+| 13 | 连接池打满了怎么排查？为什么加池常常没用？ | [连接池](/database/mysql/connection-pool) |
 
-> **一个提醒**：这 12 题里有 5 题的答案都落在"**索引**"上。如果时间只够看两篇，选 [索引底层](/database/mysql/index-structure) 和 [索引设计](/database/mysql/index-design)。
+> **一个提醒**：这 13 题里有 5 题的答案都落在"**索引**"上。如果时间只够看两篇，选 [索引底层](/database/mysql/index-structure) 和 [索引设计](/database/mysql/index-design)。
