@@ -565,6 +565,32 @@ html .VPHome .VPFeature .details {
   flex: 1 1 100% !important;
 }
 
+/* 卡片底部「进入 xxx」提示（linkText 字段）——2026-09-17 首页改版首次启用。
+   默认主题样式是与 details 同级的独立块，但本项目把 .box 改成了 flex row + wrap、
+   details 又占满 100% 换行，所以这里必须显式让 .link-text 也独占一行，
+   否则它会试图挤在 details 右侧。details 保留 flex-grow 把提示压到卡片底部对齐。
+   ⚠️ 主题是 scoped + 主题默认给 .link-text { padding-top: 8px }，
+   所以 padding 用 !important 覆盖、并把字号收到 13px（辅助刻度），不与正文抢视觉。*/
+html .VPHome .VPFeature .link-text {
+  flex: 1 1 100% !important;
+  padding-top: 10px !important;
+}
+
+html .VPHome .VPFeature .link-text-value {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
+/* hero 那句核心区分（两条路线各管什么）用正文色加重 + 一道品牌色下划线：
+   tagline 整体是 text-2 灰，strong 只加粗不变色，实测与周围同重、第一眼抓不住。
+   下划线用 brand-soft（柔和绿）而不是 brand-1，避免整句变「链接」观感 */
+html .VPHome .tagline strong {
+  color: var(--vp-c-text-1) !important;
+  font-weight: 600 !important;
+  border-bottom: 2px solid var(--vp-c-brand-soft);
+  padding-bottom: 1px;
+}
+
 /* ── 开发者导航页（/nav/）────────────────────────────
    frontmatter navRail:true + pageClass:nav-page（pageClass 挂在根 .Layout 上）；
    保留右侧 aside（分类导航走 aside-outline-before 插槽），布局与文档页一致：
