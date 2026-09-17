@@ -1,7 +1,7 @@
 ---
-date: 2026-09-16
+date: 2026-09-17
 title: L2 高级开发 · 能负责一块，并对线上问题给出根因
-desc: 从「交付」到「负责」的七步阅读顺序——并发、JVM、数据原理、框架原理、消息、第二数据库与工程质量，每一步给出页清单与「读到哪一层就停」，另附本级跳过的内容、离场自检六个问题与原缺口已补齐后的读法
+desc: 从「交付」到「负责」的七步阅读顺序——并发、JVM、数据原理、框架原理、消息、第二数据库与工程质量；第七步接上可观测使用侧、容器内 JVM 与扩展-收缩，另附 Agent 循环、跳过表、离场自检与原缺口已补齐后的读法
 order: 2
 ---
 
@@ -92,7 +92,7 @@ L1 的框架停在「会用 + 知道容器管了什么」；L2 要求**能解释
 | [自动配置原理](/java/spring/spring-boot/auto-configuration) | 回读——这次读到自定义 Starter 的三段式 |
 | [自定义 Starter](/java/spring/spring-boot/starter) | 全读——「公司内部脚手架」级别的能力 |
 | [启动流程](/java/spring/spring-boot/startup) | 全读——启动慢、启动就挂，都在这条链上 |
-| [内嵌容器与请求进入](/java/spring/spring-boot/web-server) | 回读——这次读 Tomcat 三参数与线程模型，以及虚拟线程改变了什么 |
+| [内嵌容器与请求进入](/java/spring/spring-boot/web-server) | 回读——这次读 Tomcat 三参数与线程模型，以及[虚拟线程](/java/spring/spring-boot/web-server#virtual-threads)：**能说清什么时候不该用**，不当成默认加速开关 |
 | [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | 回读——SQL 会话、一级 / 二级缓存、批处理的真实代价 |
 | [缓存抽象](/java/spring/spring-framework/crosscutting/cache)、[异步执行](/java/spring/spring-framework/crosscutting/async)、[重试与并发限制](/java/spring/spring-framework/crosscutting/resilience) | 三篇全读——L1 跳过的正是这一组：它们决定「横切能力该由框架做，还是该自己做」 |
 | [序列化与类型边界](/java/spring/spring-framework/crosscutting/json) | 按需回查——L1 只读了时间类型与 `Long` 精度两节 |
@@ -127,7 +127,22 @@ L1 的框架停在「会用 + 知道容器管了什么」；L2 要求**能解释
 |---|---|
 | [覆盖率与质量门禁](/java/testing/quality-gates) | 全读——L1 跳过的那一篇：门禁不是「覆盖率越高越好」，而是「哪一类缺陷必须被拦住」 |
 | [集成测试与真实依赖](/java/testing/integration-test) | 回读——这次读「用容器起真依赖」的那部分 |
-| [CI/CD 与发布](/cloud-native/cicd/)、[流水线设计](/cloud-native/cicd/pipeline-design) | **只读流水线设计**——本级要求能改流水线、能解释「为什么构建慢」；灰度与回滚策略留 L3 |
+| [CI/CD 与发布](/cloud-native/cicd/)、[流水线设计](/cloud-native/cicd/pipeline-design) | **只读流水线设计**——本级要求能改流水线、能解释「为什么构建慢」；灰度与蓝绿留 L3 |
+| [Linux 排查实战](/fundamentals/os/linux-tools) | 回读——L1 只读了四个方向；这次把场景推演走完。**仍是先分类再动手，不调参碰运气** |
+| [Docker · 容器内 JVM](/cloud-native/docker/#jvm-in-container) | 全读这一节——堆 ≠ RSS、OOMKill 与 `ExitOnOutOfMemoryError`。namespace / 多阶段构建仍留 L3 通读 |
+| [回滚与数据库变更 · 扩展-收缩](/cloud-native/cicd/rollback-and-migration#expand-contract) | **只读这一节**——改表走 expand-contract，回填脚本能中途 kill 再重跑。发布策略全集留 L3 |
+| [日志管道 · 结构化字段](/cloud-native/observability/logging-pipeline#structured) | 回读——这次读手工线程 / 线程池 / `@Async` 会丢 MDC。Loki / 成本 / ELK 仍不读 |
+| [SLO 与告警 · 应急与复盘](/cloud-native/observability/slo-and-alerting#incident) | **过渡读法**（慢请求剧本尚未成篇）：只读排查顺序——指标确认范围 → 链路定位哪一跳 → 依赖自身 → 最后才看代码。**不读 SLI 怎么定、错误预算怎么向业务解释** |
+
+### 本级附读 · Agent 循环
+
+L1 停在闸门。本级要能解释「**模型相同，Harness 决定上限**」——线上一次 AI 调用挂住，你得知道循环为什么停不下来：
+
+| 页 | 本级怎么读 |
+|---|---|
+| [Agent 循环](/ai/agent-harness/#agent-loop) | 全读——闭环、终止判据必须来自外部可验证信号 |
+| [Harness 是什么](/ai/agent-harness/#what-is-harness) | 读到六个组成部分各自管什么 |
+| 工具调用机制、MCP 规范、多 Agent | **本级跳过**——留 L3（本级还没有「把 LLM 接进主链路」的设计场景） |
 
 ## 三、本级明确跳过的内容
 
@@ -138,13 +153,14 @@ L1 的框架停在「会用 + 知道容器管了什么」；L2 要求**能解释
 | RPC 与协议、序列化选型 | L3 | 同上——先有跨团队边界，再谈协议 |
 | 高可用容灾、多机房、单元化 | L3 | 本级先保证「单机房不出事」 |
 | 安全认证授权体系（OAuth2 / SSO / 等保） | L3 | 本级只需会接入现成的认证，不需要设计 |
-| 可观测性体系（PromQL / OTel / SLO 定义） | L3 | 本级只要求看得懂现成 dashboard、会加日志 |
-| CI/CD 的灰度、蓝绿、GitOps | L3 | 本级先把「构建 → 测试 → 制品」这条链跑顺 |
-| Docker / K8s 深入、Helm、服务网格、Operator | L3 | L1 / L2 会用现成镜像与部署脚本就够 |
+| 可观测的**设计侧**（PromQL / SLO 定义 / 选型成本） | L3 | 使用侧（字段规范、排查顺序）本级必读；设计体系留 L3 |
+| CI/CD 的灰度、蓝绿、GitOps | L3 | 本级先把「构建 → 测试 → 制品」这条链跑顺；expand-contract 已在第七步 |
+| K8s / Helm / 服务网格 / Operator、Docker 通读 | L3 | 本级读容器内 JVM 就够；编排与镜像原理留 L3 |
 | 数据仓库、Flink、ClickHouse、数仓分层 | L3 / 按需 | 属于数据侧另一条职业线，不是后端主线 |
 | DDD 与架构风格对比 | L3 | 本级先把「这一块怎么划边界」做扎实 |
 | 分库分表的迁移与在线扩容 | L3 | 本级只判断「要不要分」 |
 | 剩余 18 种设计模式 | 面试前按需 | L2 的增量在原理与并发，不在模式数量 |
+| MCP 规范、多 Agent、Spring AI | L3 | 本级只要 Agent 循环与终止判据 |
 
 ## 四、离场自检：六个问题
 
@@ -179,3 +195,4 @@ L1 的框架停在「会用 + 知道容器管了什么」；L2 要求**能解释
 | 看「这些知识会被问到多深」 | [面试专题的四层次](/interview/#layers) 与[按轮次的复习路径](/interview/#rounds) |
 | 看别人怎么把这些原理用在真实系统里 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
 | 提前准备「拿什么证明我做过」 | [可验证产出三件套](/projects/toolkit/) |
+| 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

@@ -1,7 +1,7 @@
 ---
-date: 2026-09-16
+date: 2026-09-17
 title: L1 开发 · 能独立交付一个模块
-desc: 从「能改功能」到「能独立交付」的七步阅读顺序，每一步给出页清单与「读到哪一层就停」，另附本级跳过的内容、离场自检六个问题与原缺口已补齐后的读法
+desc: 从「能改功能」到「能独立交付」的七步阅读顺序，每一步给出页清单与「读到哪一层就停」；第七步接上日志字段、Compose 与 Linux 分类，另附 AI 闸门、跳过表、离场自检与原缺口已补齐后的读法
 order: 1
 ---
 
@@ -18,7 +18,7 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | **交付** | 在别人搭好的框架里加接口、改页面、写 SQL | 拿到一个完整需求，自己拆步骤、自己判断边界情况、自己交付 |
 | **代码** | 能读懂现有代码，模仿现有风格 | 能说清「为什么这样写」，能 review 出一个明显问题 |
 | **数据** | 会写增删改查，会照着别人写的 SQL 改 | 知道哪些字段该建索引，看得懂 `EXPLAIN`，能定位一个慢查询 |
-| **问题** | 出问题先问人、先重启 | 有固定的前三步：看指标 → 看日志 → 看线程栈 |
+| **问题** | 出问题先问人、先重启 | 有固定的前三步：看指标 → 看日志（能用 `traceId` 找到那一次） → 看线程栈 |
 | **验证** | 靠手工点一遍 | 能写出别人可重复执行的测试，能说明「什么没测」 |
 
 **如果上表右列你还做不到，说明差异通常不在「学的技术不够」，而在两块以前从没被要求过的东西：测试与排查。** 这也是下面七步里第五、六、七步存在的理由——它们不是「进阶内容」，而是这一级的基础配置。
@@ -103,7 +103,7 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | [Spring MVC 执行流程](/java/spring/spring-mvc/) | 全读 |
 | [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | 读到「Mapper 的动态代理是怎么回事」 |
 | [参数校验与统一异常](/java/spring/spring-framework/crosscutting/validation) | 全读——两条异常链必须都知道，否则路径参数校验会报 500 |
-| [序列化与类型边界](/java/spring/spring-framework/crosscutting/json) | 只读「时间类型与时区」和「`Long` 精度」两节——本级一定会踩到 |
+| [序列化与类型边界](/java/spring/spring-framework/crosscutting/json) | **必读** [`#datetime`](/java/spring/spring-framework/crosscutting/json#datetime) 与 [`#long-precision`](/java/spring/spring-framework/crosscutting/json#long-precision)——离场自检第 4 题的答案就在这两节；循环引用、多态、Jackson 3 留到用到再查 |
 | [横切能力 · 导览](/java/spring/spring-framework/crosscutting/) | 读分工那一节，其余按需 |
 | [缓存抽象](/java/spring/spring-framework/crosscutting/cache)、[异步执行](/java/spring/spring-framework/crosscutting/async)、[重试与并发限制](/java/spring/spring-framework/crosscutting/resilience) | **本级跳过**——留 L2 |
 | [Spring Cloud](/java/spring/spring-cloud/) | **本级跳过**——留 L3 |
@@ -131,7 +131,21 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | [Java 虚拟机 · 导览](/java/jvm/) | 读导览，知道每一篇解决什么问题 |
 | [JDK 命令行排查：五件套的分工与开销](/java/jvm/troubleshooting-cli#division) | **只读这一节，加上 jstack 的「六种形态」**——本级能读懂线程栈就够了 |
 | [Actuator 与生产可观测](/java/spring/spring-boot/actuator) | 读到「哪些端点可以开、哪些绝不能在公网开」 |
+| [Linux 排查实战 · 四个方向先分类](/fundamentals/os/linux-tools#why-tools) | **只读这一节**——先分 CPU / IO / 内存 / 句柄，再决定看线程栈还是看磁盘；工具链速查与场景推演留 L2 |
+| [Docker · Compose](/cloud-native/docker/#compose) 与 [容器里 `localhost`](/cloud-native/docker/#network) | 能用 Compose 把依赖起起来，知道容器里的 `localhost` 不是宿主机——**别人按你的步骤能在本机复现，这一级才算交得出去**。namespace、多阶段构建、镜像瘦身不读 |
+| [日志管道 · 结构化字段](/cloud-native/observability/logging-pipeline#structured) | **过渡读法**（应用日志专篇尚未成篇）：读到字段约定、`traceId` 进 MDC、禁止把 `traceId` 拼进 `message`。Loki / 成本 / ELK **不读** |
 | [运行时数据区](/java/jvm/memory)、[垃圾回收](/java/jvm/gc)、[调优与线上排查](/java/jvm/tuning)、[堆转储与 MAT](/java/jvm/heap-dump-analysis)、[Arthas](/java/jvm/online-diagnostics)、[火焰图](/java/jvm/profiling) | **本级跳过**——留 L2 |
+
+### 本级附读 · AI 闸门
+
+日常已经在用 AI 写代码，但清单里以前没它。本级只要拿走「**什么能交、什么必须人把关**」，不学 Agent 内部机制：
+
+| 页 | 本级怎么读 |
+|---|---|
+| [Vibe Coding · 五道闸门](/ai/vibe-coding/#five-gates) | 全读这一节——产物能被自动验证的才能放手 |
+| [人的介入点](/ai/vibe-coding/#human-gates) | 读到「架构决策与资金 / 权限边界必须人把关」 |
+| [上下文才是真瓶颈](/ai/vibe-coding/#context-files) | 读到「模型不知道你的约定，就会持续产出看起来对的代码」——本级写模块时就要把约定写进上下文 |
+| 工具格局、Agent 循环、Spring AI | **本级跳过**——留 L2 / L3 |
 
 ## 三、本级明确跳过的内容
 
@@ -149,10 +163,13 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | Spring Cloud、消息队列、分布式理论 | L3 | 单机能解决的问题不需要分布式 |
 | 数据结构与算法（树/图/DP/海量数据） | 面试前按需 | 本级先把复杂度判断力拿到 |
 | 覆盖率与质量门禁 | L2 | 它属于工程效能而非交付能力 |
+| Docker 原理（namespace / 多阶段构建 / 瘦身）、K8s 与网格 | L2 / L3 | 本级只要 Compose 能起依赖 |
+| 日志管道的 Loki / 成本 / ELK、PromQL、SLO 定义 | L3 | 本级只要字段约定与 `traceId` |
+| AI 工具格局、Agent 循环、Spring AI | L2 / L3 | 本级只要闸门与上下文约定 |
 
-## 四、离场自检：六个问题
+## 四、离场自检：七个问题
 
-**这一级不是「读完某个页面」就算过。** 下面六个问题，如果你能当场说清，说明这一级的知识已经连起来了；如果一个都答不上，回到对应步骤重读：
+**这一级不是「读完某个页面」就算过。** 下面七个问题，如果你能当场说清，说明这一级的知识已经连起来了；如果一个都答不上，回到对应步骤重读：
 
 | # | 问题 | 检验的是 |
 |---|---|---|
@@ -160,10 +177,11 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | 2 | 这个查询为什么慢？`EXPLAIN` 的 `type` 列说明什么，覆盖索引省掉了哪一步？ | 第四步 |
 | 3 | 一个方法加了 `@Transactional` 却没回滚——可能的原因至少说三条 | 第五步 |
 | 4 | 接口返回的时间比数据库里差 8 小时，你先查哪三处？ | 第五步 |
-| 5 | 线上接口大面积超时，你的**前三步**是什么？什么时候决定回滚？ | 第七步 |
+| 5 | 线上接口大面积超时，你的**前三步**是什么？别人拿着一次失败请求的 `traceId`，怎么在日志里找到它？ | 第七步 |
 | 6 | 这个工具类该用静态方法，还是做成一个注入的 Bean？理由是什么？ | 第三步 + 第五步 |
+| 7 | Compose 里下游依赖没起来时，你怎么在本机复现这个模块？容器里访问「本机上的库」该用什么地址？ | 第七步 |
 
-第 6 题最容易被当成小事，但它同时考了设计原则（依赖倒置）与框架理解（谁管生命周期、可测试性从哪来）。
+第 6 题最容易被当成小事，但它同时考了设计原则（依赖倒置）与框架理解（谁管生命周期、可测试性从哪来）。第 7 题检验的是「别人能接手」——交得出去，前提是环境可复现。
 
 ## 五、本站已补齐的内容（原缺口）
 
@@ -184,3 +202,4 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | 看「这些知识会被问到多深」 | [面试专题的四层次](/interview/#layers) 与[按轮次的复习路径](/interview/#rounds) |
 | 看别人怎么把 L1 的东西用在一个真实系统里 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
 | 提前准备「拿什么证明我做过」 | [可验证产出三件套](/projects/toolkit/) |
+| 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

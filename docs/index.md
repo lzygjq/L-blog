@@ -22,7 +22,7 @@ hero:
 features:
   - icon: 🧭
     title: 成长路线
-    details: 四级能力阶梯（开发 → 高级开发 → 架构师 → CIO）＋ 贯穿四级的地基 ＋ 领域依赖链。每一级给出「读到哪一层就停」、离场自检与仍缺的知识块
+    details: 四级能力阶梯（开发 → 高级开发 → 架构师 → CIO）＋ 贯穿四级的地基 ＋ 领域依赖链。每一级给出「读到哪一层就停」与离场自检；AI 已挂进四级
     link: /projects/architect-roadmap/
   - icon: 🧮
     title: 计算机基础

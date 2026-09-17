@@ -1,7 +1,7 @@
 ---
-date: 2026-09-16
+date: 2026-09-17
 title: L4 CIO · 对一条业务线的技术结果负责
-desc: 从「设计一个系统」到「对一条业务线负责」的五步阅读顺序——技术战略、算账、风险与合规、落地叙事、业务语言，每一步同时标注本站有什么、缺什么；附本级跳过的内容与六个离场自检问题
+desc: 从「设计一个系统」到「对一条业务线负责」的五步阅读顺序——技术战略、算账、风险与合规、落地叙事（含 AI 试点边界）、业务语言；附跳过表、离场自检与知识域边界
 order: 4
 ---
 
@@ -69,7 +69,8 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 | [压测报告](/projects/toolkit/perf-report/)、[架构图](/projects/toolkit/arch-diagram/) | 全读——本级拿到的正是这两样东西，你得看得懂它们**哪里在骗人** | ✅ |
 | [大型集团绩效系统](/projects/perf-system/)、[难点地图](/projects/perf-system/#difficulty-map) | 全读——一个真实系统的**组织约束**（历史包袱、下线节奏、人员能力）写得比技术细节更多 | ✅ |
 | [智慧物业 SaaS](/projects/property-saas/)、[约束](/projects/property-saas/#constraints) | 读约束那一节——本级做规划时，**约束比目标重要** | ✅ |
-| [AI 应用](/ai/) | 读导览——AI 是业务最可能问「我们做不做、怎么做」的方向；本站有 Agent / 数字人 / Spring AI / vibe coding 四条线 | ✅ |
+| [AI 应用](/ai/) | 读导览，建立四条线的地图——业务最可能问「我们做不做」的方向 | ✅ |
+| [Vibe Coding · 五道闸门](/ai/vibe-coding/#five-gates) | **试点边界**：哪些环节可放手、失败怎么退。不读工具对比与 Agent 循环 | ✅ |
 | [研发效能度量 · 团队拓扑](/cloud-native/cicd/engineering-metrics#beyond-dora)、[技术债的量化与偿还节奏](/methodology/tech-cost-roi#tech-debt) | 读这两节——四种团队类型与三种交互模式回答「**能力怎么组织**」（按认知负荷划，不按人头）；技术债的偿还判据是**只还高频高息的债** | ✅ 已补齐 |
 
 ### 第五步 · 业务语言：本级真正的专业课
@@ -80,7 +81,7 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 | [战略设计](/methodology/ddd-strategic) | 回读——本级拿它做「业务术语与技术模块」的对齐 | ✅ |
 | [架构演进地图 · 个人路径](/projects/architecture-evolution/#my-path) | 读这一节——一个人的能力路径与一条业务线的技术路径，形状是一样的 | ✅ |
 | [面试专题的四层次](/interview/#layers) | 读「决策层」那一栏——它描述的就是本级会被问到的问题类型 | ✅ |
-| [**研发效能度量：从 DORA 指标到团队原型**](/cloud-native/cicd/engineering-metrics)、[质量成本的四个类别](/cloud-native/cicd/engineering-metrics#beyond-dora)、[给 L4 的三条建议](/cloud-native/cicd/engineering-metrics#for-cio) | 读四节——**「DORA 四项」已是过时口径，现行是五项**（三项吞吐 + 两项不稳定）。本级只读 §四 七个团队原型、§五 AI 让个人变快但交付变慢、§六 质量成本、§七 四条铁律，**口径细节留给执行层**；组织叙事的手法见[成本篇面试口径 Q10](/methodology/tech-cost-roi#interview) | ✅ 已补齐 |
+| [**研发效能度量：从 DORA 指标到团队原型**](/cloud-native/cicd/engineering-metrics)、[质量成本的四个类别](/cloud-native/cicd/engineering-metrics#beyond-dora)、[给 L4 的三条建议](/cloud-native/cicd/engineering-metrics#for-cio) | 读四节——**「DORA 四项」已是过时口径，现行是五项**（三项吞吐 + 两项不稳定）。本级只读 §四 七个团队原型、[§五 AI 让个人变快但交付变慢](/cloud-native/cicd/engineering-metrics#ai-paradox)、§六 质量成本、§七 四条铁律，**口径细节留给执行层**；组织叙事的手法见[成本篇面试口径 Q10](/methodology/tech-cost-roi#interview) | ✅ 已补齐 |
 
 ## 三、本级明确跳过的内容
 
@@ -90,6 +91,7 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 | 具体技术选型的细节对比 | 那是 L3 的活；本级只需判断「这一票该不该由我拍」 |
 | 中间件与框架的内部机制 | 同上 |
 | 新技术尝鲜（新框架 / 新语言 / 新数据库） | 交给 L2 / L3 试点；本级关注的是「试点怎么设边界、失败怎么体面地退」 |
+| Agent 循环、Spring AI API、数字人接入 | 实现是 L2 / L3 的活；本级读[五道闸门](/ai/vibe-coding/#five-gates)就够 |
 | 面试题库式的八股速记 | 本级的问题没有标准答案，只有取舍理由 |
 
 ## 四、离场自检：六个问题
@@ -127,8 +129,9 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 | **财务与法务的判定**（会计准则、合同条款、诉讼风险） | 具体判定必须走专业渠道，技术站转述反而危险 | [成本篇](/methodology/tech-cost-roi)给的是**与技术投入对话的财务语言**，不是财务判断本身 |
 | **技术路线图模板** | 它高度依赖组织语境，任何模板到下一个组织都会失效 | 用[架构演进地图的触发信号](/projects/architecture-evolution/#matrix)自己拼一份——**信号可复用，模板不可复用** |
 | **真实体量下的决策经验** | 只能来自亲身经历 | 用[智慧物业 SaaS](/projects/property-saas/)与[大型集团绩效系统](/projects/perf-system/)当模拟盘，**自己把设计重推一遍，再对照它的取舍** |
+| **AI 治理机制**（数据出境与训练用途、评测与人闸、推理账单、模型锁定与退出） | 专篇尚未成篇——不是知识域边界，是下一批评审清单同类的机制篇 | 当前用[五道闸门](/ai/vibe-coding/#five-gates)定试点边界、用[效能 §五](/cloud-native/cicd/engineering-metrics#ai-paradox)看「个人变快 ≠ 交付变稳」；采购与退出先套[自建 vs 采购](/methodology/tech-cost-roi#build-vs-buy) |
 
-**这一节的结论**：**L4 的能力有相当一部分在技术知识之外，而那一部分是本站永远不会覆盖的。** 知道自己不知道什么，是这一级的第一能力——这也是第五节把[关于本站](/about/)排在第一行的原因。
+**这一节的结论**：前四行是知识域边界，本站永远不会覆盖——**知道自己不知道什么，是这一级的第一能力**（这也是第五节把[关于本站](/about/)排在第一行的原因）。最后一行 AI 治理是机制篇缺口，不是边界：当前用闸门与效能顶上，专篇尚未成篇。
 
 ## 七、关联阅读
 
@@ -140,3 +143,4 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 | 找可复用的管理工具（演进信号、产出格式） | [架构演进地图](/projects/architecture-evolution/#matrix)、[可验证产出三件套](/projects/toolkit/) |
 | 把两个案例当模拟盘，自己算一遍账 | [智慧物业 SaaS](/projects/property-saas/)、[大型集团绩效系统](/projects/perf-system/) |
 | 补齐的三篇缺口（本级最先该读的三篇） | [研发效能度量](/cloud-native/cicd/engineering-metrics)、[技术成本与 ROI](/methodology/tech-cost-roi)、[合规体系](/security/compliance-system) |
+| 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

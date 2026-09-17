@@ -1,6 +1,6 @@
 ---
-date: 2026-09-11
-desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线、七篇正文的定位与阅读路径、高频考点速查
+date: 2026-09-17
+desc: AI 应用板块导览——AI 辅助研发与 AI 能力集成两条主线、按四级成长路线的阅读切片、七篇正文的定位与高频考点速查
 ---
 
 # AI 应用 · 板块导览
@@ -68,10 +68,22 @@ AI 应用
 | **做面向终端的 AI 产品** | [数字人导览](/ai/digital-human/) → [实时互动数字人](/ai/digital-human/interactive-avatar) → [接入宿主：Web 与原生 App](/ai/digital-human/web-vs-native) → [集成清单](/ai/digital-human/integration-checklist) |
 | **要对接 MCP / 外部工具** | [Agent 与 Harness · MCP](/ai/agent-harness/#mcp) → [Spring AI · MCP](/ai/spring-ai/#mcp) → [Spring AI Alibaba · Nacos MCP Registry](/ai/spring-ai-alibaba/#enterprise) |
 | **面试前突击** | [高频考点速查](#faq) → 回正文看推导 |
+| **按成长路线的级别读** | 见下一节[按四级读](#by-level)——同一篇在每一级拿走的深度不同 |
 
 > 路径中的「[集成清单](/ai/digital-human/integration-checklist)」虽然写在数字人板块下，但它与具体厂商无关：约束定义、能力边界盘点、凭证分层、供应商对接、验收标准——换任何第三方 AI 能力都适用。
 
-## 四、高频考点速查 {#faq}
+## 四、按四级读 {#by-level}
+
+成长路线不给页面贴 L1/L2 标签（见[级别是读者与页面的关系](/projects/architect-roadmap/#levels-as-relation)）。AI 也一样：**同一篇，四级拿走的不是同一个东西。** 读到哪一层就停，完整清单在各级页的「附读」。
+
+| 级别 | 读哪 | 读到哪一层就停 | 不要读 |
+|---|---|---|---|
+| [**L1 开发**](/projects/architect-roadmap/developer/) | [五道闸门](/ai/vibe-coding/#five-gates) → [人的介入点](/ai/vibe-coding/#human-gates) → [上下文](/ai/vibe-coding/#context-files) | 什么能交给 AI、什么必须人把关；约定要写进上下文 | 工具格局、Agent 循环、Spring AI |
+| [**L2 高级开发**](/projects/architect-roadmap/senior/) | [Agent 循环](/ai/agent-harness/#agent-loop) → [Harness](/ai/agent-harness/#what-is-harness) | 模型相同、Harness 决定上限；终止判据必须来自外部可验证信号 | MCP 规范、多 Agent、Spring AI |
+| [**L3 架构师**](/projects/architect-roadmap/architect/) | [Spring AI 定位](/ai/spring-ai/#positioning) → [多 Agent](/ai/agent-harness/#multi-agent) → [何时用 Alibaba](/ai/spring-ai-alibaba/#when-to-use) | LLM 进不进主链路、失败时业务降级成什么、要不要编排 | ChatClient API、数字人实现、MCP 细节（岗位方向再读） |
+| [**L4 CIO**](/projects/architect-roadmap/cio/) | [五道闸门](/ai/vibe-coding/#five-gates) → [效能 §五：个人变快、交付变慢](/cloud-native/cicd/engineering-metrics#ai-paradox) | 试点边界、失败怎么退；采购与退出先套[自建 vs 采购](/methodology/tech-cost-roi#build-vs-buy) | 工具对比、Agent 循环、框架 API。**治理专篇尚未成篇** |
+
+## 五、高频考点速查 {#faq}
 
 | 高频问题 | 一句话答案 | 详见 |
 |---|---|---|
@@ -95,11 +107,13 @@ AI 应用
 | Human-in-the-Loop 为什么重要？ | 技术上是一个"等人确认"节点，**组织上是 AI 决策失控的兜底与免责边界** | [Spring AI Alibaba](/ai/spring-ai-alibaba/#graph) |
 | 评估一个 AI 框架该问什么？ | 三问：能接我的模型吗（合规）、能看见它干了什么吗（可观测）、流程能被约束吗（编排） | [Spring AI Alibaba](/ai/spring-ai-alibaba/#enterprise) |
 
-## 五、与相邻板块的边界 {#boundary}
+## 六、与相邻板块的边界 {#boundary}
 
 | 相邻板块 | 分工 |
 |---|---|
+| [成长路线](/projects/architect-roadmap/) | **深度轴**：本板块按领域写机制，四级清单决定读到哪一层。入口即[按四级读](#by-level) |
 | [Java 并发](/java/concurrent/) | AI 调用是**阻塞式外部依赖**，批量调用要用并发编排控制超时与线程池——`CompletableFuture` 与虚拟线程在这条线上高频出现 |
 | [Spring Boot](/java/spring/spring-boot/) | 模型参数的配置绑定、AI 服务的可观测（Micrometer 进 Actuator）、启动与优雅停机，都复用 Boot 的机制 |
 | [消息队列](/middleware/) | AI 任务适合异步化（推理是秒级），Agent 编排与任务分发可以走 MQ；RocketMQ 5.5 的 Lite Mode 就是朝这个方向做的 |
 | [云原生](/cloud-native/) | Agent 服务是长耗时服务，扩缩容、超时、资源限额要按这个前提设计 |
+| [技术成本与 ROI](/methodology/tech-cost-roi) | L4 算 AI 的采购与退出时，先用这篇的同周期同口径；治理专篇尚未成篇 |
