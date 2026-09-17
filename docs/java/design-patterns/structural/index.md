@@ -46,6 +46,9 @@ date: 2026-09-11
 - **MyBatis 的 `MapperProxy` 属于哪种？** 动态代理——把"接口调用"转换为"SQL 执行"。
 - **`HashMap` 哪里用了享元？** 见后续享元篇（`Integer` 缓存、字符串常量池是更典型的例子）。
 - **组合模式在业务里的真实场景？** 组织架构树、菜单树、文件系统、审批流节点树——**任何"树形 + 需要统一处理叶子与容器"的场景**。
+- **`BufferedInputStream` 为什么必须自己重写 `skip`？** 因为 `FilterInputStream` 的默认实现全是纯委派——装饰者的价值全在「它重写了哪些方法」上；只重写 `read` 而不重写 `skip`，缓冲带来的收益会少一半。
+- **门面和装饰者都实现同一个接口，怎么一眼分开？** 看它持有的字段类型：持有**同一接口**的是装饰者（`HttpServletRequestWrapper` 持有 `ServletRequest`），持有**具体类**的是门面（`RequestFacade` 持有 `Request`）。
+- **为什么现在可以不写 `Class.forName("com.mysql.cj.jdbc.Driver")`？** 因为 JDBC 4.0 起驱动 jar 里带了 `META-INF/services/java.sql.Driver`，`DriverManager` 通过 SPI 自动发现并注册。
 
 ## 四、学习顺序建议
 

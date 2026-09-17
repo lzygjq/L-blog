@@ -137,7 +137,94 @@ Report copy = JSON.parseObject(JSON.toJSONString(origin), Report.class);
 
 > 反序列化注意：用 `readObject()` 得到的对象**不会走构造器**——这也是"序列化能破坏单例"的原因（见[单例模式](/java/design-patterns/creational/singleton)）。
 
-## 四、优缺点
+## 四、源码剖析
+
+### 4.1 Spring 的 `@Scope("prototype")` 与 GoF 原型：名字相同、机制相反
+
+`@Scope("prototype")` 的语义是「**每次 `getBean` 都新建一个实例**」，走的是完整的反射创建流程：
+
+```java
+// AbstractBeanFactory#doGetBean
+if (mbd.isPrototype()) {
+    Object prototypeInstance = null;
+    try {
+        beforePrototypeCreation(beanName);
+        prototypeInstance = createBean(beanName, mbd, args);   // 每次都走完整的创建 + 依赖注入
+    } finally {
+        afterPrototypeCreation(beanName);
+    }
+    bean = getObjectForBeanInstance(prototypeInstance, name, beanName, mbd);
+}
+```
+
+**它一个字节的 `clone()` 都没有调用**——名字叫 prototype，机制是「工厂」：每次请求都造一个新的。
+
+而**真正的原型模式在 Spring 内部**，用在一个意想不到的地方——`BeanDefinition` 的复制：
+
+```java
+// AbstractBeanDefinition
+public AbstractBeanDefinition cloneBeanDefinition() {
+    return (AbstractBeanDefinition) clone();
+}
+```
+
+`<bean parent="base">` 的定义继承、派生 BeanDefinition 的构造，靠的都是**克隆 `BeanDefinition`**——因为它是嵌套对象图（`propertyValues`、`constructorArgumentValues`、`methodOverrides`），逐字段拷贝既啰嗦又容易漏（正是第 1 节描述的那个问题）。
+
+> **由此得到一条很有用的经验：原型模式在框架里最常出现在「配置对象的派生 / 继承」上，而不是业务对象上。** 业务对象通常是有状态的活对象，克隆它语义不清；配置对象是只读模板，克隆它才自然。
+
+### 4.2 `Object#clone()` 是 `native`：它为什么绕过构造器
+
+```java
+// java.lang.Object
+protected native Object clone() throws CloneNotSupportedException;
+```
+
+HotSpot 里的实现（`JVM_Clone`）大致做四件事：
+
+1. **检查 `Cloneable`**——`obj->klass()->is_cloneable()` 不成立就抛 `CloneNotSupportedException`（**这就是「标记接口」的实际用途**：JVM 直接查类元数据，不需要任何方法）；
+2. **按对象实际大小分配内存**——不是按静态类型，子类多出来的字段也会被复制；
+3. **逐字段 `memcpy`**——所以是浅克隆，引用字段复制的是地址；
+4. 返回新对象。
+
+**关键差异在这一点：因为走 `memcpy`，它完全绕过构造器。**
+
+这一条同时解释了本站提过、但没串起来的三件事：
+
+| 现象 | 同一个根因 |
+|---|---|
+| 克隆出来的对象不走构造器 | `JVM_Clone` 直接 `memcpy` |
+| 反序列化出来的对象不走构造器 | `ObjectInputStream` 同样绕开构造器分配内存 |
+| 单例会被克隆、反序列化破坏 | 两者都绕过了写在构造器里的防护 |
+
+**所以防护必须一套一套地加**：私有构造器防不住克隆（要重写 `clone()` 返回同一实例）、也防不住反序列化（要写 `readResolve`）——它们是三套彼此独立的机制。
+
+### 4.3 `ArrayList#clone` 与 `HashMap#clone`：JDK 自己的浅克隆
+
+```java
+// ArrayList
+public Object clone() {
+    try {
+        ArrayList<?> v = (ArrayList<?>) super.clone();
+        v.elementData = Arrays.copyOf(elementData, size);   // ① 数组单独复制
+        v.modCount = 0;                                     // ② 迭代器计数归零
+        return v;
+    } catch (CloneNotSupportedException e) {
+        throw new InternalError(e);
+    }
+}
+```
+
+两行代码，每一行都有理由：
+
+- **① `Arrays.copyOf(elementData, size)`**：数组是引用字段，不单独复制，两个 `ArrayList` 就共享同一个数组；
+- **用 `size` 而不是 `elementData.length`**：后者会把扩容留下的空位也复制过去，副本的底层数组比需要的大，且与 `size` 不符；
+- **② `modCount = 0`**：`modCount` 是给迭代器做并发修改检测用的，副本上留着原值会让**第一次迭代就误判**（`expectedModCount` 与 `modCount` 对不上）。
+
+`HashMap#clone()` 更简单——`result.putMapEntries(this, false)`，**只复制 `Node` 引用，不复制 key / value 本身**。
+
+> **一句话记住 JDK 的克隆语义：JDK 的 `clone()` 只保证「容器对象本身」独立，「元素」一律共享。** 所以 `List<List<String>>` 必须在外面再套一层——这不是 JDK 的缺陷，而是「克隆深度只能由调用方指定」的必然结果：**`clone()` 的签名里没有任何地方能表达「深到第几层」。**
+
+## 五、优缺点
 
 **优点**
 
@@ -151,15 +238,15 @@ Report copy = JSON.parseObject(JSON.toJSONString(origin), Report.class);
 2. 每个具体原型都必须实现 `clone()`，侵入性强；
 3. 与 `final` 字段、`Cloneable` 语义容易踩坑。
 
-## 五、使用场景与边界
+## 六、使用场景与边界
 
 **适用**：报表/单据模板复制、游戏中的对象实例化（子弹、敌人）、大量相似但少数字段不同的配置对象、需要"快照 + 回滚"的场景（与[备忘录模式](/java/design-patterns/behavioral/)配合）。
 
-**一个高频误解**：**Spring 的 `@Scope("prototype")` 不是原型模式**。它是"每次请求容器都创建新实例"，走的是反射构造，并未使用 `clone()`。名字相同，机制不同——面试被问到要主动拆开说。
+**一个高频误解**：Spring 的 `@Scope("prototype")` 不是原型模式——机制差异、以及原型模式在 Spring 内部的真实用法，见第四节。
 
 **另一个真实用例**：`ArrayList` / `HashMap` 的 `clone()` 都是**浅克隆**（`ArrayList.clone()` 内部 `Arrays.copyOf` 复制元素引用），集合嵌套集合时同样需要自己处理深拷贝。
 
-## 六、面试问答
+## 七、面试问答
 
 **Q1：浅克隆和深克隆的区别？**
 浅克隆只复制字段的引用值，引用类型成员与原对象**共享同一实例**；深克隆会递归复制引用指向的对象，副本与原对象完全独立。`Object.clone()` 默认是浅克隆。

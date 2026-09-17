@@ -98,7 +98,7 @@ orderFacade.createOrder(cmd);
 | 外观 vs 代理 | 代理与目标是**同一接口**，代理控制访问；外观是**新接口**，聚合并简化 |
 | 外观 vs 桥接 | 桥接拆两个维度使其独立变化；外观聚合多个子系统以简化使用 |
 
-## 五、工程中的常见形态
+## 五、源码剖析
 
 外观模式在架构中最常见的表现就是**分层本身**：
 
@@ -113,6 +113,87 @@ orderFacade.createOrder(cmd);
 | Tomcat `RequestFacade` | 内部 `Request` 的外观 | 屏蔽容器内部方法，防止应用强转后破坏容器 |
 
 > SLF4J 是最贴切的例证：**"日志门面"这个词本身就来自 Facade**。业务只依赖 `org.slf4j.Logger`，底层换实现不需要改代码。
+
+### 5.1 `JdbcTemplate#execute`：门面接管的六件事
+
+`JdbcTemplate` 只对着**一个**子系统做门面（JDBC），这已经与教科书的示例不同——教科书的外观往往是「CPU + 内存 + 硬盘」这类多个子系统。**门面要屏蔽的对象不必是「多个」，也可以是「一个但用起来很麻烦的」。**
+
+```java
+public <T> T execute(StatementCallback<T> action) throws DataAccessException {
+    Connection con = DataSourceUtils.getConnection(obtainDataSource());  // ① 取连接（并与事务绑定）
+    Statement stmt = null;
+    try {
+        stmt = con.createStatement();
+        applyStatementSettings(stmt);                                    // ② 统一设置超时/抓取大小
+        T result = action.doInStatement(stmt);                           // ③ 回调交给业务
+        handleWarnings(stmt);                                            // ④ 统一处理 SQLWarning
+        return result;
+    } catch (SQLException ex) {
+        JdbcUtils.closeStatement(stmt);
+        throw translateException("StatementCallback", getSql(action), ex);  // ⑤ 异常翻译
+    } finally {
+        JdbcUtils.closeStatement(stmt);
+        DataSourceUtils.releaseConnection(con, getDataSource());          // ⑥ 归还连接
+    }
+}
+```
+
+门面在这里接管的不只是「调用顺序」，还有六件业务代码最容易漏的事：连接获取（含事务上下文绑定）、语句配置、警告处理、**异常翻译**（`SQLException` → `DataAccessException` 体系）、资源关闭、连接归还（区分「事务中」与「事务外」的处理）。
+
+**不懂会误判的地方**：很多人以为「门面 = 把几个调用包一层」。真正的价值在 `translateException` 这类**把底层异常体系转成上层语义**的动作——只包一层调用，调用方仍然要 `catch (SQLException)`，比不用门面还多绕一层。**判断一个门面有没有价值，看它有没有让调用方少写 try-catch。**
+
+### 5.2 Tomcat `RequestFacade`：门面不只是为了「易用」
+
+```java
+public class RequestFacade implements HttpServletRequest {
+    protected Request request;                       // 注意：持有的是容器的具体类
+
+    @Override
+    public Object getAttribute(String name) {
+        if (request == null) throw new IllegalStateException(...);
+        return request.getAttribute(name);           // 纯委派
+    }
+    ...
+}
+```
+
+`RequestFacade` 实现了 `HttpServletRequest`，内部持有 `org.apache.catalina.connector.Request`，所有方法都是纯委派——按教科书定义，这确实是门面。
+
+但它的动机和「简化使用」几乎无关：
+
+- 应用拿到的是 `RequestFacade`，**拿不到 `Request`**——因此无法调用 `Request#getCoyoteRequest` 这类容器内部方法去破坏容器状态；
+- 里面的 `getRequest()` 是 `protected` 的，**只给容器自己用**；
+- Tomcat 的源码注释把目的写得很直白：防止应用强转后调用内部 API。
+
+> **这是门面的第二个动机：隔离，而不只是简化。** 教科书只讲「让子系统更易用」，但框架里的门面常常是为了**划一条不可逾越的边界**。看到「实现接口 + 持有具体类 + 方法纯委派」，先问一句：**它是为了少写代码，还是为了少暴露能力？**
+
+顺带一个精确判据：**`RequestFacade` 持有具体类 `Request`，是门面（或适配器）；而 `HttpServletRequestWrapper` 持有同接口 `HttpServletRequest`，那才是装饰者。** 三个模式长得像，看字段类型就能分开。
+
+### 5.3 SLF4J：门面（Facade）与绑定（Provider）的分工
+
+「日志门面」这个词本身就来自 Facade，但 SLF4J 的完整机制是**门面 + 一种「实现发现」手段**：
+
+```java
+public static Logger getLogger(String name) {
+    ILoggerFactory iLoggerFactory = getILoggerFactory();   // 门面：只暴露 Logger 入口
+    return iLoggerFactory.getLogger(name);
+}
+
+private static void performInitialization() {
+    ...
+    bind();                                                // 找实现
+}
+
+private static void bind() {
+    List<SLF4JServiceProvider> providersList = findServiceProviders();  // ServiceLoader 扫 META-INF/services
+    ...
+}
+```
+
+- **门面的部分**：业务只依赖 `org.slf4j.Logger` / `LoggerFactory`，底层换成 `logback-classic` 或 `log4j-slf4j2-impl` 都不用改代码；
+- **另一半**：`findServiceProviders()` 通过 `ServiceLoader` 扫 `org.slf4j.spi.SLF4JServiceProvider`——这是**「实现维度如何被发现」**，已经落在[桥接模式](/java/design-patterns/structural/bridge)的地盘上了。
+
+**所以「门面」只是入口的形态，不是完整的机制。** 业务里说要「用门面模式封装第三方 SDK」时，往往还需要一种「选实现」的手段（SPI / 配置 / 工厂），否则换实现照样要改代码。
 
 ## 六、优缺点
 

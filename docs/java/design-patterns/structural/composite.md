@@ -140,7 +140,94 @@ root.print("");
 
 **推荐安全组合**（上方示例即此方案）：因为"往员工下面加子节点"本身就是非法操作，让它在编译期就不可能出现，比运行时抛异常更好。
 
-## 五、优缺点
+## 五、源码剖析
+
+### 5.1 MyBatis 动态 SQL：`SqlNode` 树
+
+`<if>` / `<foreach>` / `<choose>` 在启动时被解析成一棵 `SqlNode` 树——这是组合模式在整个 Java 生态里最完整的一次应用：
+
+```
+MixedSqlNode           ← Composite：持有 List<SqlNode> contents
+├── StaticTextSqlNode  ← Leaf：纯文本片段
+├── IfSqlNode          ← Composite（带条件）：test 成立才把请求转发给子节点
+│   └── StaticTextSqlNode
+├── ForEachSqlNode     ← Composite（带循环）：对集合每个元素重复应用子节点
+│   └── ...
+└── TextSqlNode        ← Leaf：含 ${} 占位符的文本
+```
+
+容器 `MixedSqlNode` 的 `apply` 就是标准递归：
+
+```java
+public class MixedSqlNode implements SqlNode {
+    private final List<SqlNode> contents;
+
+    @Override
+    public boolean apply(DynamicContext context) {
+        contents.forEach(node -> node.apply(context));   // 递归，无类型判断
+        return true;
+    }
+}
+```
+
+**与教科书写法的三处差异：**
+
+1. **统一接口里放的不是「业务能力」，而是一个「传递上下文」的方法。** 教科书示例通常是 `count()` / `print()` 这类返回结果的方法；`SqlNode` 只有一个 `apply(DynamicContext)`——**接口的职责是「让递归能走下去」，结果被累积进 `context`**。设计组合接口时不要把「聚合结果」写进签名，否则容器的实现会很别扭。
+2. **容器可以有条件地转发。** `IfSqlNode#apply` 先算 `expressionEvaluator.evaluateBoolean(test, context.getBindings())`，为假时**直接返回、不遍历子节点**。教科书里 Composite 是无条件遍历，真实容器常常是「有条件遍历」。
+3. **叶子的数量远多于容器。** `SqlNode` 的实现里只有 `MixedSqlNode` / `ForEachSqlNode` 算容器，其余全是叶子——**组合模式的维护成本主要花在叶子族的扩张上**。
+
+> **模式边界提醒**：这棵树同时是本站[解释器模式](/java/design-patterns/behavioral/interpreter)的主例。同一份代码，「统一递归处理」是组合视角，「按语法规则求值」是解释器视角——**两个模式在真实代码里经常重合**，判据是你看重它的结构还是它的求值语义。
+
+### 5.2 `java.io.File`：一个类同时是叶子和容器
+
+`File` 没有 `Leaf` / `Composite` 之分——同一个类，`isDirectory()` 为真时它就是容器：
+
+```java
+File dir = new File("/tmp");
+File[] children = dir.listFiles();        // 容器能力
+```
+
+这看起来是「透明组合」的极致，但它**并不是完整的组合模式**，缺的正是最核心的一环：
+
+| 判据 | 组合模式的要求 | `File` |
+|---|---|---|
+| 叶子与容器同一接口 | ✅ | ✅ 一个类兼任两种角色 |
+| **行为统一** | 递归封装在容器的方法内部 | ❌ `listFiles()` 只返回一层，**递归由调用方自己写** |
+
+**所以 `File` 是「树形数据结构」，不是组合模式。** 判断一个树状 API 有没有用组合模式，只看一件事：**递归是封装在节点里，还是暴露给调用方**。前者是模式，后者只是数据结构。
+
+`Files.walkFileTree(path, visitor)` 是 JDK 里更接近组合形态的版本——递归被收进 `FileTreeWalker`，调用方只实现 `visitFile` / `postVisitDirectory`（这也正是[访问者模式](/java/design-patterns/behavioral/visitor)的用法）。
+
+### 5.3 Jackson 的 `JsonNode`：为什么它反而选了「透明组合」
+
+本站第四节推荐的是「安全组合」（`add` / `remove` 只声明在容器上）。但 Jackson 恰恰相反：
+
+```java
+public abstract class JsonNode {
+    public JsonNode get(int index) { return null; }        // 叶子也实现，返回 null
+    public JsonNode get(String fieldName) { return null; }
+}
+
+public class ObjectNode extends JsonNode {                 // Composite
+    public ObjectNode put(String fieldName, String v) { ... }
+}
+
+public class TextNode extends JsonNode {                   // Leaf
+    ...
+}
+```
+
+客户端拿到一个 `JsonNode` 时**无法从类型上知道它是容器还是叶子**，所以只能在基类上声明 `get()`、用 `elements()` 统一遍历（叶子返回空迭代器）。
+
+**这不是设计失误，而是「调用方信息不足」的必然结果。** JSON 是通用数据格式，处理它的代码拿到的永远是 `JsonNode`；如果 `put` 只声明在 `ObjectNode` 上，每个调用点都要先 `instanceof` 一次——**透明组合的收益（免除类型判断）压过了接口污染的代价**。
+
+于是「安全 or 透明」的判据可以写得比第四节更准确：
+
+> **调用方能不能知道节点的具体类型？** 能（业务自己构建的树，如组织架构）→ 用安全组合，让非法操作在编译期就消失；不能（通用格式解析、插件式扩展点）→ 用透明组合，把判断推迟到运行时。
+
+---
+
+## 六、优缺点
 
 **优点**
 
@@ -155,11 +242,11 @@ root.print("");
 2. 树过深时递归可能栈溢出（需要改成显式栈迭代）；
 3. 节点数量大时，每次都从头递归计算会有性能问题（需配合缓存，见下节）。
 
-## 六、工程中的关键权衡
+## 七、工程中的关键权衡
 
 组合模式在真实系统里的难点不是结构，而是**性能与存储形态**——这两点面试常被追问：
 
-### 6.1 递归计算 vs 缓存
+### 7.1 递归计算 vs 缓存
 
 `root.memberCount()` 每次都遍历全树。组织架构上万人时，频繁调用会成为瓶颈。常见解法：
 
@@ -167,7 +254,7 @@ root.print("");
 - **读多写多的场景**改用异步预计算 + 结果表（本质是把递归计算从查询路径移到离线路径）；
 - 对超深树（层级 > 10）考虑**路径枚举**（`path = /D0/D1/D11/`）配合前缀查询替代递归。
 
-### 6.2 内存树 vs 数据库树
+### 7.2 内存树 vs 数据库树
 
 组合模式描述的是**内存中的对象结构**，而数据通常存在关系库里。两种映射方式的取舍：
 
@@ -179,7 +266,7 @@ root.print("");
 
 组合模式与这三种存储方案是正交的：**对象结构用组合模式表达，持久化方案按读写比例另选。**
 
-## 七、使用场景
+## 八、使用场景
 
 - **组织架构 / 部门树**：人员统计、权限继承、汇报线；
 - **菜单与权限树**：前端菜单渲染、后端权限校验（父子节点权限传递）；
@@ -188,7 +275,7 @@ root.print("");
 - **文件系统 / 目录**：`java.io.File` 的 `listFiles()` 本身就是组合结构；
 - **表达式树 / SQL 条件树**：`AND`/`OR` 节点组合叶子条件（与[解释器模式](/java/design-patterns/behavioral/)配合）。
 
-## 八、面试问答
+## 九、面试问答
 
 **Q1：组合模式的核心价值是什么？**
 **让客户端统一处理单个对象和对象组合。** 叶子和容器实现同一接口，递归逻辑封装在容器内部，调用方不需要写 `instanceof` 判断和显式递归。本质是用多态替代类型分支。

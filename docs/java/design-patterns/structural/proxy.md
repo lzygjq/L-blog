@@ -177,7 +177,7 @@ proxy.save("张三");
 
 **选型**：目标有接口 → 优先 JDK（无第三方依赖、更轻）；无接口或需要代理类本身的方法 → CGLIB。Spring AOP 就是按这个规则自动选的。
 
-## 七、框架中的对应实现
+## 七、源码剖析
 
 | 框架 | 实现 | 说明 |
 |---|---|---|
@@ -187,7 +187,112 @@ proxy.save("张三");
 | Dubbo | `JavassistProxyFactory` / `JdkProxyFactory` | 远程调用在本地表现为代理对象调用 |
 | JDK | `Proxy`、`InvocationHandler` | 动态代理的基础设施 |
 
-**一个高频陷阱**：Spring 中**同类内部方法互调不会走代理**（`this.methodB()` 绕过了代理对象），导致 `@Transactional` / `@Async` 失效。原因是调用方拿到的 `this` 是原始对象而不是代理对象。
+**一个高频陷阱**：Spring 中**同类内部方法互调不会走代理**（`this.methodB()` 绕过了代理对象），导致 `@Transactional` / `@Async` 失效。原因是调用方拿到的 `this` 是原始对象，不是代理对象（细节见第 7.2 节）。
+
+同族的另外两种失效场景：**`private` / `protected` 方法**（Spring AOP 只拦截 public）、**`final` 类或 `final` 方法**（CGLIB 靠继承生成子类，无法覆写）。绕开第一种的常见手段是 `AopContext.currentProxy()`（需开启 `exposeProxy`）或把方法拆到另一个 bean。
+
+### 7.1 JDK 动态代理为什么必须实现接口
+
+```java
+public static Object newProxyInstance(ClassLoader loader, Class<?>[] interfaces, InvocationHandler h) {
+    ...
+    Class<?> cl = getProxyClass0(loader, intfs);       // 生成或命中缓存
+    ...
+}
+
+// ProxyClassFactory#apply 里的校验
+for (Class<?> intf : interfaces) {
+    if (!intf.isInterface()) {
+        throw new IllegalArgumentException(intf.getName() + " is not an interface");
+    }
+    if (!Modifier.isPublic(intf.getModifiers())) {
+        // 非 public 接口必须与代理类同包
+        ...
+    }
+}
+```
+
+`ProxyGenerator` 生成的代理类反编译后长这样：
+
+```java
+public final class $Proxy0 extends Proxy implements Foo {
+    private static Method m3;
+
+    public $Proxy0(InvocationHandler h) { super(h); }
+
+    @Override
+    public final Object bar() {
+        return super.h.invoke(this, m3, null);       // 转发给 InvocationHandler
+    }
+}
+```
+
+**根因在这里：代理类必须 `extends Proxy`**——为了拿到 `h` 字段，以及统一转发 `equals` / `hashCode` / `toString`。而 Java 是单继承，**已经继承了 `Proxy`，就不可能再继承你的目标类**。
+
+所以教科书那句「JDK 动态代理基于接口、CGLIB 基于继承」，真正的成因是**「单继承 + 必须继承 `Proxy`」这个双重约束**，而不是「JDK 做不了类代理」这种能力上的描述。CGLIB 之所以能代理类，是因为它直接改字节码生成子类，**不走 `Proxy` 这条链**。
+
+> 这也顺带解释了「为什么非 public 接口必须和代理类同包」「为什么接口数组里不能有重复」——它们都是「一个类只能带一组 `interfaces`、且可见性必须自洽」这条 JVM 规则的直接后果。
+
+### 7.2 `JdkDynamicAopProxy#invoke`：一个 invoke 装了整条 AOP 链
+
+```java
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    ...
+    // ① 拿到与当前方法匹配的通知链
+    List<Object> chain = this.advised.getInterceptorsAndDynamicInterceptionAdvice(method, targetClass);
+
+    if (chain.isEmpty()) {
+        // ② 没有通知：直接反射调用目标方法，不构造调用链
+        Object[] argsToUse = AopProxyUtils.adaptArgumentsIfNecessary(method, args);
+        retVal = AopUtils.invokeJoinpointUsingReflection(target, method, argsToUse);
+    } else {
+        // ③ 有通知：构造 ReflectiveMethodInvocation，逐个 proceed
+        MethodInvocation invocation =
+                new ReflectiveMethodInvocation(proxy, target, method, args, targetClass, chain);
+        retVal = invocation.proceed();
+    }
+    ...
+}
+```
+
+三点值得注意：
+
+1. **没有通知时短路。** `chain.isEmpty()` 直接反射调用，**不构造 `MethodInvocation`**。所以「被代理的 bean 每次调用都要付调用链的代价」是错的——没配通知就没有这层开销。
+2. **`@Transactional` 的事务代码不在这里。** `invoke` 只负责「把调用送进链」；事务的开启 / 提交 / 回滚在链上的 `TransactionInterceptor#invoke` 里，日志在 `LogInterceptor`，安全在 `MethodSecurityInterceptor`。→ **代理负责「入口」，横切逻辑住在拦截器里**，是两个层次各司其职。面试里最容易答错的就是把它混成一句「代理里做了事务」。
+3. **拦截器链是按方法缓存的。** `AdvisedSupport` 用 `methodCache`（`ConcurrentHashMap`）缓存「方法 → 通知链」的结果，**只有第一次算**。这也是运行时动态增删通知需要 `freeze()` 配合的原因：缓存一旦建立，改变通知集合就必须让缓存失效。
+
+### 7.3 `MapperProxy#invoke`：为什么 Mapper 接口不需要实现类
+
+```java
+public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+    try {
+        if (Object.class.equals(method.getDeclaringClass())) {
+            return method.invoke(this, args);              // ① equals/hashCode/toString 走本地
+        } else {
+            return cachedInvoker(method).invoke(proxy, method, args, sqlSession);
+        }
+    } catch (Throwable t) {
+        throw ExceptionUtil.unwrapThrowable(t);
+    }
+}
+
+private MapperMethodInvoker cachedInvoker(Method method) {
+    return methodCache.computeIfAbsent(method, m -> {
+        if (m.isDefault()) {                               // ② JDK 8 默认方法走另一条路
+            return new DefaultMethodInvoker(getMethodHandleJava9(m));
+        } else {
+            return new PlainMethodInvoker(
+                    new MapperMethod(mapperInterface, method, sqlSession.getConfiguration()));
+        }
+    });
+}
+```
+
+**三处与教科书的差异：**
+
+1. **它没有目标对象。** 教科书的代理是「代理 + 被代理对象」成对的；`MapperProxy` 背后并没有一个 `UserMapper` 实例——**它把「接口方法 → SQL 语句」的映射当成了目标**。所以「代理模式背后一定有一个真实对象」这句话是错的，**目标也可以是一份约定**。
+2. **`MapperMethod` 是懒解析 + 缓存的。** 每个方法只在第一次调用时解析（`computeIfAbsent`），解析结果（SQL 类型、参数映射、返回类型处理）之后一直复用——**这正是「Mapper 接口零实现类」既可行又不慢的原因**。
+3. **`Object` 的三个方法不走代理。** `equals` / `hashCode` / `toString` 直接本地 invoke，否则会出现「拿 Mapper 当 `Map` 的 key 时触发一次 SQL 查询」这种荒谬行为。**自己实现 `InvocationHandler` 时，这三个方法必须单独处理。**
 
 ## 八、与装饰者模式的边界
 

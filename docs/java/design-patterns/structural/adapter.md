@@ -136,7 +136,7 @@ public class MyListener extends DefaultApplicationListener {
 
 同时实现 `Target` 与 `Adaptee` 两套接口，使两边都能互相调用。用于"过渡期新旧系统并存、双向往来"的场景，实现复杂度较高，通常只在迁移窗口期临时使用。
 
-## 七、JDK 与框架中的实现
+## 七、源码剖析
 
 | 实现 | Target | Adaptee | 说明 |
 |---|---|---|---|
@@ -148,7 +148,7 @@ public class MyListener extends DefaultApplicationListener {
 | `Executors.callable(Runnable)` | `Callable` | `Runnable` | 内部类 `RunnableAdapter` |
 | **Spring MVC `HandlerAdapter`** | 统一的 `handle()` 调用协议 | 各种形态的 Handler | 见下文 |
 
-### Spring MVC 中的 HandlerAdapter（面试高频）
+### 7.1 Spring MVC 中的 HandlerAdapter
 
 `DispatcherServlet` 需要支持多种 Handler：实现了 `Controller` 接口的、用 `@RequestMapping` 注解的方法、`HttpRequestHandler`、静态资源处理器……它们的调用方式各不相同。
 
@@ -162,6 +162,71 @@ DispatcherServlet ──▶ HandlerAdapter（Target）
 ```
 
 `DispatcherServlet` 只做一件事：遍历已注册的 `HandlerAdapter`，问 `supports(handler)`，找到能处理当前 Handler 的那个，调用统一的 `handle()`。**新增一种 Handler 类型时，只需新增一个 HandlerAdapter，DispatcherServlet 完全不用改**——这是适配器模式在框架层面的教科书用法。
+
+### 7.2 `InputStreamReader`：适配器可以有状态
+
+```java
+public class InputStreamReader extends Reader {
+    private final StreamDecoder sd;
+
+    public InputStreamReader(InputStream in, Charset cs) {
+        super(in);
+        this.sd = StreamDecoder.forInputStreamReader(in, this, cs);   // 关键：造出一个解码器
+    }
+
+    @Override
+    public int read() throws IOException {
+        return sd.read();
+    }
+
+    @Override
+    public int read(char cbuf[], int offset, int length) throws IOException {
+        return sd.read(cbuf, offset, length);
+    }
+}
+```
+
+它把 `InputStream`（字节）适配成 `Reader`（字符），但**不是纯转发**——中间多了一个 `StreamDecoder`，它持有 `Charset`、`ByteBuffer`，以及**半个多字节字符的残留状态**（UTF-8 下一个汉字占 3 字节，若这次只读到 2 字节，剩下的必须留在解码器里等下一次读）。
+
+> **这是与教科书最不同的地方**：教科书的适配器示例是「方法名、参数不一样，转发一下就好」；真实的适配器常常需要持有一份**转换过程中的中间状态**。**一旦有状态，就要额外考虑线程安全与能否重复使用**——`InputStreamReader` 不是线程安全的，也没有 `reset()`。
+
+顺带一个常见面试点：不指定字符集时它用平台默认字符集（JDK 18 起默认改为 UTF-8），属于「适配器里藏了一个隐式参数」的经典坑。
+
+### 7.3 `Arrays.asList`：适配出来的视图可能只支持目标接口的一部分
+
+```java
+public static <T> List<T> asList(T... a) {
+    return new ArrayList<>(a);          // 注意：这是 Arrays 的私有内部类，不是 java.util.ArrayList
+}
+
+private static class ArrayList<E> extends AbstractList<E> implements RandomAccess, java.io.Serializable {
+    private final E[] a;
+
+    ArrayList(E[] array) { a = Objects.requireNonNull(array); }
+
+    @Override public E set(int index, E element) { E old = a[index]; a[index] = element; return old; }
+    // 没有 add / remove —— 依靠 AbstractList 的默认实现抛 UnsupportedOperationException
+}
+```
+
+返回的 `List` 就是**直接包着原数组**的一个视图：
+
+```java
+String[] arr = {"a", "b", "c"};
+List<String> list = Arrays.asList(arr);
+list.set(0, "z");
+System.out.println(arr[0]);              // z —— 改 List 就是改数组
+
+list.add("d");                           // 运行时抛 UnsupportedOperationException
+```
+
+三层容易踩的地方：
+
+1. **它只有一个字段 `E[] a`，没有做任何复制**——所以改 `List` 会改到原数组，改原数组也会改这个 `List`（**双向可见**）。
+2. **它没有实现 `add` / `remove`**，靠 `AbstractList` 的默认实现抛异常。也就是说：**这个适配器只覆盖了目标接口的一部分方法，而且是运行时才失败**，不是编译期。
+3. **对 `List<Integer>` 调用 `remove(1)` 会删下标而不是删元素**——`remove(int)` 与 `remove(Object)` 的重载选择在装箱类型上是经典陷阱。
+
+> **结论：适配器不保证提供完整的目标接口。** 当目标接口的某个方法在被适配者上「没有意义」时，有三种选择——抛异常（`Arrays.asList`）、给空实现、或者干脆不做这个适配。**选哪种取决于调用方会不会踩到，而这件事必须写在文档和命名里**（JDK 文档第一句就是 "Returns a fixed-size list backed by the specified array"）。
 
 ## 八、与相邻模式的边界
 

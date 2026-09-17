@@ -231,7 +231,9 @@ private Object readResolve() {
 
 若单例类实现了 `Cloneable` 且暴露了 `clone()`，`super.clone()` 会造出新对象。**防护**：不实现 `Cloneable`，或重写 `clone()` 直接返回 `instance`。
 
-## 六、JDK 源码中的单例
+## 六、源码剖析
+
+### 6.1 `Runtime`：标准的饿汉式单例
 
 `java.lang.Runtime` 是标准的**饿汉式**单例：
 
@@ -247,7 +249,125 @@ public class Runtime {
 }
 ```
 
-其他例子：`java.lang.System` 的部分内部实现、`Desktop`、Spring 中默认 `singleton` 作用域的 Bean（注意：**Spring 的单例是"容器内单例"，与 GoF 单例不同**，一个 JVM 里可以有多个容器，各自持有自己的实例）。
+### 6.2 Spring 的 singleton scope：容器级单例，不是 GoF 单例
+
+```java
+// AbstractBeanFactory#doGetBean
+if (mbd.isSingleton()) {
+    sharedInstance = getSingleton(beanName, () -> {
+        try {
+            return createBean(beanName, mbd, args);
+        } catch (BeansException ex) {
+            destroySingleton(beanName);
+            throw ex;
+        }
+    });
+    bean = getObjectForBeanInstance(sharedInstance, name, beanName, mbd);
+}
+
+// DefaultSingletonBeanRegistry
+public Object getSingleton(String beanName, ObjectFactory<?> singletonFactory) {
+    synchronized (this.singletonObjects) {
+        Object singletonObject = this.singletonObjects.get(beanName);
+        if (singletonObject == null) {
+            ...
+            singletonObject = singletonFactory.getObject();
+            addSingleton(beanName, singletonObject);
+        }
+        return singletonObject;
+    }
+}
+```
+
+**它与 GoF 单例有三处根本差异**：
+
+| 维度 | GoF 单例 | Spring 的 singleton scope |
+|---|---|---|
+| 唯一性的作用域 | **类加载器**内唯一 | **容器**内唯一（一个 JVM 可以有父子多个容器，各持一份） |
+| 靠什么保证唯一 | `static final` 字段 + 私有构造器 | `singletonObjects`（`ConcurrentHashMap`），**键是 beanName 而不是 Class** |
+| 能不能造出第二个 | 代码里做不到 | **能**——换个 bean name 注册即可 |
+
+第二条最容易被忽略：**键是 `beanName`**。所以同一个类注册成两个 bean name，容器里就真有两个实例——这在 GoF 单例里不可能。
+
+> **面试口径**：被问「Spring 的单例是单例模式吗」，正确的答法是——**机制不同、约束更弱，换来的是可测试性与可替换性**。实例住在容器里而非类的静态字段中，所以测试里能换掉它、能按 profile 给不同实现。**GoF 单例的静态字段恰恰是它最被诟病的地方。**
+
+顺带一个副产品：**正因为要「容器级单例」，Spring 才必须解决「如何安全地发布一个尚未初始化完的半成品」**——这就是 `getSingleton` 之外那两级缓存（`earlySingletonObjects` / `singletonFactories`）存在的理由。**单例的并发发布问题与循环依赖问题是同一个问题的两面。**
+
+### 6.3 两个边界判据：`Unsafe#getUnsafe` 与 `Collections.emptyList()`
+
+**判据一：单例可以是「权限门」，不只是「唯一实例」。**
+
+```java
+public final class Unsafe {
+    private static final Unsafe theUnsafe = new Unsafe();
+
+    @CallerSensitive
+    public static Unsafe getUnsafe() {
+        Class<?> caller = Reflection.getCallerClass();
+        if (!VM.isSystemDomainLoader(caller.getClassLoader())) {
+            throw new SecurityException("Unsafe");
+        }
+        return theUnsafe;                              // 只有引导类加载器拿得到
+    }
+
+    private Unsafe() {}
+}
+```
+
+`Unsafe` 的实例本身是饿汉式单例，但**它的真正目的是访问控制**：通过「谁能调用 `getUnsafe()`」决定谁有能力做底层内存操作。教科书里的单例只解决唯一性，而 JDK 用它做**能力控制**——**同一份结构，目的可以完全不同。**
+
+**判据二：返回同一个实例 ≠ 单例模式。**
+
+```java
+public static final <T> List<T> emptyList() {
+    return (List<T>) EMPTY_LIST;      // 永远返回同一个共享实例
+}
+```
+
+`Collections.emptyList()` 每次返回同一个 `EMPTY_LIST`，但它**不是单例模式**：
+
+- 它没有私有构造器，也不阻止你 `new ArrayList()`；
+- 单例模式的要求是「**你无法创建出第二个**」，而它只是「**框架替你复用了同一个**」。
+
+**它的真正定位是[享元](/java/design-patterns/structural/flyweight)**：共享的是「一个不可变的空集合」这个状态。判据很清晰——**「能不能创建第二个」是单例，「复用同一个实例」是享元。** 不少讲单例的文章把这类 API 当例子列进来，是错的。
+
+### 6.4 枚举单例：三大破坏手段被语言一次性解决
+
+```java
+public enum Singleton {
+    INSTANCE;
+
+    public void doSomething() { }
+}
+```
+
+编译后它的形态是：
+
+```java
+public final class Singleton extends Enum<Singleton> {
+    public static final Singleton INSTANCE;
+    private static final Singleton[] $VALUES;
+
+    static {                                        // <clinit>：类初始化阶段
+        INSTANCE = new Singleton("INSTANCE", 0);
+        $VALUES = new Singleton[] { INSTANCE };
+    }
+
+    private Singleton(String name, int ordinal) { ... }
+}
+```
+
+对照第 5 节的三种破坏手段，枚举是**唯一不需要任何额外代码就全部免疫的写法**：
+
+| 破坏手段 | 静态写法需要的防护 | 枚举写法 |
+|---|---|---|
+| 反射（`Constructor#newInstance`） | 构造器里加 `if (instance != null) throw` | ✅ JVM 层面禁止反射创建枚举 |
+| 反序列化 | 必须写 `readResolve()` | ✅ 反序列化走 `Enum.valueOf`，返回同一常量 |
+| 克隆 | 重写 `clone()`，或干脆不实现 `Cloneable` | ✅ `Enum#clone` 是 `final` 且直接抛 `CloneNotSupportedException` |
+
+至于线程安全：`INSTANCE` 的赋值发生在 `<clinit>` 里，而 JVM 保证类初始化的互斥与可见性——**不需要 `volatile`、不需要 DCL、不需要静态内部类**。
+
+> **口诀：如果只是要一个「进程内唯一的配置持有者 / 无状态服务」，枚举写法成本最低、破绽最少。** DCL 那一整套 `volatile` 与指令重排分析，只有在你必须**延迟初始化**（依赖运行期参数、初始化代价大）时才真正需要。
 
 ## 七、优缺点与使用场景
 

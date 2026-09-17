@@ -117,7 +117,9 @@ e3.export("月报");   // 调用链：水印 → 加密 → 压缩 → 基础导
 
 > 注意：`super.export(content)` 的调用嵌套会形成一个**调用链栈**，顺序由包装顺序决定。写成 `EncryptDecorator(new CompressDecorator(...))` 是"先压缩后加密"；反过来则是"先加密后压缩"——语义完全不同。**这是装饰者最需要小心的地方。**
 
-## 四、JDK 中的实现：IO 流
+## 四、源码剖析
+
+### 4.1 Java IO：装饰者的教科书应用
 
 Java IO 是装饰者模式的教科书应用：
 
@@ -157,7 +159,125 @@ try (DataInputStream in = new DataInputStream(
 }
 ```
 
-其他 JDK 例子：`Collections.unmodifiableList` / `synchronizedList`（加"不可变"或"同步"职责）、`HttpServletRequestWrapper`（Servlet API 中用于扩展请求）、`java.io.Reader` 家族的 `BufferedReader`。
+### 4.2 `FilterInputStream` 的默认方法是「全委派」：装饰者必须重写才有价值
+
+```java
+public class FilterInputStream extends InputStream {
+    protected volatile InputStream in;
+
+    public int read() throws IOException { return in.read(); }
+    public int read(byte b[]) throws IOException { return read(b, 0, b.length); }
+    public int read(byte b[], int off, int len) throws IOException { return in.read(b, off, len); }
+    public long skip(long n) throws IOException { return in.skip(n); }
+    public int available() throws IOException { return in.available(); }
+    public void close() throws IOException { in.close(); }
+    public synchronized void mark(int readlimit) { in.mark(readlimit); }
+    public synchronized void reset() throws IOException { in.reset(); }
+    public boolean markSupported() { return in.markSupported(); }
+}
+```
+
+**注意：这一整个类一个功能都没加，全是纯委派。** 真正的装饰逻辑全在子类里：
+
+```java
+// BufferedInputStream：只重写了需要改变行为的那些方法
+public synchronized int read(byte b[], int off, int len) throws IOException {
+    ...
+    for (;;) {
+        int nread = read1(b, off + n, len - n);      // ① 优先从内部 buffer 取
+        ...
+    }
+}
+
+public synchronized long skip(long n) throws IOException {
+    ...
+    if (n <= count - pos) {          // ② buffer 里还有，直接移动指针，不真的读
+        pos += (int) n;
+        return n;
+    }
+    ...
+}
+```
+
+**这是本站各篇里最容易被忽略的一条：教科书说「装饰者与被装饰者同一接口、默认委派」，但没说「默认委派只是兜底」。**
+
+如果一个子类一个问题方法都不重写（比如一个声称「加日志」的 `LoggingInputStream` 却不在 `read` 里写日志），它就退化成**透明代理**——**装饰者的全部价值都在「它重写了哪些方法」上**。看一个装饰者实现，只要看它重写了哪几个方法，就知道它到底加了什么能力。
+
+`skip` 的重写尤其值得注意：`BufferedInputStream#skip` 在 buffer 够用时**只移动 `pos` 指针、不产生任何 I/O**——「加缓冲」这个职责要同时改 `read` 和 `skip` 两个方法才算完整。**这是「默认委派会漏掉职责」的实例**：只重写 `read`、忘了 `skip`，缓冲的收益就少一半。
+
+### 4.3 MyBatis 的 `Cache` 装饰链：五层包装，且顺序有讲究
+
+MyBatis 的二级缓存是装饰者在工程里的标准用法——`CacheBuilder#build` 把多个装饰者叠成一条链：
+
+```java
+public Cache build() {
+    setDefaultImplementations();
+    Cache cache = newBaseCacheInstance(implementation, id);       // ① 最内层：PerpetualCache
+    ...
+    for (Class<? extends Cache> decorator : decorators) {        // ② 按配置再套装饰者
+        cache = newCacheDecoratorInstance(decorator, cache);
+    }
+    cache = setStandardDecorators(cache);                        // ③ 最后套标准装饰者
+    return cache;
+}
+
+private Cache setStandardDecorators(Cache cache) {
+    if (clearInterval != null) cache = new ScheduledCache(cache);  // 定时清理
+    if (logPrefix != null)     cache = new LoggingCache(cache);    // 命中率日志
+    cache = new SynchronizedCache(cache);                          // 同步包装
+    return cache;
+}
+```
+
+最终拿到的是这样一个套娃：
+
+```
+SynchronizedCache              ← 最外层：锁住所有读写
+└── LoggingCache               ← 统计命中率
+    └── ScheduledCache         ← 定时清空
+        └── LruCache           ← 按 LRU 淘汰
+            └── PerpetualCache ← 最内层：真正的 Map
+```
+
+**链的顺序不是随便排的，它决定了行为的语义**：
+
+| 装饰者 | 必须处在哪一层 | 为什么 |
+|---|---|---|
+| `PerpetualCache` | 最内 | 它是唯一的真实存储，其余都只是拦截 |
+| `LruCache` / `FifoCache` | 内层 | 淘汰策略要作用在真实存储上 |
+| `ScheduledCache` | 中层 | 它按时间清空内层缓存 |
+| `LoggingCache` | 在 `ScheduledCache` 之外 | **否则命中率统计会把「定时清理造成的未命中」和「真实未命中」混在一起** |
+| `SynchronizedCache` | 最外 | 不套在最外面，就锁不住其它装饰者的状态字段 |
+
+> **这比「能套娃」深一层：装饰者链是洋葱，谁在外面决定了谁能观察到谁的副作用。** 设计装饰链时，先想清楚「哪些统计要包含哪些行为」，顺序自然就定了。
+
+### 4.4 `HttpServletRequestWrapper`：判据是「持有的是接口还是具体类」
+
+```java
+public class HttpServletRequestWrapper extends ServletRequestWrapper
+        implements HttpServletRequest {
+
+    public HttpServletRequestWrapper(HttpServletRequest request) {
+        super(request);
+    }
+    ...
+}
+```
+
+它的父类 `ServletRequestWrapper` 持有的字段类型是 **`ServletRequest`（同接口）**，所有方法纯委派——这是**装饰者**。
+
+对照本站[外观模式](/java/design-patterns/structural/facade)里的 `RequestFacade`：它同样实现 `HttpServletRequest`，但**持有的是容器具体类 `Request`**——那是门面。
+
+| 实现 | 实现的接口 | 持有的字段类型 | 判定 |
+|---|---|---|---|
+| `FilterInputStream` | `InputStream` | `InputStream` | 装饰者 |
+| `HttpServletRequestWrapper` | `HttpServletRequest` | `ServletRequest` | 装饰者 |
+| `RequestFacade` | `HttpServletRequest` | `Request`（具体类） | 门面 |
+| `HandlerAdapter` | 统一的 `handle` 协议 | 各种 `Handler` | 适配器 |
+
+> **一句判据：实现同一接口 + 持有同一接口 = 装饰者；持有具体类 = 门面 / 适配器。** 三个结构型模式长得几乎一样，字段类型是唯一可靠的分辨依据。
+
+Servlet 容器里这两个类**经常同时出现**：Tomcat 用 `RequestFacade` 把请求交给应用（隔离容器），Spring 的过滤器再用 `ContentCachingRequestWrapper` 把它包一层（加「请求体可重复读」的能力）——**同一个请求对象，先被门面包一次，再被装饰者包一次**，这是两个模式动机差异的最直观现场。
 
 ## 五、与代理模式的区别（最常被问）
 

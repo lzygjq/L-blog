@@ -165,7 +165,9 @@ msg2.send("u1001", "订单已超时");
 
 一句话：**桥接关注"结构如何拆成两条线"，策略关注"算法如何换"。** 桥接中的 `Implementor` 维度看起来像策略，但多出"抽象侧也有继承体系"这一层，这是判断的关键。
 
-## 六、JDK 中的实现：JDBC
+## 六、源码剖析
+
+### 6.1 JDBC：桥的最标准形态
 
 JDBC 是桥接模式最标准的例子：
 
@@ -185,7 +187,77 @@ JDBC 是桥接模式最标准的例子：
 - `DriverManager` / `Connection` / `Statement` 是抽象层的 API；
 - 应用代码只依赖 `java.sql.*` 这套抽象，**换数据库只需换驱动 jar 与 URL**，业务代码一行不改。
 
-其他例子：AWT 的 `Component` 与 `Peer`（`ComponentPeer` 按操作系统实现）、SLF4J（API 抽象层）与 logback/log4j2（实现层绑定）、`java.util.logging` 的 Handler 体系。
+### 6.2 `DriverManager` 的 SPI：桥的「实现维度」是怎么被发现的
+
+```java
+// DriverManager 的静态初始化块
+private static void loadInitialDrivers() {
+    String drivers = System.getProperty("jdbc.drivers");          // ① 系统属性显式指定
+    AccessController.doPrivileged((PrivilegedAction<Void>) () -> {
+        ServiceLoader<Driver> loadedDrivers = ServiceLoader.load(Driver.class);
+        Iterator<Driver> driversIterator = loadedDrivers.iterator();
+        while (driversIterator.hasNext()) {
+            driversIterator.next();                               // ② SPI 扫描并注册
+        }
+        return null;
+    });
+}
+```
+
+`ServiceLoader.load(Driver.class)` 会扫描 classpath 上所有 `META-INF/services/java.sql.Driver` 文件，把里面写的实现类实例化并注册。连接时再按 URL 逐个问：
+
+```java
+for (DriverInfo aDriver : registeredDrivers) {
+    if (isDriverAllowed(aDriver.driver, callerCL)) {
+        try {
+            Connection con = aDriver.driver.connect(url, info);   // 各驱动自己判断认不认这个 URL
+            if (con != null) return con;                          // 第一个能接上的胜出
+        } catch (SQLException ex) { }
+    }
+}
+```
+
+**与教科书的差异**：教科书的桥接里，抽象层持有 `Implementor` 的引用，**由客户端决定注入哪一个**（`new RefinedAbstraction(new ConcreteImplementorA())`）。JDBC 反过来——**抽象层自己发现实现**，客户端只给一个 URL 字符串。
+
+> **这是桥接在生产系统里的常态：桥 + 一种「实现发现机制」（SPI / 配置 / 注册表）。** 因为「换数据库只改配置」这个卖点的前提，就是客户端不做 `new`。
+
+顺带一个高频追问：**为什么现在可以不写 `Class.forName("com.mysql.cj.jdbc.Driver")`？** 因为 JDBC 4.0 起驱动 jar 里带了 `META-INF/services/java.sql.Driver`，SPI 会自动加载。老代码里的 `Class.forName` 是为了触发驱动静态块里的 `DriverManager.registerDriver(...)`——**它不是「加载」而是「注册」，SPI 出现后这一步被合并了**。
+
+### 6.3 为什么 JDBC 的抽象层全是接口
+
+`Connection`、`Statement`、`ResultSet`、`DatabaseMetaData` **全部是接口**，不是抽象类。这不只是风格选择，而是桥接能成立的前提：
+
+| 判据 | 抽象层若是抽象类 | 抽象层是接口 |
+|---|---|---|
+| 实现维度能否完全独立 | ❌ 厂商实现必须继承它，占掉唯一一次继承机会 | ✅ 厂商实现接口的同时还能继承自己的基类 |
+| 抽象层能否自由演进 | ❌ 加一个方法就会影响所有已有实现 | ✅ 加 `default` 方法即可 |
+| 实现由谁决定 | 抽象层可以自己 `new`（那就退化成模板方法了） | 只能由外部注入或发现 |
+
+**对照本站[模板方法模式](/java/design-patterns/behavioral/template-method)里的 `AbstractList`**：它同样是「抽象层 + 多套实现」，用的却是**抽象类**——因为它的意图是「父类写死骨架、子类补原语」，两个维度**并不独立**（子类必须接受父类的迭代骨架）。
+
+**桥接与模板方法的分界就在这里：实现维度能不能脱离抽象层单独变化。** 能（换数据库不改业务代码）→ 桥接；不能（换集合实现仍要遵守同一套 `modCount` 协议）→ 模板方法。
+
+### 6.4 AWT 的 `Component` 与 `ComponentPeer`
+
+比 JDBC 更纯粹的例子在 JDK 自己身上——AWT 把「界面元素」与「平台实现」拆成两个维度：
+
+```
+  抽象化维度（跨平台 API）           实现化维度（平台实现）
+┌──────────────────────┐          ┌─────────────────────┐
+│  Component / Button  │───桥────▶│   ComponentPeer     │
+│  （所有平台同一套）    │          │   (接口)             │
+└──────────────────────┘          └──────────┬──────────┘
+                                    ┌────────┼─────────┐
+                                    ▼        ▼         ▼
+                            WButtonPeer  XButtonPeer  LWButtonPeer
+                             （Windows）   （X11）    （纯 Java 实现）
+```
+
+- `Component` / `Button` / `TextField` 是跨平台 API，业务只写这一层；
+- `ComponentPeer` 是 `Implementor` 接口，`Toolkit#createButton` 按当前平台返回 `WButtonPeer`、`XButtonPeer` 或 `LWButtonPeer`；
+- **`Toolkit` 在这里扮演的角色与 `DriverManager` 完全一样**：一个「按环境选实现」的入口。
+
+> `java.util.logging` 的 `Handler` 体系、SLF4J 的 `SLF4JServiceProvider` 也是同一结构。**凡是「一套 API 要跑在多种底层之上」的地方，几乎都能看到桥接 + 发现机制的组合。**
 
 ## 七、优缺点
 

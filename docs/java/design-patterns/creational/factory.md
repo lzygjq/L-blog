@@ -245,7 +245,7 @@ public class SettlementService {
 抽象工厂（一个工厂管一族产品）      ← 保证产品配套；代价是加产品线要改所有工厂
 ```
 
-## 七、框架中的对应实现
+## 七、源码剖析
 
 | 框架 | 实现 | 属于哪种 |
 |---|---|---|
@@ -255,6 +255,99 @@ public class SettlementService {
 | JDK | `Calendar.getInstance()` | 简单工厂 |
 | JDK | `Executors.newFixedThreadPool()` 等 | 简单工厂（静态方法按参数产出不同 `ExecutorService`） |
 | MyBatis | `SqlSessionFactory` | 工厂方法 + 建造者（用 `SqlSessionFactoryBuilder` 组装） |
+
+### 7.1 `FactoryBean` 与 `&` 前缀：容器里的两种 bean
+
+```java
+public interface FactoryBean<T> {
+    T getObject() throws Exception;          // 产品
+    Class<?> getObjectType();                // 产品类型
+    default boolean isSingleton() { return true; }
+}
+```
+
+麻烦在于：**`FactoryBean` 自己也是一个 bean**。容器必须能同时表达「工厂」和「工厂的产品」两种身份——靠的就是名字前缀：
+
+```java
+// AbstractBeanFactory
+String FACTORY_BEAN_PREFIX = "&";
+
+// AbstractBeanFactory#getObjectForBeanInstance
+protected Object getObjectForBeanInstance(Object beanInstance, String name, String beanName, RootBeanDefinition mbd) {
+    if (!(beanInstance instanceof FactoryBean) || BeanFactoryUtils.isFactoryDereference(name)) {
+        return beanInstance;                              // 带 & 前缀：返回工厂自己
+    }
+    ...
+    return getObjectFromFactoryBean(factory, beanName, !synthetic);   // 不带 &：返回 getObject() 的产物
+}
+```
+
+```java
+Object sqlSessionFactory = context.getBean("sqlSessionFactory");    // getObject() 的产物
+Object factory          = context.getBean("&sqlSessionFactory");    // FactoryBean 本身
+```
+
+**与教科书的差异**：教科书的工厂方法里产品类型在编译期就定了，调用方 `new` 一个工厂、拿产品，天经地义。但**在 IoC 容器里，工厂也必须是被容器管理的对象**——于是同一个 bean name 就指向了两个东西，只能用前缀区分。
+
+> **这是「把模式搬进框架」的典型增量成本：教科书示例里不存在的问题（工厂自己被注入、被后置处理器加工、被 AOP 代理），在框架里全都要解决。** 看到 `FactoryBean` 别只记 API，要记住它存在的理由是「容器里的一切都得先是 bean」。
+
+### 7.2 `Collection#iterator` 算不算工厂方法
+
+```java
+// ArrayList
+public Iterator<E> iterator() {
+    return new Itr();                 // Itr 是 ArrayList 的私有内部类
+}
+```
+
+对照教科书的工厂方法四角色：
+
+| 角色 | 教科书 | `ArrayList` |
+|---|---|---|
+| 抽象工厂 | `Creator` 声明 `factoryMethod()` | `Collection#iterator()` ✅ |
+| 抽象产品 | `Product` | `Iterator<E>` ✅ |
+| 具体工厂 | `ConcreteCreator` | `ArrayList` ✅ |
+| 具体产品 | `ConcreteProduct` | `ArrayList.Itr` ✅ |
+
+四个角色齐了，**但「具体工厂」与「具体产品」是同一个类的内外两层**（`ArrayList` 与它的私有内部类 `Itr`）。这在教科书示例里很少见，却是**工厂方法在 JDK 里最常见的形态**。
+
+判据其实一直很清楚：**创建逻辑被推迟到「具体实现类」内部，调用方只面向抽象产品编程。** 「具体工厂要不要独立成类」是形态问题，不是模式问题。
+
+更贴近教科书「多套具体工厂」的例子是同为 `Collection` 的另一个实现：`Collections.unmodifiableList(list).iterator()` 返回 `UnmodifiableList.Itr`——**同一个抽象产品、两套具体工厂与具体产品**。
+
+### 7.3 `Executors` 的简单工厂：返回值被刻意收窄
+
+```java
+public static ExecutorService newFixedThreadPool(int nThreads) {
+    return new ThreadPoolExecutor(nThreads, nThreads, 0L, TimeUnit.MILLISECONDS,
+                                  new LinkedBlockingQueue<Runnable>());
+}
+
+public static ExecutorService newSingleThreadExecutor() {
+    return new FinalizableDelegatedExecutorService(
+            new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>()));
+}
+```
+
+两个都是「静态方法按参数返回不同实现」的简单工厂，但第二个多包了一层：
+
+```java
+static class DelegatedExecutorService extends AbstractExecutorService {
+    private final ExecutorService e;
+
+    DelegatedExecutorService(ExecutorService executor) { e = executor; }
+
+    public void execute(Runnable command) { e.execute(command); }
+    public void shutdown() { e.shutdown(); }
+    // 注意：没有 setCorePoolSize / setMaximumPoolSize / setKeepAliveTime
+}
+```
+
+为什么？因为 `newSingleThreadExecutor()` 对调用方的承诺是「**永远只有一个线程**」。如果直接返回 `ThreadPoolExecutor`，调用方可以强转回去、把核心线程数改成 10——**承诺就没了**。包一层之后，**强转也拿不到配置方法**。
+
+> **这是简单工厂里最容易被忽略的一层职责：不只是「选实现」，还包括「限制产物对外暴露的能力面」。** 教科书的简单工厂只做 `switch`，真实的工厂方法常常还要保证「拿到手的东西不能被玩坏」。
+
+另外 `Executors.defaultThreadFactory()` 返回的 `DefaultThreadFactory` 负责给线程命名（`pool-N-thread-M`）——**给「这个线程从哪来」留下可观测的线索**，也是工厂的常见附带职责。
 
 ## 八、面试问答
 

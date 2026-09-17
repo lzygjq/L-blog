@@ -190,7 +190,95 @@ public class PresetOrders {
 
 **组合使用**是很常见的：工厂决定"用哪个建造者"，建造者负责"如何组装"。MyBatis 就是典型——`SqlSessionFactoryBuilder.build(Configuration)` 组装出 `SqlSessionFactory`（工厂本身又是建造者的产物）。
 
-## 五、优缺点
+## 五、源码剖析
+
+### 5.1 MyBatis `SqlSessionFactoryBuilder`：建造者的产物本身又是工厂
+
+```java
+public SqlSessionFactory build(InputStream inputStream, String environment, Properties properties) {
+    try {
+        XMLConfigBuilder parser = new XMLConfigBuilder(inputStream, environment, properties);
+        return build(parser.parse());              // 先把 XML 解析成 Configuration
+    } catch (Exception e) {
+        throw ExceptionFactory.wrapException("Error building SqlSession.", e);
+    }
+}
+
+public SqlSessionFactory build(Configuration config) {
+    return new DefaultSqlSessionFactory(config);   // 产物本身是一个工厂
+}
+```
+
+**与教科书的四处差异：**
+
+1. **Builder 自己不做「分步组装」。** 教科书的 Builder 有 `buildPartA()` / `buildPartB()` 一串步骤方法；这里只有一个 `build`，真正的组装被**委托给了 `XMLConfigBuilder#parse()`**。→ **「步骤」可以由协作对象实现，Builder 只负责「定序 + 产出 + 兜异常」。**
+2. **Builder 本身是无状态的。** 它没有 `private final` 字段保存中间结果（中间状态全在 `Configuration` 里），所以可以被反复调用。教科书示例里的 Builder 通常持有半成品字段——**那才是「不能复用、不能共享」的真正原因**。
+3. **产物是工厂，不是数据对象。** 建造者产出 `SqlSessionFactory`，而它本身又是「创建 `SqlSession`」的工厂。**模式可以串联**：建造者组装复杂配置，工厂按配置生产运行时对象。
+4. **它没有 `Director`。** 组装顺序由 `parse()` 内部的固定调用决定，不存在「换一种顺序组装」的需求。
+
+### 5.2 Lombok `@Builder` 生成的结构：它把「校验」这一环丢了
+
+手写 Builder 有三个要点（私有构造器、字段 `final`、校验集中在 `build()`）。`@Builder` 只兑现了前两个：
+
+```java
+// @Builder 生成的等价形态
+public class Order {
+    private String no;
+    private String userId;
+
+    public static OrderBuilder builder() { return new OrderBuilder(); }
+
+    public static class OrderBuilder {
+        private String no;
+        private String userId;
+
+        OrderBuilder() {}
+        public OrderBuilder no(String no)          { this.no = no; return this; }
+        public OrderBuilder userId(String userId)  { this.userId = userId; return this; }
+        public Order build()                       { return new Order(no, userId); }   // 没有任何校验
+    }
+}
+```
+
+```java
+// 这三行都能编译、能运行，不报错，直到下游 NPE
+Order o1 = Order.builder().build();
+Order o2 = Order.builder().no(null).build();
+Order o3 = Order.builder().userId("u1").build();
+```
+
+**不懂会误判的地方**：`@Builder` 让**所有字段都变成可选**，「哪些字段必填」这条语义在编译期彻底消失。有人用 `@Builder` + `@NonNull` 以为补上了，但 `@NonNull` 只在**赋值那一刻**校验（`no(null)` 会立刻抛），**漏调 setter 仍然静默通过**。
+
+**正确的组合**是 `@Builder` + 手写 `build()`（Lombok 允许手写 `build()` 覆盖生成的方法），把整体校验补回去——这正好对应第 3.2 节示例里那三行 `if`。
+
+### 5.3 `AbstractStringBuilder`：`append` 返回 `this` 说明不了什么
+
+```java
+public AbstractStringBuilder append(String str) {
+    if (str == null) return appendNull();
+    int len = str.length();
+    ensureCapacityInternal(count + len);          // 可能扩容
+    putStringAt(count, str);                      // 内部是 byte[] value（JDK 9+ 紧凑字符串）
+    count += len;
+    return this;                                  // ← 链式的实现基础
+}
+
+private int newCapacity(int minCapacity) {
+    int oldCapacity = value.length >> coder;      // coder = 0 时除以 1，= 1 时除以 2
+    int newCapacity = (oldCapacity << 1) + 2;     // 扩容到 1 倍 + 2
+    if (newCapacity - minCapacity < 0) newCapacity = minCapacity;
+    if (newCapacity - MAX_ARRAY_SIZE > 0) newCapacity = hugeCapacity(minCapacity);
+    return newCapacity;
+}
+```
+
+三点值得注意：
+
+1. **`append` 返回 `this` 是「流式 API」的实现手段，与建造者模式无关。** 建造者的判据是「**有组装步骤 + 有产出方法**」，不是「方法返回 `this`」。反过来，`StringBuilder` **是**建造者的 JDK 形态（见第 3.3 节）——因为它有 `append`（组装）与 `toString`（产出）。
+2. **`toString()` 每次都是新对象**（`new String(value, 0, count)`），不是缓存的结果。这与「建造者产出的产品不可变」一致：产出即定型，之后与建造者再无关系。
+3. **`newCapacity` 里的第二次判断是这份源码最容易被追问的一行**：`(oldCapacity << 1) + 2` 在容量接近 `Integer.MAX_VALUE` 时会溢出成负数，所以必须再比一次 `newCapacity - minCapacity < 0` 把它掰回来——**先算、再验、溢出则退回最小值**，这个顺序不能颠倒。
+
+## 六、优缺点
 
 **优点**
 
@@ -205,7 +293,7 @@ public class PresetOrders {
 2. 产品内部结构变化时，建造者需要同步修改；
 3. 参数很少的对象用它属于过度设计。
 
-## 六、使用场景
+## 七、使用场景
 
 | 场景 | 说明 |
 |---|---|
@@ -216,7 +304,7 @@ public class PresetOrders {
 | Spring Security `HttpSecurity` | 链式配置过滤器链 |
 | 复杂报表 / 规则对象 | 参数多、可选参数多，且需要整体校验 |
 
-## 七、面试问答
+## 八、面试问答
 
 **Q1：建造者模式和工厂模式的区别？**
 **工厂管"造什么"，建造者管"怎么造"。** 工厂一步返回成品，建造者分步组装、最后 `build()` 产出；工厂的扩展点是产品类型，建造者的扩展点是组装步骤。两者常组合使用。

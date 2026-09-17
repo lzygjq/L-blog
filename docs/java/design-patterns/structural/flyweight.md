@@ -132,7 +132,7 @@ template.renderOnShelf(product, sku);
 
 > 注意：这里的 `ProductTemplate` 必须是**不可变**的。如果它持有可变状态，多个商品共享同一个实例会互相污染——**享元的正确性依赖内部状态的不可变性**。
 
-## 五、JDK 中的实现
+## 五、源码剖析
 
 ### 5.1 包装类的缓存池
 
@@ -185,6 +185,61 @@ System.out.println(s1 == s4);         // true
 字符串常量池是享元思想在 JVM 层面的实现：**字面量在池中只存一份，多个引用共享**。`intern()` 就是把一个堆上的字符串"加入或取出"池中实例。
 
 > 其他例子：`java.lang.Character` 的 `CharacterCache`、`Boolean` 的 `TRUE`/`FALSE`、`java.util.logging` 的 `Level` 常量，以及各类枚举值（枚举常量天然是享元）。
+
+### 5.3 `IntegerCache` 的真实实现与两个边界
+
+```java
+private static class IntegerCache {
+    static final int low = -128;
+    static final int high;
+    static final Integer[] cache;
+
+    static {
+        int h = 127;
+        String integerCacheHighPropValue = VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
+        if (integerCacheHighPropValue != null) {
+            h = Math.max(parseInt(integerCacheHighPropValue), 127);   // ① 调小是无效的
+            h = Math.min(h, Integer.MAX_VALUE - (-low) - 1);          // ② 防止数组过大
+        }
+        high = h;
+        cache = new Integer[(high - low) + 1];
+        int j = low;
+        for (int k = 0; k < cache.length; k++) {
+            cache[k] = new Integer(j++);                              // ③ 一次性填满
+        }
+    }
+
+    private IntegerCache() {}
+}
+```
+
+两个容易被追问的边界：
+
+1. **上限可以改，但只能在启动时改，且只能调大。** `-XX:AutoBoxCacheMax=N` 最终就落在 `java.lang.Integer.IntegerCache.high` 这个 saved property 上；而源码里第一行是 `Math.max(parseInt(...), 127)`——**`-XX:AutoBoxCacheMax=10` 仍然会缓存到 127**。
+2. **缓存数组是一次性填满的**：`static` 块里循环 `new Integer(j++)`，类加载时就把这 256 个（或更多）对象全造出来。这是**空间换时间**，且这份空间**全局共享、除非类被卸载否则不回收**。
+   - 反过来看：**`-XX:AutoBoxCacheMax` 调得越大，启动时要分配的 `Integer` 越多**。默认只到 127，是因为 JDK 认为这个小范围覆盖了绝大多数用法。
+
+### 5.4 常量池发生在编译期，还是运行期
+
+同样一句字符串拼接，进不进常量池，取决于**编译期能不能算出结果**：
+
+```java
+String a = "he" + "llo";              // 编译期折叠 → 字节码里直接是 ldc "hello"
+String b = "hello";
+System.out.println(a == b);           // true
+
+final String P = "he";
+String c = P + "llo";                 // final 变量也参与折叠
+System.out.println(c == b);           // true
+
+String s = "he";
+String d = s + "llo";                 // 运行期拼接（JDK 9+ 走 invokedynamic）→ false
+System.out.println(d == b);           // false
+```
+
+判据只有一条：**javac 能不能在编译期把这个表达式算成常量**（语言规范里叫 *constant expression*）。能——字节码里直接一个 `ldc`，走常量池；不能——生成 `invokedynamic makeConcatWithConstants`，结果落在堆上。
+
+> **这一条把享元的适用范围说清楚了：池可以在运行期（`IntegerCache` / `intern()`），也可以在编译期（字符串折叠）。** 编译期折叠是零成本的（连查池都省了）；运行期的池则要在「省内存」与「查池开销」之间权衡——**这也是 `intern()` 不能滥用的原因**：它是一个同步的哈希查找，放在热路径上得不偿失。（JDK 7 起字符串常量池已从永久代移到堆上，表长可用 `-XX:StringTableSize` 调整。）
 
 ## 六、与相邻概念的区别
 
