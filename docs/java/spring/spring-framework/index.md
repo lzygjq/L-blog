@@ -21,7 +21,7 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 | **AOP** | [AOP 与代理机制](/java/spring/spring-framework/aop/) | 横切逻辑怎么织入、JDK 代理与 CGLIB 如何选 | ★★★★★ |
 | | ↳ [声明式事务与传播行为](/java/spring/spring-framework/aop/transaction) | `@Transactional` 怎么生效、为什么会失效 | ★★★★★ |
 | **MyBatis** | [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | SQL 怎么被执行、延迟加载和缓存有什么坑 | ★★★★ |
-| **横切能力** | [缓存 · 异步 · 重试 · 校验 · 序列化](/java/spring/spring-framework/crosscutting/) | 加个注解就以为生效的那五个能力，各自的生效条件与失效清单 | ★★★★ |
+| **横切能力** | [缓存 · 异步 · 重试 · 校验 · 序列化 · 出站 HTTP](/java/spring/spring-framework/crosscutting/) | 加个注解就以为生效的五个能力，加上出站超时对齐 | ★★★★ |
 
 **五块的分工逻辑**（这也是它们为什么这样切分）：
 
@@ -126,7 +126,7 @@ Spring 是整个生态的地基。Boot 和 Cloud 都是在这一层之上做**�
 
 > **答题提醒**：Spring 的问题几乎都能追溯到"生命周期 + 代理"两条主线。回答时先定位到具体阶段（如"这发生在属性填充阶段"），再展开细节——比直接背结论更有说服力，也更容易自证理解。
 >
-> **横切能力（缓存 / 异步 / 重试 / 校验 / 序列化）的 60 题独立成块**，见[横切能力 · 面试索引](/java/spring/spring-framework/crosscutting/#interview)。本页保持 **22 题**的口径，不把那部分重复列在这里。
+> **横切能力（缓存 / 异步 / 重试 / 校验 / 序列化 / 出站 HTTP）的 72 题独立成块**，见[横切能力 · 面试索引](/java/spring/spring-framework/crosscutting/#interview)。本页保持 **22 题**的口径，不把那部分重复列在这里。
 
 ## 六、相关联的菜单
 

@@ -8,7 +8,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 
 这个板块**不写新知识**。它的唯一职责是把散在各板块的题目串起来：**每条索引都指向正文锚点，答案在正文里**。
 
-各板块的导览页或正文末尾都已经有纵向题单（合计 **1187 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
+各板块的导览页或正文末尾都已经有纵向题单（合计 **1212 题**，每题都带「一句话答案 + 正文锚点」）。既然有了那些题单，为什么还要这一页？
 
 ## 一、纵向题单解决不了的三件事 {#why}
 
@@ -16,7 +16,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 |---|---|---|
 | **同一个概念横跨多个板块** | 「一致性」在 MySQL 讲事务、在 Redis 讲缓存、在 MQ 讲顺序与幂等、在 Spring Cloud 讲分布式事务——四篇各自都对，但没有人告诉你**它们是同一个问题的四种解法** | [跨板块连线题](#threads) |
 | **面试是按轮次递进的** | 题单按知识域排（Java / 存储 / 中间件…），不按「一面问什么、二面问什么」排 | [按轮次的复习路径](#rounds) |
-| **1187 道全看一遍不现实** | 题单里记忆题与决策题混在一起，不知道哪道该背题面、哪道该背推导 | [四个层次](#layers)分优先级 + [自检清单](#checklist) |
+| **1212 道全看一遍不现实** | 题单里记忆题与决策题混在一起，不知道哪道该背题面、哪道该背推导 | [四个层次](#layers)分优先级 + [自检清单](#checklist) |
 
 **一句话定位**：各板块是**内容层**（把机制讲透），这一页是**检索层**（告诉你先看什么，以及同一件事在哪几处出现过）。
 
@@ -50,9 +50,9 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 轮次 | 考察重点 | 建议入口（按顺序） |
 |---|---|---|
 | **基础面 / 一面** | 语言与数据结构基本功、SQL 与索引、能说清常用组件的行为 | [计算机基础 43 题](/fundamentals/#faq) → [Java 基础 41 题](/java/basics/#faq) → [集合 25 题](/java/collections/#faq) → [并发 41 题](/java/concurrent/#faq) → [MySQL 13 题](/database/mysql/#interview) |
-| **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [横切能力 60 题](/java/spring/spring-framework/crosscutting/#interview) → [Spring Boot 18 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
+| **二面 / 原理面** | JVM、并发进阶、框架原理、中间件可靠性——**追问「为什么」** | [JVM 13 题](/java/jvm/#interview-index) → [Spring 框架 22 题](/java/spring/spring-framework/#interview) → [横切能力 72 题](/java/spring/spring-framework/crosscutting/#interview) → [Spring Boot 21 题](/java/spring/spring-boot/#faq) → [消息队列 26 题](/middleware/#interview) → [测试与质量 10 题](/java/testing/#interview) |
 | **三面 / 架构面** | 分布式取舍、云原生落地、数据链路、**方案对比与代价** | [Spring Cloud 10 题](/java/spring/spring-cloud/#interview-index) → [云原生 16 题](/cloud-native/#interview-questions) → [数据仓库 27 题](/bigdata/#faq) → [Flink 流处理 34 题](/bigdata/flink/#faq) → [ClickHouse 40 题](/bigdata/clickhouse/#faq) → [MongoDB 48 题](/database/mongodb/#faq) → [Redis 16 题](/database/redis/#interview) |
-| **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [成长路线](/projects/architect-roadmap/)（四级自检）→ [可验证产出工具箱](/projects/toolkit/)（ADR / 压测报告 / 架构图） |
+| **项目面 / 交叉面** | 「你做过什么」——**看证据，不看形容词** | [项目实战](/projects/#interview)（导览）→ [成长路线](/projects/architect-roadmap/)（四级自检）→ [可验证产出工具箱](/projects/toolkit/)（立项三件套 + 故障复盘） |
 | **AI 方向岗** | 工程化的 AI 协作方式、Agent 与 MCP、框架选型 | [AI 应用 19 题](/ai/#faq) → [Agent 与 Harness](/ai/agent-harness/#interview) → [Spring AI](/ai/spring-ai/#interview) |
 | **大前端相关岗** | 小程序双线程模型、`setData` 边界、登录支付时序 | [大前端 6 题](/frontend/#interview) |
 | **场景设计题** | 「设计一个秒杀 / 短链 / 排行榜」——**没有标准答案，只有取舍** | [Redis 场景地图](/database/redis/scenarios) → [消息队列三条主线](/middleware/#three-threads) → [设计模式面试高频](/java/design-patterns/#interview) |
@@ -75,7 +75,9 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | Spring 容器、AOP、事务边界 | [Spring 框架](/java/spring/spring-framework/#interview) | `@Transactional` 为什么失效、循环依赖三级缓存 |
 | SQL 走索引、回表 | [MySQL](/database/mysql/index-structure) | 索引为什么用 B+ 树、什么时候索引失效 |
 | 缓存命中或穿透 | [Redis](/database/redis/cache-patterns) | 一致性四档怎么选、布隆过滤器会不会漏判 |
-| 跨服务调用与保护 | [Spring Cloud](/java/spring/spring-cloud/#interview-index) | 熔断降级、幂等、链路追踪 |
+| 跨服务调用与保护 | [Spring Cloud](/java/spring/spring-cloud/#interview-index) · [出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http) | 熔断降级、幂等、链路追踪；**出站超时必须短于入站预算** |
+| 一次慢请求怎么查 | [慢请求剧本](/cloud-native/observability/slow-request) | 先范围后哪一跳；不要把「经历了什么」的清单再背一遍 |
+| 应用日志怎么跟上请求 | [应用日志](/java/spring/spring-boot/logging#mdc) | `traceId` 进 MDC，不要拼进 `message` |
 | 容器、探针、滚动更新 | [云原生](/cloud-native/kubernetes/#probes) | liveness 与 readiness 为什么分开、滚动更新怎么不中断 |
 
 **答这道题的正确姿势**：不要一口气背完。挑一条「与自己项目有关的链路」讲深，其他环节点到为止——面试官问这道题，是在**找你熟悉的那一段**。
@@ -120,7 +122,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | **网络** | 重传、连接排队、长连接不均 | [TCP 核心机制](/fundamentals/network/tcp)、[Service 负载均衡](/cloud-native/kubernetes/#service-ingress) |
 | **存储** | 索引失效、全表扫、大分页 | [索引设计](/database/mysql/index-design) |
 
-**先分类、再优化**：五面里只有一面是瓶颈，改错地方不仅无效，还会引入新问题（比如给内存瓶颈加线程数）。
+**先分类、再优化**：五面里只有一面是瓶颈，改错地方不仅无效，还会引入新问题（比如给内存瓶颈加线程数）。线上怎么从告警走到「哪一跳」，用[慢请求剧本](/cloud-native/observability/slow-request)，不要从这张表直接跳进调参。
 
 ### 4.5 「隔离」的四种粒度 {#thread-isolation}
 
@@ -146,8 +148,8 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | Java 并发 | 41 | [高频考点速查](/java/concurrent/#faq) | 可见性、锁、JUC 工具类、线程池、并发容器 |
 | Java 虚拟机 | 72 | [面试高频索引](/java/jvm/#interview-index) | 内存结构、GC、收集器、GC 日志；**实操四篇**：命令行五件套判读（jstat 十列 / 线程栈六形态 / 三次采样）、堆转储与 MAT 支配树、Arthas 在线诊断（trace / watch / vmtool）、火焰图四类剖析（on-CPU / off-CPU / alloc / lock）与 JFR |
 | Spring 框架 | 22 | [面试高频问题](/java/spring/spring-framework/#interview) | 容器启动、Bean 生命周期、AOP、MyBatis |
-| **Spring 横切能力** | 60 | [面试索引](/java/spring/spring-framework/crosscutting/#interview) | 缓存失效条件与脏缓存、异步默认执行器与上下文传递、方法级重试与幂等前提、两条异常链与 RFC 9457、`Long` 精度与 Jackson 3 迁移 |
-| Spring Boot | 18 | [高频考点速查](/java/spring/spring-boot/#faq) | 自动配置、配置体系、Actuator、内嵌容器 |
+| **Spring 横切能力** | 72 | [面试索引](/java/spring/spring-framework/crosscutting/#interview) | 缓存失效条件与脏缓存、异步默认执行器与上下文传递、方法级重试与幂等前提、两条异常链与 RFC 9457、`Long` 精度与 Jackson 3 迁移、出站超时与两套连接池 |
+| Spring Boot | 21 | [高频考点速查](/java/spring/spring-boot/#faq) | 自动配置、配置体系、Actuator、内嵌容器、应用日志 |
 | Spring Cloud | 10 | [面试索引](/java/spring/spring-cloud/#interview-index) | 注册发现、网关限流、熔断、分布式事务、幂等 |
 | 设计模式 | 7 组辨析 | [面试高频](/java/design-patterns/#interview) | 只列最易混淆的边界（代理 vs 装饰、策略 vs 状态） |
 | MySQL | 13 | [面试高频清单](/database/mysql/#interview) | 索引、事务、日志、MVCC、主从、连接池 |
@@ -158,7 +160,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 搜索与检索 | 90 | [面试索引](/search/#interview) | 倒排索引与 FST 压缩、分词器三件套与中文分词、`text` 与 `keyword`、mapping 与 dynamic、refresh / flush / translog 与近实时、段合并、删除与更新的真相、query 与 filter 上下文、term / match / match_phrase、bool 四子句、BM25、分片对算分的干扰、doc_values 与 fielddata、聚合的近似性、分片与路由、深分页三方案、脑裂与选主、reindex 与别名、31GB 堆上限、ELK 栈与同步一致性 |
 | 云原生 | 16 | [面试高频清单](/cloud-native/#interview-questions) | 容器原理、K8s 对象、Helm 与配置管理、服务网格、CRD 与 Operator |
 | **CI/CD 与发布** | 72 | [面试索引](/cloud-native/cicd/#interview) | 提交粒度与可回退性（rebase 的 `ours`/`theirs` 反转、评审规模）、流水线节律与门禁、制品治理与 SBOM/签名/SLSA、四种发布策略与 `preStop` 双路径竞态、GitOps 与渐进式交付、扩展-收缩与发布检查清单；**外加研发效能五项指标、口径怎么定、七个团队原型、AI 的实测影响、质量成本四类** |
-| **监控与可观测** | 59 | [面试索引](/cloud-native/observability/#interview) | 指标与 PromQL、日志管道与 Loki 高基数陷阱、链路传播与 OTel、SLO 与错误预算、成本与许可 |
+| **监控与可观测** | 69 | [面试索引](/cloud-native/observability/#interview) | 指标与 PromQL、日志管道与 Loki 高基数陷阱、链路传播与 OTel、SLO 与错误预算、慢请求决策树、成本与许可 |
 | 数据仓库 | 27 | [高频考点速查](/bigdata/#faq) | CDC 同步、Doris 表模型、湖仓、分层建模 |
 | Flink 流处理 | 34 | [面试索引](/bigdata/flink/#faq) | 水印与空闲分区、屏障对齐与端到端三段论、四种 Join 的状态代价、背压定位与倾斜、增量快照的无锁原理 |
 | ClickHouse | 40 | [面试索引](/bigdata/clickhouse/#faq) | 不可变 part 推出的五条结论、稀疏索引与「排序键 / 主键」的分工、跳数索引与 PREWHERE、三条更新路径的代价、`internal_replication` 这个开关、先分负载再选引擎的五条判据 |
@@ -172,7 +174,7 @@ desc: 全站题单的检索层——不复制正文，只给「按层次 + 按�
 | 分布式协调 | 51 | [面试索引](/distributed/coordination/#interview-index) | 协调服务的边界与六种原语、znode 与约 1MB 硬上限、会话与临时节点、Watcher 三个特性与羊群效应、zxid 的 epoch + 计数器、ZAB 与 Raft 的"两套机制 vs 一套"、TRUNC 的推理链、ZK 默认读非线性的后果、锁的能力边界与 fencing token、RedLock 的定位、etcd 的 2GiB 配额与 compaction/defrag 之别、KRaft 为什么去掉 ZK、Observer 与投票集合 |
 | 安全与合规 | 38 | [面试高频索引](/security/#interview) | 会话与令牌、越权防护、OAuth2 与 PKCE、XSS/CSRF/注入、签名与重放、密码存储与脱敏；**外加等保定级与一个中心三重防护、数据出境三条路径与两个阈值、开源许可传染性与传递依赖、SBOM 与 CRA、审计留痕** |
 
-**上表合计 1187 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
+**上表合计 1212 题**（口径：只累加「题量」列的纯数字项；设计模式那一行的「7 组辨析」是**要点式辨析**、不是独立题目，不计入合计。同一板块内部的「汇总表 + 子题单」不重复计入；每题在正文里都有对应的推导过程）。
 
 ## 六、自检清单 {#checklist}
 

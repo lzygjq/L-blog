@@ -2,7 +2,7 @@
 date: 2026-09-16
 title: 成本、许可与落地路线
 sidebar: 成本与落地
-order: 5
+order: 6
 desc: 三支柱各自的成本曲线与数据量估算、开源许可的三档差异（Apache-2.0 / AGPLv3 / SSPL）对商用与内嵌的影响、三条可落地的技术路线、自建与托管的临界点、保留与采样的统一设计，以及可观测性体系该按什么顺序搭
 ---
 
@@ -176,4 +176,4 @@ Spring Boot Actuator + micrometer-registry-prometheus
 | 9 | 可观测性该按什么顺序搭？ | **① 结构化日志 + traceId → ② 指标 + 告警 → ③ SLI/SLO/错误预算 → ④ 链路 → ⑤ 日志平台 → ⑥ 采样与成本优化**。**日志排在第 5 位**：它最贵，且没有前四层的关联规范时，只是一堆更贵的文本 |
 | 10 | 最常见的结构性误用是什么？ | **把三个支柱当三个独立工具**——排查时靠时间戳人工对账。可观测与"三个工具"的唯一分界线是**关联字段是否统一**（`service` + `traceId` 全站一致） |
 
-> 上一篇：[SLO 与告警](/cloud-native/observability/slo-and-alerting)　|　回到：[监控与可观测 · 导览](/cloud-native/observability/)
+> 上一篇：[慢请求剧本](/cloud-native/observability/slow-request)　|　回到：[监控与可观测 · 导览](/cloud-native/observability/)

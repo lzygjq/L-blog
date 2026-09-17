@@ -346,4 +346,4 @@ for (Order o : orders) {
 | 11 | Jackson 3 带来了什么迁移成本？ | **根包名从 `com.fasterxml.jackson` 改为 `tools.jackson`**，推荐用 `JsonMapper.builder()` 构建。注解基本兼容但 **import 全要改**，自定义 `Serializer`/`Module` 需要适配。Jackson 2 以 deprecated 形式保留，计划在 Spring Framework 7.2 移除 |
 | 12 | 怎么降低序列化层的迁移与事故风险？ | **始终注入容器托管的 `ObjectMapper`，不要在各处 `new`**；把全局约定收敛到 `spring.jackson.*` 与 `Customizer`。这样时间格式、未知字段策略、Long 处理都只有一处定义，迁移时只改配置、业务代码不动 |
 
-> 回到：[Spring 横切能力 · 导览](/java/spring/spring-framework/crosscutting/)
+> 回到：[Spring 横切能力 · 导览](/java/spring/spring-framework/crosscutting/)　|　下一篇：[出站 HTTP 超时](/java/spring/spring-framework/crosscutting/outbound-http)

@@ -2,14 +2,14 @@
 date: 2026-09-16
 title: 监控与可观测 · 板块导览
 sidebar: 监控与可观测
-desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字段关联、五个分篇的地图与阅读顺序、与搜索/可用性/服务网格等板块的分工边界，以及 59 题面试索引
+desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字段关联、六个分篇的地图与阅读顺序、与搜索/可用性/服务网格等板块的分工边界，以及 69 题面试索引
 ---
 
 # 监控与可观测 · 板块导览
 
 这个板块原先只有一页概览——四个支柱（Metrics / Logging / Tracing / 告警）各自压在几百字里，够回答"是什么"，不够回答"怎么配、会踩什么坑"。
 
-现在拆成五篇：**先讲清指标与查询语义**（它最容易"看着对、算错了"），**再讲日志的成本结构与那条高基数陷阱**，**然后是链路的传播断点**，**接着把告警从"拍阈值"升级为"算预算"**，**最后收口到成本、许可与落地顺序**。
+现在拆成六篇：**先讲清指标与查询语义**（它最容易"看着对、算错了"），**再讲日志的成本结构与那条高基数陷阱**，**然后是链路的传播断点**，**接着把告警从"拍阈值"升级为"算预算"**，**再把「告警之后怎么查」收成一棵决策树**，**最后才是成本、许可与落地顺序**。
 
 > **主线：能下钻到单次请求，才叫可观测。**
 >
@@ -38,7 +38,7 @@ desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字
 
 **所以这个板块不是"工具手册"**——它讲的是这条路径上每一环**为什么会在真实环境里断掉**。
 
-## 二、五篇地图 {#map}
+## 二、六篇地图 {#map}
 
 | 篇 | 主题 | 一句话主线 | 关键落点 |
 |---|---|---|---|
@@ -46,7 +46,8 @@ desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字
 | [二、日志管道](/cloud-native/observability/logging-pipeline) | 结构化 · 采集 · 存储路线 | **成本与价值由同一个东西决定：结构** | 全文索引 vs 标签索引；**Loki 想按 `traceId` 查却最不适合**；四步压成本 |
 | [三、链路追踪与 OTel](/cloud-native/observability/tracing-otel) | 传播 · 采样 · 标准与后端 | **难点不在埋点，在上下文能不能穿过所有边界** | 四类断点（网关/MQ/线程池/响应式）；头部与尾部采样；OTel 的四层分工 |
 | [四、SLO 与告警](/cloud-native/observability/slo-and-alerting) | 信号 · 预算 · 应急复盘 | **告警的合法性只有一条：响的时候有人知道该做什么** | 四个黄金信号；SLI/SLO/SLA 分界；多窗口燃烧率；十类反模式 |
-| [五、成本、许可与落地](/cloud-native/observability/observability-selection) | 成本曲线 · 许可 · 顺序 | **不是"装了什么"，而是"愿意为多少信息付多少钱"** | 三条成本曲线；Apache-2.0 / AGPLv3 / SSPL 三档差异；六阶段落地顺序 |
+| [五、慢请求剧本](/cloud-native/observability/slow-request) | 范围 · 哪一跳 · 分支 | **慢是症状；先定范围再定哪一跳，禁止从代码开查** | 与面试「一次请求经历了什么」分工；出站 / Hikari / 本进程四条支路 |
+| [六、成本、许可与落地](/cloud-native/observability/observability-selection) | 成本曲线 · 许可 · 顺序 | **不是"装了什么"，而是"愿意为多少信息付多少钱"** | 三条成本曲线；Apache-2.0 / AGPLv3 / SSPL 三档差异；六阶段落地顺序 |
 
 ## 三、三支柱：各自擅长什么、靠什么关联 {#three-pillars}
 
@@ -77,7 +78,7 @@ desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字
 | [混沌与演练](/high-availability/chaos-drills) | 故障注入的方法与成熟度 | 演练**要验的是"告警响没响、runbook 准不准"**，这是与本板块的交叉点 |
 | [K8s 探针](/cloud-native/kubernetes/#probes) | liveness / readiness 的语义 | Actuator 端点该交给哪种探针，在那边讲 |
 | [服务网格](/cloud-native/service-mesh/#capabilities) | Sidecar 在流量层自动传播链路上下文 | **网格管进程间，管不了进程内**——线程池与异步任务是它的盲区 |
-| [微服务治理](/java/spring/spring-cloud/resilience) · [RPC 可靠性](/middleware/rpc/rpc-reliability#tracing) | 超时、重试、熔断、优雅上下线 | 本板块的链路篇是**给这些行为提供证据**：重试了 3 次在指标上只表现为延迟升高，只有链路看得见是三次独立调用 |
+| [微服务治理](/java/spring/spring-cloud/resilience) · [RPC 可靠性](/middleware/rpc/rpc-reliability#tracing) · [出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http) | 超时、重试、熔断、优雅上下线 | 本板块的链路篇与[慢请求剧本](/cloud-native/observability/slow-request)是**给这些行为提供证据**：重试了 3 次在指标上只表现为延迟升高，只有链路看得见是三次独立调用 |
 | [分布式协调](/distributed/coordination/#thread) | 协调服务自身怎么选型与治理 | 那套服务的**指标与告警**同样适用本板块的判据 |
 
 ## 五、版本与许可现状 {#versions}
@@ -92,7 +93,7 @@ desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字
 | **Elasticsearch / Kibana** | **SSPL + Elastic License（非 OSI）**（2021-02 变更） | 对外提供检索服务受限制，**OpenSearch（Apache-2.0）** 是许可更安全的分支 |
 | Prometheus / OTel / Jaeger / SkyWalking / Fluent Bit | **Apache-2.0** | 最宽松，可内嵌 |
 
-## 六、面试高频索引（59 题） {#interview}
+## 六、面试高频索引（69 题） {#interview}
 
 按"被问到的概率 × 答不好会暴露功底"排序，前 12 条：
 
@@ -111,7 +112,7 @@ desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字
 | 11 | 从 2.x 升到 3.x 最容易踩什么？ | 两处**静默**生效：**区间选择器改左开右闭**、**`le="1"` 被规范化为 `le="1.0"`** | [指标篇 Q9](/cloud-native/observability/metrics-prometheus#interview) |
 | 12 | 可观测性该按什么顺序搭？ | **日志结构化 → 指标告警 → SLO → 链路 → 日志平台 → 成本治理**；**日志排第五**，因为它最贵且依赖前四层 | [成本篇 Q9](/cloud-native/observability/observability-selection#interview) |
 
-> 五篇内容页共 **59 题**，上面只列了最该先背的 12 条；各篇末尾都有自己的完整题单。
+> 六篇内容页共 **69 题**，上面只列了最该先背的 12 条；各篇末尾都有自己的完整题单。
 
 ## 七、边界与阅读建议 {#todo}
 
@@ -119,14 +120,14 @@ desc: 可观测性的主线是"能下钻到单次请求"、三支柱靠统一字
 
 - **Elasticsearch 的引擎原理与运维**（倒排索引、算分、分片、ILM）→ 见[搜索与检索](/search/#thread)；
 - **K8s 探针语义与滚动发布**→ 见[Kubernetes](/cloud-native/kubernetes/#probes)；
-- **超时/重试/熔断的实现**→ 见[微服务治理](/java/spring/spring-cloud/resilience) 与 [RPC 可靠性](/middleware/rpc/rpc-reliability#timeout)；
+- **超时/重试/熔断的实现**→ 见[微服务治理](/java/spring/spring-cloud/resilience)、[出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http) 与 [RPC 可靠性](/middleware/rpc/rpc-reliability#timeout)；
 - **几个 9 的换算与 RTO/RPO**→ 见[可用性目标](/high-availability/availability-targets#caliber)。
 
 **阅读顺序按角色**：
 
 | 你的处境 | 建议顺序 |
 |---|---|
-| 第一次系统接触 | 导览 → 指标 → 日志 → 链路 → SLO → 成本 |
+| 第一次系统接触 | 导览 → 指标 → 日志 → 链路 → SLO → 慢请求剧本 → 成本 |
 | 要立刻配一套可用的 | [成本篇的六阶段](/cloud-native/observability/observability-selection#sequence) → 指标 → SLO |
 | 面试准备 | 上面 12 条索引 → 各篇末尾题单 → 指标篇的升级坑 |
-| 线上正在排查 | 指标篇[§1 范围判定](/cloud-native/observability/metrics-prometheus#scope) → 告警篇[§6 排查顺序](/cloud-native/observability/slo-and-alerting#incident) |
+| 线上正在排查 | [慢请求剧本](/cloud-native/observability/slow-request)（决策树）→ 告警篇[§6 应急时间](/cloud-native/observability/slo-and-alerting#incident) |

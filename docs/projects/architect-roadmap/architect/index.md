@@ -176,5 +176,5 @@ L1 与 L2 的缺口是**内容缺口**（缺某一篇），L3 不是。这一级
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
 | 看「架构题会被追问到什么程度」 | [面试专题的四层次](/interview/#layers) 与[跨板块连线题](/interview/#threads) |
 | 拿两个案例当模拟盘，自己重推一遍设计 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
-| 把设计写成可评审的材料 | [可验证产出三件套](/projects/toolkit/)：ADR / 压测报告 / 架构图 |
+| 把设计写成可评审的材料 | [可验证产出工具箱](/projects/toolkit/)：立项三件套（ADR / 压测 / 架构图）+ 运行期[故障复盘](/projects/toolkit/postmortem/) |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

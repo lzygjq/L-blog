@@ -239,6 +239,8 @@ jdbc:mysql://host:3306/db?connectTimeout=3000&socketTimeout=12000&useSSL=true&se
 
 > **`socketTimeout` 默认为 0（无限等待）是最容易被忽略的一处**：一个卡住的查询会让线程永远挂在那里——连接不会归还、线程不会释放，**表现就是"池慢慢被吃满"**。把它设成一个有限值（比如最长合理查询时间的 1.5 倍）是一行配置换一个故障模式的典型。
 
+同一条「内层必须短于外层」也适用于 **HTTP 出站**：网关先 504、应用还在读 socket，日志里同样没有超时。HTTP 客户端的连接/读取超时、以及它和重试怎么分同一笔入站预算，见[出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http#timeouts)。**Hikari 和 HTTP 客户端是两套池，不要调错。**
+
 ## 六、连接泄漏与"池打满"的四种根因 {#leaks}
 
 ### 6.1 泄漏长什么样
@@ -388,4 +390,4 @@ active 满 + pending 为 0          → 刚好用满，还没到排队（临界�
 
 > **这一篇在[成长路线](/projects/architect-roadmap/)里的位置**：属 [L2 高级开发](/projects/architect-roadmap/senior/)的缺口——L1 只要"会用默认配置"，**L2 要能解释"连接池打满"这条线上最常见的根因之一**，并且能把它讲成"超时对齐 + 背压"而不是"把池调大"。[L3 架构师](/projects/architect-roadmap/architect/)要处理的是**跨服务的连接预算与容量规划**（见[容量测算](/projects/property-saas/capacity-and-perf/)）。
 
-> 回到：[MySQL · 导览](/database/mysql/)　|　相关：[慢查询定位与 SQL 优化](/database/mysql/diagnosis)　|　相关：[发布即故障：连接池与线程池耗尽](/cloud-native/cicd/rollback-and-migration#release-incidents)
+> 回到：[MySQL · 导览](/database/mysql/)　|　相关：[慢查询定位与 SQL 优化](/database/mysql/diagnosis)　|　相关：[出站 HTTP 超时](/java/spring/spring-framework/crosscutting/outbound-http)　|　相关：[发布即故障：连接池与线程池耗尽](/cloud-native/cicd/rollback-and-migration#release-incidents)

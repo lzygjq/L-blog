@@ -46,7 +46,7 @@ features:
     link: /cloud-native/
   - icon: 🎯
     title: 实战与面试
-    details: 绩效系统四大技术难点、智慧物业 SaaS 云原生与数仓落地、架构演进地图、ADR / 压测报告 / 架构图三件套，以及横向串联各板块的面试专题
+    details: 绩效系统四大技术难点、智慧物业 SaaS 云原生与数仓落地、架构演进地图、立项三件套与故障复盘，以及横向串联各板块的面试专题
     link: /projects/
 date: 2026-09-11
 ---

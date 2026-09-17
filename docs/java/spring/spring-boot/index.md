@@ -1,16 +1,16 @@
 ---
 date: 2026-09-13
 title: Spring Boot · 导览
-desc: 自动配置、Starter 工程化、启动流程、配置体系、Actuator、内嵌容器六块的定位、依赖关系与推荐顺序
+desc: 自动配置、Starter 工程化、启动流程、配置体系、Actuator、内嵌容器、应用日志七块的定位、依赖关系与推荐顺序
 ---
 
 # Spring Boot · 导览
 
 Spring Boot 解决的问题可以用一句话概括：**把"搭一个能跑的 Spring 应用"从配置工作变成依赖声明**。
 
-它的能力全部建立在 Spring Framework 的 IoC 容器之上——**自动配置本质是"条件化的 Bean 注册"，启动流程本质是"按顺序驱动容器"**。其余四块都是这两条主线的延伸：Starter 是"把自动配置打包分发"的工程化，配置体系是"装配读取什么"，Actuator 与内嵌容器是"跑起来之后与跑起来之前"。
+它的能力全部建立在 Spring Framework 的 IoC 容器之上——**自动配置本质是"条件化的 Bean 注册"，启动流程本质是"按顺序驱动容器"**。其余几块都是这两条主线的延伸：Starter 是"把自动配置打包分发"的工程化，配置体系是"装配读取什么"，Actuator 与内嵌容器是"跑起来之后与跑起来之前"，应用日志是「刚才那一次」在进程内的约定。
 
-## 一、六块内容与依赖关系 {#modules}
+## 一、七块内容与依赖关系 {#modules}
 
 | # | 主题 | 回答的核心问题 | 依赖 |
 |---|---|---|---|
@@ -20,6 +20,7 @@ Spring Boot 解决的问题可以用一句话概括：**把"搭一个能跑的 S
 | 4 | [配置体系](/java/spring/spring-boot/configuration) | 配置从哪来、谁覆盖谁？改了为什么不生效？ | 启动流程 |
 | 5 | [Actuator 与生产可观测](/java/spring/spring-boot/actuator) | 它现在健康吗、慢在哪、刚才发生了什么？ | 启动流程、配置体系 |
 | 6 | [内嵌容器与请求进入](/java/spring/spring-boot/web-server) | Web 服务器什么时候起来？请求怎么进来？ | 启动流程、Actuator |
+| 7 | [应用日志约定](/java/spring/spring-boot/logging) | 字段叫什么、`traceId` 怎么跟上请求、级别怎么用？ | Actuator（动态改级别） |
 
 ```text
                     ┌──────────────────────────────┐
@@ -43,10 +44,15 @@ Spring Boot 解决的问题可以用一句话概括：**把"搭一个能跑的 S
                            ▼
                   ┌──────────────────┐
                   │ ⑥ 内嵌容器与请求  │   ← Web 服务器何时起、请求如何进入
+                  └────────┬─────────┘
+                           │
+                           ▼
+                  ┌──────────────────┐
+                  │ ⑦ 应用日志约定    │   ← 进程内字段 / MDC / 级别；管道在可观测板块
                   └──────────────────┘
 ```
 
-**推荐顺序：① → ② → ③ → ④ → ⑤ → ⑥。** 前三块是"装配机制 + 分发方式 + 驱动时机"，构成理解 Boot 的最小闭环；后三块是"配置从哪来、上线看什么、请求怎么进"，对应日常开发与运维的三个高频场景。
+**推荐顺序：① → ② → ③ → ④ → ⑤ → ⑥ → ⑦。** 前三块是"装配机制 + 分发方式 + 驱动时机"，构成理解 Boot 的最小闭环；后四块是"配置从哪来、上线看什么、请求怎么进、出事怎么按一次请求收齐日志"。⑦ 与 ⑤ 并列：Actuator 回答「现在健康吗」，日志回答「刚才那一次」。
 
 ## 二、一条贯穿的主线：约定优于配置 {#convention}
 
@@ -68,8 +74,9 @@ Spring Boot 解决的问题可以用一句话概括：**把"搭一个能跑的 S
 | **第一次系统理解 Boot** | [自动配置](/java/spring/spring-boot/auto-configuration) → [启动流程](/java/spring/spring-boot/startup) → [配置体系](/java/spring/spring-boot/configuration) |
 | **要做一个内部 starter** | [自动配置](/java/spring/spring-boot/auto-configuration) → [Starter 设计与自定义](/java/spring/spring-boot/starter)（含测试与坑表） |
 | **"配置改了不生效"** | [配置体系](/java/spring/spring-boot/configuration#precedence) → 用 `/actuator/env` 验证来源 |
-| **上线前做生产加固** | [Actuator](/java/spring/spring-boot/actuator#security) → [内嵌容器](/java/spring/spring-boot/web-server#graceful-shutdown)（优雅停机） |
+| **上线前做生产加固** | [Actuator](/java/spring/spring-boot/actuator#security) → [应用日志](/java/spring/spring-boot/logging) → [内嵌容器](/java/spring/spring-boot/web-server#graceful-shutdown)（优雅停机） |
 | **压测 QPS 上不去 / 连接超时** | [内嵌容器](/java/spring/spring-boot/web-server#tomcat-threads)（三个参数的关系） |
+| **别人拿 `traceId` 找不到那次请求** | [应用日志](/java/spring/spring-boot/logging#mdc) → [日志管道 · 结构化](/cloud-native/observability/logging-pipeline#structured) |
 | **面试前突击** | [高频考点速查](#faq) → 回正文看推导 |
 
 ## 四、高频考点速查 {#faq}
@@ -88,6 +95,9 @@ Spring Boot 解决的问题可以用一句话概括：**把"搭一个能跑的 S
 | 健康检查是怎么汇总的？ | 所有 `HealthIndicator` 聚合，任一 `DOWN` 即整体 `DOWN`；可按用途配健康分组 | [Actuator](/java/spring/spring-boot/actuator#health-indicators) |
 | 指标基数问题指什么？ | 标签取值组合数决定时间序列数；给 userId / 原始 URL 打标签会爆炸，要用模板化 + `MeterFilter` 兜底 | [Actuator](/java/spring/spring-boot/actuator#cardinality) |
 | 不重启怎么改日志级别？ | `POST /actuator/loggers/{name}`；**还原要传 `configuredLevel: null`**，传具体值会钉住配置 | [Actuator](/java/spring/spring-boot/actuator#loggers) |
+| 应用日志最小该有哪些字段？ | `timestamp`（带时区）、`level`、`service`、`traceId`、`message`；异常进独立字段。`service` 与 `traceId` 必须和指标、链路同一套值 | [应用日志](/java/spring/spring-boot/logging#fields) |
+| `traceId` 为什么不写在业务代码里？ | 链路库写入 MDC，日志框架从 MDC 读。拼进 `message` 等于关联键对检索不可见；手工线程会丢上下文 | [应用日志](/java/spring/spring-boot/logging#mdc) |
+| 日志为什么写 stdout？ | 容器哲学：应用不管轮转与采集。写容器内文件会随重启丢失，且 `kubectl logs` 看不到 | [应用日志](/java/spring/spring-boot/logging#hygiene) |
 | `maxConnections` / `acceptCount` / `maxThreads` 分别管什么？ | 接纳连接数 / 内核 accept 队列 / 工作线程数；连接进不来时服务端**没有日志** | [内嵌容器](/java/spring/spring-boot/web-server#three-params) |
 | 为什么 `Filter` 里不能直接 `@Autowired`？ | `Filter` 由 Servlet 容器创建，时机早于 Spring 容器就绪；用 `FilterRegistrationBean` 注册 | [内嵌容器](/java/spring/spring-boot/web-server#filter-autowired) |
 | `@ControllerAdvice` 能捕获所有异常吗？ | 不能：只覆盖进入 `DispatcherServlet` 之后的异常；Filter / 404 / 容器层错误走 `/error` 转发 | [内嵌容器](/java/spring/spring-boot/web-server#error-handling) |
@@ -103,3 +113,4 @@ Spring Boot 解决的问题可以用一句话概括：**把"搭一个能跑的 S
 | [Spring Framework：IoC 与 Bean](/java/spring/spring-framework/) | 容器本身的能力（Bean 生命周期、循环依赖、AOP）属于 Framework；Boot 只做"条件化装配 + 驱动时机" |
 | [云原生与 K8s](/cloud-native/) | 探针、优雅停机、配置挂载在两侧都有：**机制与参数**在 Boot 侧，**编排与部署策略**在云原生侧 |
 | [线程池](/java/concurrent/thread-pool) | Boot 的 `@Async` / `TaskExecutor` 是"配置层"，线程池的原理与参数推导在 Java 并发板块 |
+| [日志管道](/cloud-native/observability/logging-pipeline) | 本菜单的[应用日志](/java/spring/spring-boot/logging)管**进程内约定**（字段、MDC、级别）；管道管采集、索引、Loki 高基数与成本 |

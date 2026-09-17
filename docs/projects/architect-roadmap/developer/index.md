@@ -1,7 +1,7 @@
 ---
 date: 2026-09-17
 title: L1 开发 · 能独立交付一个模块
-desc: 从「能改功能」到「能独立交付」的七步阅读顺序，每一步给出页清单与「读到哪一层就停」；第七步接上日志字段、Compose 与 Linux 分类，另附 AI 闸门、跳过表、离场自检与原缺口已补齐后的读法
+desc: 从「能改功能」到「能独立交付」的七步阅读顺序，每一步给出页清单与「读到哪一层就停」；第七步接上应用日志、Compose 与 Linux 分类，另附 AI 闸门、跳过表、离场自检与原缺口已补齐后的读法
 order: 1
 ---
 
@@ -133,7 +133,7 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | [Actuator 与生产可观测](/java/spring/spring-boot/actuator) | 读到「哪些端点可以开、哪些绝不能在公网开」 |
 | [Linux 排查实战 · 四个方向先分类](/fundamentals/os/linux-tools#why-tools) | **只读这一节**——先分 CPU / IO / 内存 / 句柄，再决定看线程栈还是看磁盘；工具链速查与场景推演留 L2 |
 | [Docker · Compose](/cloud-native/docker/#compose) 与 [容器里 `localhost`](/cloud-native/docker/#network) | 能用 Compose 把依赖起起来，知道容器里的 `localhost` 不是宿主机——**别人按你的步骤能在本机复现，这一级才算交得出去**。namespace、多阶段构建、镜像瘦身不读 |
-| [日志管道 · 结构化字段](/cloud-native/observability/logging-pipeline#structured) | **过渡读法**（应用日志专篇尚未成篇）：读到字段约定、`traceId` 进 MDC、禁止把 `traceId` 拼进 `message`。Loki / 成本 / ELK **不读** |
+| [应用日志：结构化、MDC 与级别](/java/spring/spring-boot/logging) | **只读到字段约定、`traceId` 进 MDC、级别纪律与 stdout。** Loki / 成本 / ELK **不读**——那些在[日志管道](/cloud-native/observability/logging-pipeline) |
 | [运行时数据区](/java/jvm/memory)、[垃圾回收](/java/jvm/gc)、[调优与线上排查](/java/jvm/tuning)、[堆转储与 MAT](/java/jvm/heap-dump-analysis)、[Arthas](/java/jvm/online-diagnostics)、[火焰图](/java/jvm/profiling) | **本级跳过**——留 L2 |
 
 ### 本级附读 · AI 闸门
@@ -164,7 +164,7 @@ L1 的分水岭不是「会多少技术」，而是**交付方式**变了：从�
 | 数据结构与算法（树/图/DP/海量数据） | 面试前按需 | 本级先把复杂度判断力拿到 |
 | 覆盖率与质量门禁 | L2 | 它属于工程效能而非交付能力 |
 | Docker 原理（namespace / 多阶段构建 / 瘦身）、K8s 与网格 | L2 / L3 | 本级只要 Compose 能起依赖 |
-| 日志管道的 Loki / 成本 / ELK、PromQL、SLO 定义 | L3 | 本级只要字段约定与 `traceId` |
+| 日志管道的 Loki / 成本 / ELK、PromQL、SLO 定义 | L3 | 本级读[应用日志](/java/spring/spring-boot/logging)的字段约定与 `traceId` |
 | AI 工具格局、Agent 循环、Spring AI | L2 / L3 | 本级只要闸门与上下文约定 |
 
 ## 四、离场自检：七个问题

@@ -1,7 +1,7 @@
 ---
 date: 2026-09-17
 title: L2 高级开发 · 能负责一块，并对线上问题给出根因
-desc: 从「交付」到「负责」的七步阅读顺序——并发、JVM、数据原理、框架原理、消息、第二数据库与工程质量；第七步接上可观测使用侧、容器内 JVM 与扩展-收缩，另附 Agent 循环、跳过表、离场自检与原缺口已补齐后的读法
+desc: 从「交付」到「负责」的七步阅读顺序——并发、JVM、数据原理、框架原理、消息、第二数据库与工程质量；第七步接上慢请求剧本、容器内 JVM 与扩展-收缩，另附 Agent 循环、跳过表、离场自检与原缺口已补齐后的读法
 order: 2
 ---
 
@@ -95,6 +95,7 @@ L1 的框架停在「会用 + 知道容器管了什么」；L2 要求**能解释
 | [内嵌容器与请求进入](/java/spring/spring-boot/web-server) | 回读——这次读 Tomcat 三参数与线程模型，以及[虚拟线程](/java/spring/spring-boot/web-server#virtual-threads)：**能说清什么时候不该用**，不当成默认加速开关 |
 | [MyBatis 执行流程与集成](/java/spring/spring-framework/mybatis/) | 回读——SQL 会话、一级 / 二级缓存、批处理的真实代价 |
 | [缓存抽象](/java/spring/spring-framework/crosscutting/cache)、[异步执行](/java/spring/spring-framework/crosscutting/async)、[重试与并发限制](/java/spring/spring-framework/crosscutting/resilience) | 三篇全读——L1 跳过的正是这一组：它们决定「横切能力该由框架做，还是该自己做」 |
+| [出站 HTTP：超时对齐与调用预算](/java/spring/spring-framework/crosscutting/outbound-http) | **全读**——出站超时必须短于入站剩余；HTTP 客户端池与 Hikari 是两套池。Feign / 负载均衡不读（留 L3） |
 | [序列化与类型边界](/java/spring/spring-framework/crosscutting/json) | 按需回查——L1 只读了时间类型与 `Long` 精度两节 |
 
 ### 第五步 · 消息：本级第一次跨进程
@@ -131,8 +132,9 @@ L1 的框架停在「会用 + 知道容器管了什么」；L2 要求**能解释
 | [Linux 排查实战](/fundamentals/os/linux-tools) | 回读——L1 只读了四个方向；这次把场景推演走完。**仍是先分类再动手，不调参碰运气** |
 | [Docker · 容器内 JVM](/cloud-native/docker/#jvm-in-container) | 全读这一节——堆 ≠ RSS、OOMKill 与 `ExitOnOutOfMemoryError`。namespace / 多阶段构建仍留 L3 通读 |
 | [回滚与数据库变更 · 扩展-收缩](/cloud-native/cicd/rollback-and-migration#expand-contract) | **只读这一节**——改表走 expand-contract，回填脚本能中途 kill 再重跑。发布策略全集留 L3 |
-| [日志管道 · 结构化字段](/cloud-native/observability/logging-pipeline#structured) | 回读——这次读手工线程 / 线程池 / `@Async` 会丢 MDC。Loki / 成本 / ELK 仍不读 |
-| [SLO 与告警 · 应急与复盘](/cloud-native/observability/slo-and-alerting#incident) | **过渡读法**（慢请求剧本尚未成篇）：只读排查顺序——指标确认范围 → 链路定位哪一跳 → 依赖自身 → 最后才看代码。**不读 SLI 怎么定、错误预算怎么向业务解释** |
+| [应用日志](/java/spring/spring-boot/logging#mdc) | 回读——这次读手工线程 / 线程池 / `@Async` 会丢 MDC。Loki / 成本 / ELK 仍不读 |
+| [慢请求剧本](/cloud-native/observability/slow-request) | **全读决策树**——先范围后哪一跳；出站 / Hikari / 本进程是分支。**不读** SLI 怎么定、错误预算怎么向业务解释（仍在 SLO 篇，留 L3） |
+| [故障复盘](/projects/toolkit/postmortem/) | 读 Why / What 与模板——根因查清之后用时间线写成机制改动。演练与混沌不读 |
 
 ### 本级附读 · Agent 循环
 
@@ -153,7 +155,7 @@ L1 停在闸门。本级要能解释「**模型相同，Harness 决定上限**�
 | RPC 与协议、序列化选型 | L3 | 同上——先有跨团队边界，再谈协议 |
 | 高可用容灾、多机房、单元化 | L3 | 本级先保证「单机房不出事」 |
 | 安全认证授权体系（OAuth2 / SSO / 等保） | L3 | 本级只需会接入现成的认证，不需要设计 |
-| 可观测的**设计侧**（PromQL / SLO 定义 / 选型成本） | L3 | 使用侧（字段规范、排查顺序）本级必读；设计体系留 L3 |
+| 可观测的**设计侧**（PromQL / SLO 定义 / 选型成本） | L3 | 使用侧（[应用日志](/java/spring/spring-boot/logging)、[慢请求剧本](/cloud-native/observability/slow-request)）本级必读；设计体系留 L3 |
 | CI/CD 的灰度、蓝绿、GitOps | L3 | 本级先把「构建 → 测试 → 制品」这条链跑顺；expand-contract 已在第七步 |
 | K8s / Helm / 服务网格 / Operator、Docker 通读 | L3 | 本级读容器内 JVM 就够；编排与镜像原理留 L3 |
 | 数据仓库、Flink、ClickHouse、数仓分层 | L3 / 按需 | 属于数据侧另一条职业线，不是后端主线 |
@@ -194,5 +196,5 @@ L1 停在闸门。本级要能解释「**模型相同，Harness 决定上限**�
 | 回到路线总览，看自己在哪一级 | [成长路线](/projects/architect-roadmap/) |
 | 看「这些知识会被问到多深」 | [面试专题的四层次](/interview/#layers) 与[按轮次的复习路径](/interview/#rounds) |
 | 看别人怎么把这些原理用在真实系统里 | [项目实战](/projects/)、[架构演进地图](/projects/architecture-evolution/#matrix) |
-| 提前准备「拿什么证明我做过」 | [可验证产出三件套](/projects/toolkit/) |
+| 提前准备「拿什么证明我做过」 | [可验证产出工具箱](/projects/toolkit/)（立项三件套 + 出事之后的[故障复盘](/projects/toolkit/postmortem/)） |
 | 看本级 AI 该读到哪一层 | [AI 应用 · 按四级读](/ai/#by-level) |

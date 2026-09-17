@@ -319,6 +319,8 @@ public class App {
 
 ### 6.2 `/actuator/loggers`：不重启改日志级别 {#loggers}
 
+操作入口在这里；**字段、MDC、级别纪律**见[应用日志约定](/java/spring/spring-boot/logging)。还原时必须传 `null`，传具体值会钉死该 logger。
+
 ```bash
 # 查看某个 logger 的当前状态
 curl -s localhost:8080/actuator/loggers/com.example.order

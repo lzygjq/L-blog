@@ -2,27 +2,27 @@
 date: 2026-09-16
 title: Spring 横切能力 · 板块导览
 sidebar: 横切能力
-desc: 缓存、异步、重试、校验、序列化五类横切能力的主线与分工，一个方法上的注解栈该谁在外，与 Spring 核心/Web/Cloud 三个菜单及 Redis、安全板块的边界，版本与现状九条，以及 60 题面试索引
+desc: 缓存、异步、重试、校验、序列化五类注解能力，加上出站 HTTP 超时对齐；注解栈顺序、与相邻板块边界、版本现状，以及 72 题面试索引
 ---
 
 # Spring 横切能力 · 板块导览
 
-Spring 里有一类知识**不属于任何一块"机制"**，却是每个项目都要配、每个面试官都会追问的：**缓存、异步、重试、校验、序列化**。
+Spring 里有一类知识**不属于任何一块"机制"**，却是每个项目都要配、每个面试官都会追问的：**缓存、异步、重试、校验、序列化**，以及**出站调用的超时预算**。
 
-它们的共同点是——**加个注解或配个 Bean 就"应该"生效，而失效时都不报错**：
+前五个的共同点是——**加个注解或配个 Bean 就"应该"生效，而失效时都不报错**：
 
 - `@Cacheable` 没生效 → 每次都查库，只是"慢了"
 - `@Async` 没生效 → 方法变成同步执行，只是"响应慢了"
 - `@Valid` 没生效 → 脏参数进了业务逻辑，可能到数据库才报错
 - 序列化配错 → 接口返回了**错误的数据**，而不是报错
 
-这块内容原先分散在[Spring 核心](/java/spring/spring-framework/)的机制篇里被零星提及——**导览页的主线二甚至明确列出了 `@Async`、`@Cacheable` 这两个"靠代理生效"的注解，但站内一直只有 `@Transactional` 有专篇**。本板块把这五个零覆盖或薄覆盖的缺口补齐。
+这块内容原先分散在[Spring 核心](/java/spring/spring-framework/)的机制篇里被零星提及——**导览页的主线二甚至明确列出了 `@Async`、`@Cacheable` 这两个"靠代理生效"的注解，但站内一直只有 `@Transactional` 有专篇**。本板块把这五个零覆盖或薄覆盖的缺口补齐，并补上出站 HTTP 的超时对齐——它不是注解失效，是**入站预算被出站花光**。
 
-> **主线：这五个能力都是"加个注解就以为生效"，而每个都有各自的生效条件与失效清单。**
+> **主线：前五个能力都是"加个注解就以为生效"；第六个是"出站超时以为配了"。**
 >
-> **理解它们的关键不是记住注解，而是回答三个问题：这段逻辑有没有被执行（代理与条件）、它读写的状态是不是同一份（key / 事务 / Locale / 时区）、它和相邻能力谁先谁后（注解栈的顺序）。**
+> **理解前五个的关键不是记住注解，而是回答三个问题：这段逻辑有没有被执行（代理与条件）、它读写的状态是不是同一份（key / 事务 / Locale / 时区）、它和相邻能力谁先谁后（注解栈的顺序）。**
 >
-> **五篇的失效模式可以统一成一句话：注解的语义由代理决定，代理的边界由调用方式决定，而大多数生产事故都发生在"你以为走了代理"的那次自调用上。**
+> **五篇注解的失效模式可以统一成一句话：注解的语义由代理决定，代理的边界由调用方式决定，而大多数生产事故都发生在"你以为走了代理"的那次自调用上。出站超时则是另一句话：内层必须短于外层，否则用户看到 504，日志里没有超时。**
 
 ## 一、一条主线：注解写上去 ≠ 行为生效 {#thread}
 
@@ -56,9 +56,9 @@ Spring 里有一类知识**不属于任何一块"机制"**，却是每个项目�
 | **注解没生效** | 缓存不命中、异步变异步、校验不执行 | **在方法体第一行打日志**——不执行说明代理没走到 |
 | **生效了但语义错** | 脏缓存、时间差 8 小时、ID 末位变 0 | **看原始响应体**（`curl` / Network）——原始就错则是序列化或顺序问题 |
 
-**这个二分法是本板块最实用的一个工具**：它能在一分钟内把问题从"五个能力都怀疑一遍"收敛到"某一篇的某一节"。
+**这个二分法是本板块最实用的一个工具**：它能在一分钟内把问题从"五个能力都怀疑一遍"收敛到"某一篇的某一节"。出站超时是第三类——**外层先失败、内层还在等**——判别手段是对网关超时与出站 `readTimeout`，不是看注解。
 
-## 二、五篇地图 {#map}
+## 二、六篇地图 {#map}
 
 | # | 篇目 | 回答的核心问题 | 最高频的坑 |
 |---|---|---|---|
@@ -67,6 +67,7 @@ Spring 里有一类知识**不属于任何一块"机制"**，却是每个项目�
 | 3 | [重试与并发限制](/java/spring/spring-framework/crosscutting/resilience) | 什么该重试、重试几次、退避怎么算 | **重试了非幂等操作**；`@Transactional` 在外导致重试无效 |
 | 4 | [校验与异常](/java/spring/spring-framework/crosscutting/validation) | 校验在哪一层、失败怎么统一报出去 | **两条异常链只处理一条** → 路径参数报 500 |
 | 5 | [序列化边界](/java/spring/spring-framework/crosscutting/json) | 类型怎么翻译、时间按哪个时区、ID 怎么不失真 | **`Long` 超出 JS 安全整数**；`LocalDateTime` 被按时区解释 |
+| 6 | [出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http) | 出站超时怎么短于入站预算、重试会不会把预算吃光 | **网关 504 但应用没有超时日志**；HTTP 池与 Hikari 调错 |
 
 **五篇的共同结构**（也是它们的价值所在）：
 
@@ -83,6 +84,8 @@ Spring 里有一类知识**不属于任何一块"机制"**，却是每个项目�
 ```
 
 **第五篇（序列化）与另外四篇略有不同**：它没有"代理"这一层——序列化不依赖 AOP 拦截。但把它放在这里的原因是**同一个主线**：它同样是"配了就应该生效、失效时静默返回错数据"的横切能力，而且它的故障排查手段（看原始响应体）与另外四篇形成互补。
+
+**第六篇（出站 HTTP）也没有代理**：它接在重试篇的「总时长必须小于上游超时」之后，落到客户端的 connect/read/借连接等待，以及和 Hikari 那套入站池的分工。服务发现与 Feign 不在本篇。
 
 ## 三、注解栈：同一个方法上的顺序问题 {#annotation-stack}
 
@@ -126,7 +129,8 @@ public void doSubmit(Long id) { ... }      // 内层：只负责业务与事务�
 | [Spring 核心](/java/spring/spring-framework/) | 代理机制、Bean 生命周期、事务传播行为——**"为什么注解会失效"的底层机制** | 五篇的失效清单全部建立在这套机制上，尤其见[AOP 与代理机制](/java/spring/spring-framework/aop/) |
 | [Spring MVC](/java/spring/spring-mvc/) | 请求分发、参数绑定、`HttpMessageConverter` 的**位置** | [校验与异常](/java/spring/spring-framework/crosscutting/validation)依赖参数绑定链路的结论 |
 | [Spring Boot](/java/spring/spring-boot/) | 自动配置、内嵌容器、**虚拟线程**、优雅停机 | [异步执行](/java/spring/spring-framework/crosscutting/async)引用[虚拟线程](/java/spring/spring-boot/web-server#virtual-threads)与[优雅停机](/java/spring/spring-boot/web-server#graceful-shutdown) |
-| [Spring Cloud](/java/spring/spring-cloud/) | **服务级**容错：熔断、限流、隔离、分布式调度 | [重试与并发限制](/java/spring/spring-framework/crosscutting/resilience)讲**方法级**，服务级见[服务保护](/java/spring/spring-cloud/resilience) |
+| [Spring Cloud](/java/spring/spring-cloud/) | **服务级**容错：熔断、限流、隔离、分布式调度 | [重试与并发限制](/java/spring/spring-framework/crosscutting/resilience)讲**方法级**，服务级见[服务保护](/java/spring/spring-cloud/resilience)；打到哪一台见[负载均衡](/java/spring/spring-cloud/loadbalancer)，打过去等多久见[出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http) |
+| [连接池](/database/mysql/connection-pool#timeouts) | 入站路径上 Hikari 的五个超时 | [出站 HTTP](/java/spring/spring-framework/crosscutting/outbound-http#pools)是另一套池；对齐原则相同 |
 | [Redis 板块](/database/redis/) | **缓存策略**：穿透/击穿/雪崩、一致性四档、多级缓存架构 | [缓存抽象](/java/spring/spring-framework/crosscutting/cache)只讲注解与顺序，策略见[缓存模式](/database/redis/cache-patterns) |
 | [安全板块](/security/) | 认证授权、`@PreAuthorize`、OAuth2 | `SecurityContext` 在异步线程的传递见[异步执行·上下文传递](/java/spring/spring-framework/crosscutting/async#context) |
 | [测试板块](/java/testing/) | 切片测试、`@MockitoBean`、上下文缓存 | 异步与校验的测试写法引用 [Spring Boot 测试](/java/testing/spring-boot-test) |
@@ -164,9 +168,9 @@ public void doSubmit(Long id) { ... }      // 内层：只负责业务与事务�
 
 > **与站内其他页面的口径一致性**：Boot 版本与 EOL 时点引用自[内嵌容器与请求进入 · 版本现状](/java/spring/spring-boot/web-server#version)；虚拟线程的配置与边界同页[第九节](/java/spring/spring-boot/web-server#virtual-threads)。两处如与本文不一致，以那两处为准（它们随版本更新维护）。
 
-## 六、面试索引：60 题 {#interview}
+## 六、面试索引：72 题 {#interview}
 
-五篇各 12 题，按"被追问的概率"排序。**Spring 的横切问题几乎都能追溯到"代理 + 生命周期 + 顺序"三条线**——回答时先定位到阶段或顺序，再展开细节：
+前五篇各 12 题，出站 HTTP 12 题。**注解类问题几乎都能追溯到"代理 + 生命周期 + 顺序"**——回答时先定位到阶段或顺序，再展开细节。超时类问题先问「内外层谁先失败」。
 
 | 篇目 | 题数 | 索引 | 高频前三 |
 |---|---|---|---|
@@ -175,6 +179,7 @@ public void doSubmit(Long id) { ... }      // 内层：只负责业务与事务�
 | 重试与并发限制 | 12 | [重试与并发限制 · 面试口径](/java/spring/spring-framework/crosscutting/resilience#interview) | 重试的四个前提、与事务的顺序、幂等 |
 | 校验与异常 | 12 | [校验与异常 · 面试口径](/java/spring/spring-framework/crosscutting/validation#interview) | `@Valid` vs `@Validated`、两条异常链、RFC 9457 |
 | 序列化边界 | 12 | [序列化边界 · 面试口径](/java/spring/spring-framework/crosscutting/json#interview) | `Long` 精度、时间与时区、Jackson 3 迁移 |
+| 出站 HTTP | 12 | [出站 HTTP · 面试口径](/java/spring/spring-framework/crosscutting/outbound-http#interview) | 内外层超时方向、两套连接池、重试预算 |
 
 **跨篇的四个必答题**（面试官常把它们合在一起问）：
 
@@ -199,10 +204,13 @@ public void doSubmit(Long id) { ... }      // 内层：只负责业务与事务�
         │
         ▼
 ⑤ 序列化边界 ──────────▶ 收口：数据出去时类型怎么不失真
+        │
+        ▼
+⑥ 出站 HTTP 超时 ───────▶ 另一条线：入站预算怎么花在出站与重试上
 ```
 
-**顺序不是必须的**——五篇彼此独立，可以按当前遇到的问题直接跳到对应篇。但**如果按顺序读，会明显感觉到 ①→②→③ 是一条线**（都是"方法的执行行为"），而 ④→⑤ 是另一条线（都是"请求进出的边界行为"）。
+**顺序不是必须的**——六篇彼此可独立跳读。**如果按顺序读，会明显感觉到 ①→②→③ 是一条线**（都是"方法的执行行为"），④→⑤ 是另一条线（都是"请求进出的边界行为"），⑥ 挂在 ③ 后面（同一笔超时预算）。
 
-**建议的前置知识**：至少读过[AOP 与代理机制](/java/spring/spring-framework/aop/)，理解"代理替换的是 Bean 的最终形态"。**没有这个前提，五篇的失效清单会变成需要死记的条目**——有了它，所有失效原因都是同一句话的不同表现。
+**建议的前置知识**：至少读过[AOP 与代理机制](/java/spring/spring-framework/aop/)，理解"代理替换的是 Bean 的最终形态"。**没有这个前提，前五篇的失效清单会变成需要死记的条目**——有了它，所有失效原因都是同一句话的不同表现。第六篇的前置是[连接池 · 超时对齐](/database/mysql/connection-pool#timeouts)里「内层必须短于外层」那一句。
 
 > 回到：[Spring · 导览](/java/spring/spring-framework/)　|　相关：[Spring 生态 · 导览](/java/spring/)

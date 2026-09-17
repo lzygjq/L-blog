@@ -64,7 +64,7 @@ L4 的分水岭是**责任对象变了**：从「一个系统」到「**一条�
 
 | 页 | 本级怎么读 | 覆盖度 |
 |---|---|---|
-| [可验证产出三件套](/projects/toolkit/) | 全读——ADR / 压测报告 / 架构图，是评审团队产出时的统一标准 | ✅ |
+| [可验证产出工具箱](/projects/toolkit/) | 全读——立项三件套（ADR / 压测 / 架构图）是评审设计时的统一标准；[故障复盘](/projects/toolkit/postmortem/)是评审运行期改进的标准 | ✅ |
 | [ADR 模板](/projects/toolkit/adr/template)、[ADR 实例](/projects/toolkit/adr/adr-001-event-bus-stream) | 全读——决策记录是「组织记忆」，**本级最该制度化的一件事** | ✅ |
 | [压测报告](/projects/toolkit/perf-report/)、[架构图](/projects/toolkit/arch-diagram/) | 全读——本级拿到的正是这两样东西，你得看得懂它们**哪里在骗人** | ✅ |
 | [大型集团绩效系统](/projects/perf-system/)、[难点地图](/projects/perf-system/#difficulty-map) | 全读——一个真实系统的**组织约束**（历史包袱、下线节奏、人员能力）写得比技术细节更多 | ✅ |

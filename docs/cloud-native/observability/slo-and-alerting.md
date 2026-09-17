@@ -136,7 +136,7 @@ Google SRE 归纳的四个信号，是"该监控什么"的标准答案（按对�
 | 止血 | 从开始处理到用户恢复 | **MTTM**（缓解时间） |
 | 修复 | 到根因真正消除 | **MTTR / MTBF** 口径见[可用性目标](/high-availability/availability-targets#mtbf-mttr) |
 
-**排查顺序（与[指标篇](/cloud-native/observability/metrics-prometheus#scope)呼应）**：先看指标确认**范围**（只有这个接口还是全站、什么时候开始）→ 再看链路定位**哪一跳** → 再看该依赖自身的指标与日志 → 最后才看代码。**顺序反了就会陷入"上来就翻日志、越翻越乱"。**
+**排查顺序（与[指标篇](/cloud-native/observability/metrics-prometheus#scope)呼应）**：先看指标确认**范围**（只有这个接口还是全站、什么时候开始）→ 再看链路定位**哪一跳** → 再看该依赖自身的指标与日志 → 最后才看代码。**顺序反了就会陷入"上来就翻日志、越翻越乱"。** 把这棵树走成可执行分支，见[慢请求剧本](/cloud-native/observability/slow-request)。
 
 **复盘的三条纪律**：
 
@@ -178,4 +178,4 @@ Google SRE 归纳的四个信号，是"该监控什么"的标准答案（按对�
 | 11 | 复盘怎么做才有用？ | 三条纪律：**无责**（追责会让下次没人说真话）、**行动项有 owner 与 deadline 并进任务跟踪**、**时间线精确到分钟**（区分"检测慢"还是"处置慢"）。**判据：如果结论是"某人要更小心"，这次复盘白做了**——应产出机制改动 |
 | 12 | 演练应该验证什么？ | **不只是"系统扛不扛得住"，更要验"告警响没响、runbook 准不准"**。真实故障不按你的节奏来，演练是唯一能主动验证检测能力的手段 |
 
-> 上一篇：[链路追踪与 OpenTelemetry](/cloud-native/observability/tracing-otel)　|　回到：[监控与可观测 · 导览](/cloud-native/observability/)
+> 上一篇：[链路追踪与 OpenTelemetry](/cloud-native/observability/tracing-otel)　|　下一篇：[慢请求剧本](/cloud-native/observability/slow-request)

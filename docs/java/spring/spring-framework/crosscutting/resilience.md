@@ -286,4 +286,4 @@ public Balance fetchBalance(String accountId) { ... }
 | 11 | 上限只在异常类型上白名单还是黑名单？ | **白名单更安全**——只列出要重试的临时性异常（超时、连接失败），因为依赖升级会引入新的异常类型，白名单的默认行为（不重试）不会意外放大流量 |
 | 12 | 重试的总时长该设多少？ | **必须小于上游的超时时间**。否则出现"调用方早已超时、服务端还在重试链里"的幽灵请求，在链路追踪里表现为**没有父 span 的孤立调用** |
 
-> 回到：[Spring 横切能力 · 导览](/java/spring/spring-framework/crosscutting/)　|　下一篇：[参数校验与统一异常](/java/spring/spring-framework/crosscutting/validation)
+> 回到：[Spring 横切能力 · 导览](/java/spring/spring-framework/crosscutting/)　|　下一篇：[参数校验与统一异常](/java/spring/spring-framework/crosscutting/validation)　|　相关：[出站 HTTP · 重试预算](/java/spring/spring-framework/crosscutting/outbound-http#retry-budget)

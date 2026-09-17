@@ -59,6 +59,8 @@ error.*    异常类型 / 堆栈（结构化，不要塞进 message）
 
 > **关键：`service` 与 `traceId` 这两个字段，必须和指标、链路用同一套取值。** 三个支柱能否互相跳转，完全取决于这几个字段是否对齐——这是"可观测"与"三个独立工具"的唯一分界线。
 
+应用进程内怎么落到 Logback / Boot（级别纪律、stdout、MDC、禁止拼进 `message`），见[应用日志约定](/java/spring/spring-boot/logging)。**本篇从字段离开进程之后接着讲。**
+
 **`traceId` 怎么进日志？** 靠 MDC（Mapped Diagnostic Context）+ 链路库自动写入，而不是手写：
 
 ```xml

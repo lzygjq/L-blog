@@ -238,7 +238,8 @@ const sidebarSpec = [
         children: [
           { text: 'ADR 架构决策记录', dir: 'projects/toolkit/adr', group: true },
           { text: '压测报告', link: '/projects/toolkit/perf-report/' },
-          { text: '架构图', link: '/projects/toolkit/arch-diagram/' }
+          { text: '架构图', link: '/projects/toolkit/arch-diagram/' },
+          { text: '故障复盘', link: '/projects/toolkit/postmortem/' }
         ]
       },
       {

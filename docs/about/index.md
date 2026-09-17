@@ -22,14 +22,14 @@ L知识库是一个面向 Java 后端方向的技术知识站点，定位是**�
 | [数据与存储](/database/) | MySQL 索引与事务、PostgreSQL 的 MVCC / VACUUM / 索引类型、Redis 原理与高可用、MongoDB 文档模型与原生分片、分库分表；[搜索与检索](/search/)（Elasticsearch 倒排索引与分词、写入链路与近实时、查询 DSL 与相关性算分、分片与深分页、ELK 日志栈）；[数据仓库](/bigdata/)（Canal 同步、Flink 流处理、Doris 与 ClickHouse、Iceberg 冷热分层与建模） |
 | [中间件与分布式](/middleware/) | RabbitMQ、Kafka、RocketMQ、物联网 MQTT，RPC 与协议（序列化与 IDL / 协议与传输 / Dubbo 机制 / 可靠性治理）；[分布式理论](/distributed/)（共识协议 Paxos / Raft 与选主、一致性哈希与数据分布、分布式 ID、协调服务 ZooKeeper 与 etcd） |
 | [架构与云原生](/cloud-native/) | Docker、Kubernetes、Helm 与配置管理、服务网格、CRD 与 Operator、CI/CD 与发布（含研发效能度量）、监控与可观测；[架构方法论](/methodology/)（DDD 战略与战术、架构风格谱系、拆分粒度与部署形态、事件驱动与 CQRS、落地反模式、技术成本与 ROI）；[高可用](/high-availability/)（可用性目标与度量、冗余与故障转移、多机房与单元化、混沌工程与故障演练）；[安全与合规](/security/)（认证与令牌、授权与越权、OAuth2 与 OIDC、Web 攻击防护、加密脱敏与合规边界、等保与数据出境与开源许可治理） |
-| [实战与面试](/projects/) | [成长路线](/projects/architect-roadmap/)、[架构演进地图](/projects/architecture-evolution/)、[可验证产出三件套](/projects/toolkit/)（ADR / 压测报告 / 架构图）、绩效系统与智慧物业 SaaS 两个案例系统；[AI 应用](/ai/)（AI 辅助研发、Spring AI、数字人）；[面试专题](/interview/)（高频考点索引、四层次分级、跨板块连线题） |
+| [实战与面试](/projects/) | [成长路线](/projects/architect-roadmap/)、[架构演进地图](/projects/architecture-evolution/)、[可验证产出工具箱](/projects/toolkit/)（立项三件套 + 故障复盘）、绩效系统与智慧物业 SaaS 两个案例系统；[AI 应用](/ai/)（AI 辅助研发、Spring AI、数字人）；[面试专题](/interview/)（高频考点索引、四层次分级、跨板块连线题） |
 
 ## 阅读建议
 
 - **体系化学习**：先看[成长路线](/projects/architect-roadmap/)确认自己处在哪一级，再按该级的清单顺序推进。**顺序是按依赖排的，不是按板块排的**——比如「测试」排在「框架」之后，是因为它要测的是框架。每个板块的导览页另有自己的「阅读建议」，那是板块内的顺序。
 - **按需查阅**：作为技术手册使用，遇到具体问题直接在各板块内检索；每个板块的导览页都有「与相邻板块的边界」，用来判断该去哪一页。
 - **面试准备**：先从[面试专题](/interview/)的四层次与题单索引进入，再回到各板块正文补齐原理细节；项目面的答案素材在[项目实战](/projects/)。
-- **想知道「哪里还没写」**：[成长路线的覆盖度](/projects/architect-roadmap/#coverage)——百科缺口已补齐；当前写的是每一级交付闭环还差哪一环（日志字段 / 慢请求剧本 / 对账 / AI 治理），**缺的写出来，比让读者自己撞墙好**。
+- **想知道「哪里还没写」**：[成长路线的覆盖度](/projects/architect-roadmap/#coverage)——百科缺口与交付闭环前两批已补；还差 L3 方案评审 / 对账 / 多租户方法、L4 AI 治理，**缺的写出来，比让读者自己撞墙好**。
 
 ## 内容边界
 

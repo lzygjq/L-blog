@@ -177,16 +177,16 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 
 ## 六、覆盖度：本站有什么、缺什么 {#coverage}
 
-按级别盘一遍全站检索的结果。**缺的写出来，比让读者自己撞墙好。** 百科型缺口（Git / 依赖 / REST、连接池、ROI / 效能 / 合规）已于 2026-09-17 补齐；**现在缺的不是「还少哪一章中间件」，而是每一级交付闭环还没接到清单上的那一环**——本批先改路线、用已有正文顶上，专篇按批补：
+按级别盘一遍全站检索的结果。**缺的写出来，比让读者自己撞墙好。** 百科型缺口（Git / 依赖 / REST、连接池、ROI / 效能 / 合规）已于 2026-09-17 补齐；交付闭环的前两批（接清单 + 应用日志 / 出站超时 / 慢请求 / 复盘）已落地。**现在缺的仍不是「还少哪一章中间件」**——L3 的方案评审 / 对账 / 多租户方法、L4 的 AI 治理专篇按后续批次补：
 
 | 级别 | 现状（2026-09-17） |
 |---|---|
-| **L1 开发** | 三项百科缺口已补齐。本批把已有正文接到清单：[日志字段](/cloud-native/observability/logging-pipeline#structured) / [Compose](/cloud-native/docker/#compose) / [Linux 分类](/fundamentals/os/linux-tools#why-tools) / [AI 闸门](/ai/vibe-coding/#five-gates)。应用日志专篇尚未成篇，当前是过渡读法 |
-| **L2 高级开发** | 连接池已补齐。本批接下：[可观测使用侧](/cloud-native/observability/slo-and-alerting#incident) / [容器内 JVM](/cloud-native/docker/#jvm-in-container) / [扩展-收缩](/cloud-native/cicd/rollback-and-migration#expand-contract) / [Agent 循环](/ai/agent-harness/#agent-loop)。慢请求剧本与出站超时专篇尚未成篇 |
+| **L1 开发** | 三项百科缺口已补齐。清单接到：[应用日志](/java/spring/spring-boot/logging) / [Compose](/cloud-native/docker/#compose) / [Linux 分类](/fundamentals/os/linux-tools#why-tools) / [AI 闸门](/ai/vibe-coding/#five-gates) |
+| **L2 高级开发** | 连接池已补齐。清单接到：[慢请求剧本](/cloud-native/observability/slow-request) / [出站超时](/java/spring/spring-framework/crosscutting/outbound-http) / [故障复盘](/projects/toolkit/postmortem/) / [容器内 JVM](/cloud-native/docker/#jvm-in-container) / [扩展-收缩](/cloud-native/cicd/rollback-and-migration#expand-contract) / [Agent 循环](/ai/agent-harness/#agent-loop) |
 | **L3 架构师** | 仍不是内容缺口。本批把「AI 进不进主链路」挂上清单（[Spring AI 定位](/ai/spring-ai/#positioning) / [多 Agent](/ai/agent-harness/#multi-agent)）。方案评审 / 对账 / 多租户方法尚未成篇——缺的仍是模拟盘，不是原理 |
 | **L4 CIO** | ROI / 效能 / 合规已补齐。本批标清 [AI 试点边界](/ai/vibe-coding/#five-gates) 与 [效能 §五](/cloud-native/cicd/engineering-metrics#ai-paradox)。AI 治理专篇尚未成篇；组织 / 财务 / 法务仍是知识域边界 |
 
-上表里 **L1 的三项百科缺口**属于「**代价由别人承担、所以最容易被自己忽略**」的那一类：分支模型决定你的提交能不能被评审，依赖管理决定构建能不能复现，接口契约决定调用方要不要为你的接口写特殊逻辑。本批接上的日志字段、Compose、闸门是同一类，只是换成「别人能不能接手你交的模块」。**L4 的三项已补齐**——它们的难点不在技术深度，而在**把组织、预算与风险里的判断翻译成可验证的机制**；补齐之后 L4 仍有本站不覆盖的部分（组织设计、财务与法务判定），那些已在该级页明确列为「知识域边界」。
+上表里 **L1 的三项百科缺口**属于「**代价由别人承担、所以最容易被自己忽略**」的那一类：分支模型决定你的提交能不能被评审，依赖管理决定构建能不能复现，接口契约决定调用方要不要为你的接口写特殊逻辑。应用日志、Compose、闸门是同一类，只是换成「别人能不能接手你交的模块」。**L4 的三项已补齐**——它们的难点不在技术深度，而在**把组织、预算与风险里的判断翻译成可验证的机制**；补齐之后 L4 仍有本站不覆盖的部分（组织设计、财务与法务判定），那些已在该级页明确列为「知识域边界」。
 
 **每一项在对应级别页里都有落点**——L1、L2、L4 标明本级该读到哪一层（见 [L1 开发](/projects/architect-roadmap/developer/)、[L2 高级开发](/projects/architect-roadmap/senior/)、[L4 CIO](/projects/architect-roadmap/cio/)）；L3 的该节解释的是「**为什么这一级缺的不是内容**」，见 [L3 架构师](/projects/architect-roadmap/architect/)。AI 的四级切片见 [AI 应用 · 按四级读](/ai/#by-level)。
 
@@ -197,6 +197,6 @@ desc: 四级能力路线——从「开发」起步，经高级开发、架构�
 | 按领域查知识 | 顶部导航的 6 个板块（每个板块导览页都有「阅读建议」） |
 | 按深度走路线 | 本页（**最右侧竖栏顶部的「成长路线」直达**，全站常驻）→ 四级清单：[L1 开发](/projects/architect-roadmap/developer/) → [L2 高级开发](/projects/architect-roadmap/senior/) → [L3 架构师](/projects/architect-roadmap/architect/) → [L4 CIO](/projects/architect-roadmap/cio/) |
 | 看「会被问到多深」 | [面试专题](/interview/)：四层次分级、按轮次的复习路径、跨板块连线题 |
-| 拿证据讲项目 | [项目实战](/projects/) 的两个案例系统，产出格式见[可验证产出三件套](/projects/toolkit/) |
+| 拿证据讲项目 | [项目实战](/projects/) 的两个案例系统，产出格式见[可验证产出工具箱](/projects/toolkit/) |
 | 判断该不该升级架构 | [架构演进地图](/projects/architecture-evolution/)：五层 × 四档的触发信号与验收标准 |
 | 按级别读 AI | [AI 应用 · 按四级读](/ai/#by-level)：L1 闸门 → L2 循环 → L3 主链路 → L4 试点边界 |
