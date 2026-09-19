@@ -3,7 +3,8 @@
 # ▶ 当前状态：**已恢复发布**（2026-09-19）。
 #    「写完要恢复发布」三件事的落地情况：
 #      ① 取消 `push:` 注释、恢复自动部署 —— 2026-09-19 完成（AI 侧，本次提交）
-#      ② Settings → Pages → Source 选 GitHub Actions —— 用户侧网页操作
+#      ② Settings → Pages → Source 选 GitHub Actions —— ⚠ **必须人工**：实测 AI/API/token
+#         都无权限开通（见下方 Setup Pages 步骤的注释），这是 GitHub 的刻意限制
 #      ③ 可见性改回 Public —— 2026-09-19 完成（实测 API 返回 "private": false）
 #    （历史：2026-09-15 曾暂停发布，仓库转 private，站点被自动下线。）
 #
@@ -49,10 +50,14 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
         with:
-          # 仓库尚未开启 Pages 时由 action 自动启用（需 pages: write 权限，本 workflow 已声明）。
-          # 2026-09-19：首次触发因 Pages 未配置而失败（Setup Pages 步骤报
-          # HttpError: Not Found / "Get Pages site failed"），加此参数后无需再去
-          # 网页点 Settings → Pages → Source —— 部署链路自闭环。
+          # ⚠ 保留 enablement:true 仅作「Pages 曾开启过、后被关掉」场景的兜底。
+          # 2026-09-19 实测：**首次开启 Pages 时它不生效** —— GITHUB_TOKEN 权限不足，
+          # 报 `HttpError: Resource not accessible by integration` / `Create Pages site failed`
+          # （workflow 已声明 pages: write 仍不够，创建 Pages site 需 administration 级权限，
+          #  这是 GitHub 的刻意限制：不允许 workflow 自行开通 Pages）。
+          # → **仓库从未开过 Pages 时，必须人工去一次：**
+          #    Settings → Pages → Build and deployment → Source → **GitHub Actions**
+          #    人工开启后，本 workflow 每次 push 自动构建部署，此后无需再管。
           enablement: true
 
       - name: Install dependencies
