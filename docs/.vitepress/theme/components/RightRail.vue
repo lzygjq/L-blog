@@ -2,17 +2,23 @@
      - 成长路线 / 架构路线固定入口（跳转链接，非开关；全站常驻，见 RoadmapLink.vue）
      - 侧边栏显示/隐藏（原导航栏左上角汉堡按钮移到这里）
      - 本页目录显示/隐藏（原导航栏右侧按钮移到这里）
+     - 沉浸阅读（隐藏顶栏 + 左栏 + 右侧目录，只留正文；见 ImmersiveToggle.vue）
      - 全屏阅读（参考 pdai.tech 的全屏图标，浏览器原生 Fullscreen API）
      - 回到顶部（滚动超过 400px 出现）
      整条 fixed 在视口右缘、导航栏以下；Layout 预留 padding-right 让内容不压住工具栏
 
      排列取「导航 / 面板开关 / 阅读工具」三段式：两条路线叠在顶部、下面用 1px 分隔线隔开，
-     与原有那条（分隔开关与工具）一致。 -->
+     与原有那条（分隔开关与工具）一致。
+
+     ⚠️ 沉浸模式下本容器收缩为「只剩 ImmersiveToggle」的右上角小卡片（custom.css
+     的 html.immersive 段）—— 那条规则按类名白名单保留子项，**新增按钮时要同步改它**，
+     否则新按钮在沉浸模式下会一起消失。 -->
 <script setup>
 import RoadmapLink from './RoadmapLink.vue'
 import SidebarToggle from './SidebarToggle.vue'
 import AsideToggle from './AsideToggle.vue'
 import FullScreenToggle from './FullScreenToggle.vue'
+import ImmersiveToggle from './ImmersiveToggle.vue'
 import BackToTop from './BackToTop.vue'
 </script>
 
@@ -38,6 +44,7 @@ import BackToTop from './BackToTop.vue'
     <SidebarToggle />
     <AsideToggle />
     <div class="rail-divider" aria-hidden="true"></div>
+    <ImmersiveToggle />
     <FullScreenToggle />
     <BackToTop />
   </div>

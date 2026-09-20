@@ -4,11 +4,13 @@
 //     顶部导航居中/hover/选中态、侧边栏宽度、滚动条
 //   - RightRail.vue：最右侧竖版工具栏（layout-bottom 插槽，fixed 定位），
 //     内含成长路线 / 架构路线入口、侧边栏开关（原导航栏左上角）、本页目录开关（原导航栏右侧）、
-//     全屏阅读、回到顶部
+//     沉浸阅读、全屏阅读、回到顶部
 //   - RoadmapLink.vue：成长路线 / 架构路线固定入口（全站常驻的跳转链接，由 RightRail 引用）。
 //     2026-09-17 立：左侧 sidebar 按路径前缀映射，在非 projects 板块里看不到这两条路线，
 //     需要一个跨板块常驻的入口；架构路线叠在成长路线下面。
 //   - SidebarToggle.vue / AsideToggle.vue：左栏/目录开关（由 RightRail 引用）
+//   - ImmersiveToggle.vue：沉浸阅读开关（由 RightRail 引用）—— 隐藏顶栏 + 左栏 +
+//     右侧目录，只留正文；Esc 亦可退出。挂右栏而非顶栏的原因见组件头注释
 //   - NavRail.vue：导航页右侧分类导航（aside-outline-before 插槽，frontmatter navRail: true 时渲染）
 //   - NavBoard.vue：导航页卡片主体（由 docs/nav.md 引用）
 //   - BackToTop.vue：回到顶部（由 RightRail 引用）

@@ -319,8 +319,13 @@ html.aside-collapsed {
   --vp-aside-extra: 256px;
 }
 
-html.aside-collapsed .VPDoc .aside {
-  display: none;
+/* ⚠️ 必须同时列出 `:has(...)` 那条分支：下方 ≥1280px 的「目录里有链接才显示」
+   规则带 !important 且特异性 0,4,2，单独一个 `.aside`（0,3,1）会被它反压回来。
+   2026-09-19 实测确认过：点击开关后 html 类已正确加上 `aside-collapsed`，
+   但目录仍算作 display:block —— 开关在 ≥1280px 下等于失效（只要目录非空） */
+html.aside-collapsed .VPDoc .aside,
+html.aside-collapsed .VPDoc .aside:has(.VPDocAside a) {
+  display: none !important;
 }
 
 /* 右侧目录开关：导航栏内图标按钮，与左侧汉堡按钮同款样式。
@@ -911,4 +916,108 @@ html .VPSidebar .VPSidebarItem .text {
 /* 回退形态（浮层在侧边栏内部）没有"侧边"可言，箭头关掉 */
 .sidebar-tip--inside::before {
   display: none;
+}
+
+/* ============================================================
+   沉浸阅读模式（html.immersive）
+   ------------------------------------------------------------
+   由 components/ImmersiveToggle.vue 切换（右栏开关组，Esc 亦可退出）。
+   目标：只剩正文 —— 顶部导航 / 左侧目录 / 右侧「本页目录」全部隐藏，
+   正文列吃掉腾出的宽度。
+
+   与 sidebar-collapsed / aside-collapsed 同构，但粒度更粗：那两个各收一栏、
+   保留顶栏；本模式一次收掉三处导航。
+
+   ⚠️ 隐藏元素只是第一步，**腾出的空间必须显式回收**，否则留下空白：
+     ① 左：`--vp-sidebar-width` 归零 → VPContent 的 padding-left 联动归零
+           （变量已注册 @property，宽度变化带 0.25s 过渡）
+     ② 上：VPContent 的 `padding-top: var(--vp-nav-height)` 是给顶栏让位的
+           64px，顶栏没了必须清零，否则标题上方空一大块
+     ③ 右：**刻意不回收** —— 右栏在此模式下收缩为「只剩退出按钮」的小卡片，
+           继续占着 48px + 8px 缝。这样正文不会被浮动的按钮压住，
+           按钮也始终可点（它是本模式唯一的出口）。`.Layout` 的 padding-right 保持原样。
+   ============================================================ */
+
+html.immersive {
+  --vp-sidebar-width: 0px;
+}
+
+/* 三处导航 + 移动端「本页导航」条一次隐藏。
+   ⚠️ `.aside:has(...)` 那条必须单列：≥1280px 时它带 !important 且特异性
+   高于只写一个 .aside（0,4,2 vs 0,3,2），只写前者会被它反压回来 */
+html.immersive .VPNav,
+html.immersive .VPLocalNav,
+html.immersive .VPSidebar,
+html.immersive .VPDoc .aside,
+html.immersive .VPDoc .aside:has(.VPDocAside a) {
+  display: none !important;
+}
+
+/* 顶缝回收（默认主题只在 ≥960px 加 padding-top） */
+@media (min-width: 960px) {
+  html.immersive .VPContent,
+  html.immersive .VPContent.has-sidebar {
+    padding-top: 0 !important;
+  }
+}
+
+/* 正文顶部留白：常态 16px 是「内容卡上沿」的视觉厚度，顶栏消失后标题会显得贴顶，
+   补到 28px（= 常态 16 + 收回的 8px 细缝 + 4px 呼吸）。底部维持 48px。
+   特异性与 `html .VPDoc .content-container`（0,3,1）相同，靠排在文件更后来生效 */
+html.immersive .VPDoc .content-container {
+  padding-top: 28px;
+}
+
+/* 右栏收缩：从「通栏竖条」变成「只剩一颗按钮的小卡片」，贴右上角。
+   top / bottom / height 三件必须一起改，只改 top 仍是通栏 */
+html.immersive .right-rail {
+  top: var(--lp-gap);
+  bottom: auto;
+  height: auto;
+  padding: 3px 0;
+}
+
+html.immersive .right-rail > * {
+  display: none !important;
+}
+
+/* 唯一保留项：退出按钮。⚠️ 新增右栏按钮时这里不必改（按类名白名单保留），
+   但**不要**把本规则删掉 —— 删了就无路可退 */
+html.immersive .right-rail > .immersive-toggle {
+  display: flex !important;
+}
+
+/* 移动端右栏默认整条隐藏；若在桌面进入沉浸后缩窗，入口会凭空消失 —— 强制保留 */
+@media (max-width: 767px) {
+  html.immersive .right-rail {
+    display: flex !important;
+  }
+}
+
+/* ===== 开关按钮本体（与 .sidebar-toggle / .aside-toggle 同款 36×36 圆角方块）===== */
+.immersive-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--vp-c-text-2);
+  cursor: pointer;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.immersive-toggle:hover {
+  color: var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+}
+
+/* 沉浸中：按钮品牌色常亮 —— 它此刻既唯一入口也唯一出口，必须一眼可见 */
+html.immersive .immersive-toggle {
+  color: var(--vp-c-brand-1);
+  background-color: var(--vp-c-brand-soft);
 }
