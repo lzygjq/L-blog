@@ -4,13 +4,17 @@
 //     顶部导航居中/hover/选中态、侧边栏宽度、滚动条
 //   - RightRail.vue：最右侧竖版工具栏（layout-bottom 插槽，fixed 定位），
 //     内含成长路线 / 架构路线入口、侧边栏开关（原导航栏左上角）、本页目录开关（原导航栏右侧）、
-//     沉浸阅读、全屏阅读、回到顶部
+//     最近阅读、沉浸阅读、全屏阅读、回到顶部
 //   - RoadmapLink.vue：成长路线 / 架构路线固定入口（全站常驻的跳转链接，由 RightRail 引用）。
 //     2026-09-17 立：左侧 sidebar 按路径前缀映射，在非 projects 板块里看不到这两条路线，
 //     需要一个跨板块常驻的入口；架构路线叠在成长路线下面。
 //   - SidebarToggle.vue / AsideToggle.vue：左栏/目录开关（由 RightRail 引用）
 //   - ImmersiveToggle.vue：沉浸阅读开关（由 RightRail 引用）—— 隐藏顶栏 + 左栏 +
 //     右侧目录，只留正文；Esc 亦可退出。挂右栏而非顶栏的原因见组件头注释
+//   - ReadingLog.vue：最近阅读入口（由 RightRail 引用）—— 浮层列出最近读过的页面
+//   - ReadingRecorder.vue：阅读位置记录器（无 UI，挂 layout-top，全站常驻）
+//   - ReadingResume.vue：继续上次阅读横幅（挂 doc-before，落在正文标题之上）
+//     三者共用 composables/useReadingLog.mjs（localStorage 持久化）
 //   - NavRail.vue：导航页右侧分类导航（aside-outline-before 插槽，frontmatter navRail: true 时渲染）
 //   - NavBoard.vue：导航页卡片主体（由 docs/nav.md 引用）
 //   - BackToTop.vue：回到顶部（由 RightRail 引用）
@@ -23,6 +27,8 @@ import RightRail from './components/RightRail.vue'
 import NavRail from './components/NavRail.vue'
 import NavBoard from './components/NavBoard.vue'
 import SidebarTip from './components/SidebarTip.vue'
+import ReadingRecorder from './components/ReadingRecorder.vue'
+import ReadingResume from './components/ReadingResume.vue'
 import './custom.css'
 
 // 百度统计的 SPA 页面上报
@@ -61,7 +67,10 @@ export default {
       // 最右侧竖版工具栏（侧边栏开关 / 目录开关 / 回到顶部）
       'layout-bottom': () => h(RightRail),
       // 侧边栏长标题的悬停浮层（Teleport 到 body，与布局无关）
-      'layout-top': () => h(SidebarTip)
+      // + 阅读位置记录器（无 UI，须全站常驻 —— 换页时 Layout 不重建，它才活得过导航）
+      'layout-top': () => [h(SidebarTip), h(ReadingRecorder)],
+      // 「继续上次阅读」横幅：落在 .content-container 内、正文标题之上
+      'doc-before': () => h(ReadingResume)
     })
   },
   enhanceApp({ app, router }) {

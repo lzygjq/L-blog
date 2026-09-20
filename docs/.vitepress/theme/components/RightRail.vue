@@ -2,6 +2,7 @@
      - 成长路线 / 架构路线固定入口（跳转链接，非开关；全站常驻，见 RoadmapLink.vue）
      - 侧边栏显示/隐藏（原导航栏左上角汉堡按钮移到这里）
      - 本页目录显示/隐藏（原导航栏右侧按钮移到这里）
+     - 最近阅读（浮层列出最近读过的页面与各自进度，点即跳回；见 ReadingLog.vue）
      - 沉浸阅读（隐藏顶栏 + 左栏 + 右侧目录，只留正文；见 ImmersiveToggle.vue）
      - 全屏阅读（参考 pdai.tech 的全屏图标，浏览器原生 Fullscreen API）
      - 回到顶部（滚动超过 400px 出现）
@@ -11,14 +12,17 @@
      与原有那条（分隔开关与工具）一致。
 
      ⚠️ 沉浸模式下本容器收缩为「只剩 ImmersiveToggle」的右上角小卡片（custom.css
-     的 html.immersive 段）—— 那条规则按类名白名单保留子项，**新增按钮时要同步改它**，
-     否则新按钮在沉浸模式下会一起消失。 -->
+     的 html.immersive 段）：那条规则先 `> * { display: none }` 全部隐藏，再按类名
+     白名单放行 ImmersiveToggle。所以**新增按钮默认在沉浸模式下不可见** ——
+     这是刻意的（沉浸的语义就是「只剩正文」，多一个入口就不叫沉浸）。
+     只有确实需要在沉浸中仍可达的按钮，才去那条白名单里补一条。 -->
 <script setup>
 import RoadmapLink from './RoadmapLink.vue'
 import SidebarToggle from './SidebarToggle.vue'
 import AsideToggle from './AsideToggle.vue'
 import FullScreenToggle from './FullScreenToggle.vue'
 import ImmersiveToggle from './ImmersiveToggle.vue'
+import ReadingLog from './ReadingLog.vue'
 import BackToTop from './BackToTop.vue'
 </script>
 
@@ -44,6 +48,7 @@ import BackToTop from './BackToTop.vue'
     <SidebarToggle />
     <AsideToggle />
     <div class="rail-divider" aria-hidden="true"></div>
+    <ReadingLog />
     <ImmersiveToggle />
     <FullScreenToggle />
     <BackToTop />
