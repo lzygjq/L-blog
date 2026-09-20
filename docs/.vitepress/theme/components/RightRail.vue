@@ -3,6 +3,7 @@
      - 侧边栏显示/隐藏（原导航栏左上角汉堡按钮移到这里）
      - 本页目录显示/隐藏（原导航栏右侧按钮移到这里）
      - 最近阅读（浮层列出最近读过的页面与各自进度，点即跳回；见 ReadingLog.vue）
+     - 语音朗读（把本页正文读出来，浏览器原生 Web Speech API；见 SpeechReader.vue）
      - 沉浸阅读（隐藏顶栏 + 左栏 + 右侧目录，只留正文；见 ImmersiveToggle.vue）
      - 全屏阅读（参考 pdai.tech 的全屏图标，浏览器原生 Fullscreen API）
      - 回到顶部（滚动超过 400px 出现）
@@ -23,6 +24,7 @@ import AsideToggle from './AsideToggle.vue'
 import FullScreenToggle from './FullScreenToggle.vue'
 import ImmersiveToggle from './ImmersiveToggle.vue'
 import ReadingLog from './ReadingLog.vue'
+import SpeechReader from './SpeechReader.vue'
 import BackToTop from './BackToTop.vue'
 </script>
 
@@ -49,6 +51,7 @@ import BackToTop from './BackToTop.vue'
     <AsideToggle />
     <div class="rail-divider" aria-hidden="true"></div>
     <ReadingLog />
+    <SpeechReader />
     <ImmersiveToggle />
     <FullScreenToggle />
     <BackToTop />
